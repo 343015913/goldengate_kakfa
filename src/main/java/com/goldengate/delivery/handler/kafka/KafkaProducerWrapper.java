@@ -57,7 +57,7 @@ public class KafkaProducerWrapper {
 		sync = Boolean.parseBoolean(config.getProperty("sync", "false"));
 		// TODO Check for mandatory properties 
 		// TODO add defaults 
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, config.getProperty("brokerList"), "52.4.197.159:9092");
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, config.getProperty("brokerList",  "52.4.197.159:9092"));
 	    props.put(ProducerConfig.COMPRESSION_TYPE_CONFIG, config.getProperty("compressionCodec"));
 	    props.put(ProducerConfig.SEND_BUFFER_CONFIG, config.getProperty("socketBuffer"));
 	    props.put(ProducerConfig.RETRY_BACKOFF_MS_CONFIG, config.getProperty("retryBackoffMs"));
