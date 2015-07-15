@@ -57,13 +57,13 @@ public class KafkaProducerWrapper {
 		sync = Boolean.parseBoolean(config.getProperty("sync", "false"));
 		// TODO Check for mandatory properties 
 		// TODO add defaults 
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, config.getProperty("brokerList"));
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, config.getProperty("brokerList"), "52.4.197.159:9092");
 	    props.put(ProducerConfig.COMPRESSION_TYPE_CONFIG, config.getProperty("compressionCodec"));
 	    props.put(ProducerConfig.SEND_BUFFER_CONFIG, config.getProperty("socketBuffer"));
 	    props.put(ProducerConfig.RETRY_BACKOFF_MS_CONFIG, config.getProperty("retryBackoffMs"));
 	    props.put(ProducerConfig.METADATA_MAX_AGE_CONFIG, config.getProperty("metadataExpiryMs"));
 	    props.put(ProducerConfig.METADATA_FETCH_TIMEOUT_CONFIG, config.getProperty("metadataFetchTimeoutMs"));
-		props.put(ProducerConfig.ACKS_CONFIG, config.getProperty("requestRequiredAcks"));
+		props.put(ProducerConfig.ACKS_CONFIG, config.getProperty("requestRequiredAcks", "1"));
 		props.put(ProducerConfig.TIMEOUT_CONFIG, config.getProperty("requestTimeoutMs"));
 	    props.put(ProducerConfig.RETRIES_CONFIG, config.getProperty("messageSendMaxRetries"));
 		props.put(ProducerConfig.LINGER_MS_CONFIG, config.getProperty("sendTimeout.toString"));
@@ -79,7 +79,7 @@ public class KafkaProducerWrapper {
 	}
     private void initConfig() throws IOException{
        config = new Properties();
-		
+		/*
 		try {
 		  inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
 		  if (inputStream != null) {
@@ -91,6 +91,6 @@ public class KafkaProducerWrapper {
 			System.out.println("Exception: " + e);
 		} finally {
 			inputStream.close();
-		}
+		}*/
     }
 }
