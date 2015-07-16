@@ -69,7 +69,7 @@ public class KafkaProducerWrapper {
   }
 	//TODO async vs sync
 	public void send(ProducerRecordWrapper record ) throws InterruptedException, ExecutionException {
-		
+		logger.info(" KafkaProducerWrapper:Send");
 		//ProducerRecord<byte[],byte[]> record = new ProducerRecord<byte[],byte[]> (msg.topic, msg.key, msg.message);
 		if (true || sync){
 		   producer.send(record.get()).get();
