@@ -47,7 +47,7 @@
             <configuration>
             	<outputDirectory>${project.build.directory}/kafka-lib</outputDirectory>
             	<excludeGroupIds>com.goldengate.atg</excludeGroupIds>
-                <includeArtifactIds>avro,avro-ipc,commons-lang,kafka,jackson-core-asl,jackson-mapper-asl,libthrift,netty,slf4j-api</includeArtifactIds>
+                <includeArtifactIds>kafka-client,avro,avro-ipc,commons-lang,kafka,jackson-core-asl,jackson-mapper-asl,libthrift,netty,slf4j-api</includeArtifactIds>
             </configuration>
           </execution>
         </executions>
