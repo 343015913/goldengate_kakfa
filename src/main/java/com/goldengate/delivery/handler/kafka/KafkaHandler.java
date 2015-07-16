@@ -106,6 +106,7 @@ public class KafkaHandler  extends AbstractHandler{
 
 	@Override
 	public void init(DsConfiguration arg0, DsMetaData arg1) {
+		logger.info("Initializing Kafka Handler: mode=") ;
 		logger.info("Initializing Kafka Handler: mode=" + getMode());
 		super.init(arg0, arg1);
 	/*	
@@ -124,10 +125,11 @@ public class KafkaHandler  extends AbstractHandler{
 	    } catch (IOException e) {
 		   System.out.println("Exception: " + e);
 	    } 
-		/** Setting initial properties in HandlerProperties object, which will be used for communicating the 
-		 * information from Flume AbstractHandler to Operation Handlers 
-		 * */
+		// Setting initial properties in HandlerProperties object, which will be used for communicating the 
+		 // information from Flume AbstractHandler to Operation Handlers 
+		 //
 		initializeHandlerProperties();
+		logger.info("Done Initializing Kafka Handler") ;
 	}
 
 	@Override
