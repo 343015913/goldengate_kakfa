@@ -4,15 +4,20 @@ package com.goldengate.delivery.handler.kafka;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.lang.Byte;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ExecutionException;
 
+import com.goldengate.atg.datasource.GGDataSource.Status;
 import com.goldengate.delivery.handler.kafka.ProducerRecordWrapper;
 
 
@@ -23,7 +28,30 @@ public class KafkaProducerWrapper {
 	private KafkaProducer<byte[],byte[]> producer;
 	private boolean sync; 
 	
+	final private static Logger logger = LoggerFactory.getLogger(KafkaProducerWrapper.class);
 	//TODO fix IOException nonsense
+	public static void main(String [ ] args)
+	{
+		logger.info("Create KafkaProducerWrapper");
+		KafkaProducerWrapper producer;
+		try {
+			   producer = new KafkaProducerWrapper();
+		  
+		     List<ProducerRecordWrapper> events = new ArrayList<ProducerRecordWrapper>();	;
+		     ProducerRecordWrapper event = new ProducerRecordWrapper("test_topic", "test message".getBytes());
+		     events.add(event);
+		
+			for (ProducerRecordWrapper rec: events){
+				producer.send(rec);
+			}
+		} catch (Exception e1) {
+			
+			logger.error("Unable to deliver events " +  e1);
+		}
+		
+		
+		
+	}
 	public KafkaProducerWrapper() throws IOException{
 		initConfig();
 		 try {
@@ -43,7 +71,7 @@ public class KafkaProducerWrapper {
 	public void send(ProducerRecordWrapper record ) throws InterruptedException, ExecutionException {
 		
 		//ProducerRecord<byte[],byte[]> record = new ProducerRecord<byte[],byte[]> (msg.topic, msg.key, msg.message);
-		if (sync){
+		if (true || sync){
 		   producer.send(record.get()).get();
 		}
 		else{
@@ -58,7 +86,7 @@ public class KafkaProducerWrapper {
 		// TODO Check for mandatory properties 
 		// TODO add defaults 
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, config.getProperty("brokerList",  "52.4.197.159:9092"));
-	    props.put(ProducerConfig.COMPRESSION_TYPE_CONFIG, config.getProperty("compressionCodec"));
+	  /*  props.put(ProducerConfig.COMPRESSION_TYPE_CONFIG, config.getProperty("compressionCodec"));
 	    props.put(ProducerConfig.SEND_BUFFER_CONFIG, config.getProperty("socketBuffer"));
 	    props.put(ProducerConfig.RETRY_BACKOFF_MS_CONFIG, config.getProperty("retryBackoffMs"));
 	    props.put(ProducerConfig.METADATA_MAX_AGE_CONFIG, config.getProperty("metadataExpiryMs"));
@@ -72,6 +100,7 @@ public class KafkaProducerWrapper {
 		props.put(ProducerConfig.BUFFER_MEMORY_CONFIG, config.getProperty("maxMemoryBytes.toString"));
 		props.put(ProducerConfig.BATCH_SIZE_CONFIG, config.getProperty("maxPartitionMemoryBytes.toString"));
 		props.put(ProducerConfig.CLIENT_ID_CONFIG, "goldengate-producer");
+		*/
 		props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.ByteArraySerializer");
 		props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.ByteArraySerializer");
 

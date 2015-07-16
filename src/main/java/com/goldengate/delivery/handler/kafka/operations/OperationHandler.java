@@ -35,7 +35,7 @@ public abstract class OperationHandler {
 
 		StringBuilder content = prepareOutput(handlerProperties, useBeforeValues, operationType, op);
 		
-		ProducerRecordWrapper event = new ProducerRecordWrapper("babala", content.toString().getBytes());
+		ProducerRecordWrapper event = new ProducerRecordWrapper("test_topic", content.toString().getBytes());
 		//prepareEventHeader(op, event);
 		handlerProperties.events.add(event);
 	}
