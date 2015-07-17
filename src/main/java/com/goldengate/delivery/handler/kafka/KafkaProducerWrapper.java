@@ -32,7 +32,7 @@ public class KafkaProducerWrapper {
 	//TODO fix IOException nonsense
 	public static void main(String [ ] args)
 	{
-		logger.info("Create KafkaProducerWrapper");
+		
 		KafkaProducerWrapper producer;
 		try {
 			   producer = new KafkaProducerWrapper();
@@ -53,6 +53,7 @@ public class KafkaProducerWrapper {
 		
 	}
 	public KafkaProducerWrapper() throws IOException{
+		logger.info("Kafka: Create KafkaProducerWrapper");
 		initConfig();
 		 try {
 			 producer = new KafkaProducer<byte[],byte[]>(getProducerProps());
@@ -66,10 +67,11 @@ public class KafkaProducerWrapper {
 		     System.out.println("Exception: " + e);
 		     System.exit(1);
 	     } 
+		 logger.info("Kafka: Done Create KafkaProducerWrapper");
   }
 	//TODO async vs sync
 	public void send(ProducerRecordWrapper record ) throws InterruptedException, ExecutionException {
-		logger.info(" KafkaProducerWrapper:Send");
+		logger.info("Kafka: KafkaProducerWrapper:Send");
 		//ProducerRecord<byte[],byte[]> record = new ProducerRecord<byte[],byte[]> (msg.topic, msg.key, msg.message);
 		if (true || sync){
 		   producer.send(record.get()).get();
