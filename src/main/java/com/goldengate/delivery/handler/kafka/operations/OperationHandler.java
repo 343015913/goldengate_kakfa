@@ -5,6 +5,7 @@
 */
 package com.goldengate.delivery.handler.kafka.operations;
 
+import com.goldengate.delivery.handler.kafka.KafkaHandler;
 import com.goldengate.delivery.handler.kafka.ProducerRecordWrapper;
 
 import java.nio.charset.Charset;
@@ -13,6 +14,10 @@ import java.util.Map;
 
 
 
+
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.goldengate.atg.datasource.DsColumn;
 import com.goldengate.atg.datasource.adapt.Op;
@@ -30,9 +35,9 @@ import com.goldengate.delivery.handler.kafka.HandlerProperties;
  */
 public abstract class OperationHandler {
 	
-	
+	 final public static Logger logger = LoggerFactory.getLogger(OperationHandler.class);
 	protected void processOperation(Op op,HandlerProperties handlerProperties, String operationType, boolean useBeforeValues){
-
+		logger.info("Kafka: processOperation");
 		StringBuilder content = prepareOutput(handlerProperties, useBeforeValues, operationType, op);
 		
 		ProducerRecordWrapper event = new ProducerRecordWrapper("test_topic", content.toString().getBytes());

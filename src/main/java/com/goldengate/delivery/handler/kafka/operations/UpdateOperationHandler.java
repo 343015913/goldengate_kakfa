@@ -19,6 +19,7 @@ public class UpdateOperationHandler extends OperationHandler{
 
 	@Override
 	public void process(Op op, HandlerProperties handlerProperties) {
+		logger.info("Kafka: process Update");
 		processOperation(op, handlerProperties,handlerProperties.updateOpKey,false);
 		handlerProperties.totalUpdates++;
 	}

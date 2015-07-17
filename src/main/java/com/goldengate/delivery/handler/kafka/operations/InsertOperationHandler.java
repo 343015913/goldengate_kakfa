@@ -19,6 +19,8 @@ public class InsertOperationHandler extends OperationHandler{
 
 	@Override
 	public void process(Op op, HandlerProperties handlerProperties) {
+		logger.info("Kafka: process Delete");
+
 		processOperation(op, handlerProperties, handlerProperties.insertOpKey,false);
 		handlerProperties.totalInserts++;
 	}
