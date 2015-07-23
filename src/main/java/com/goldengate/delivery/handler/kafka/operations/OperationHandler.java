@@ -36,11 +36,13 @@ import com.goldengate.delivery.handler.kafka.HandlerProperties;
 public abstract class OperationHandler {
 	
 	 final public static Logger logger = LoggerFactory.getLogger(OperationHandler.class);
-	protected void processOperation(Op op,HandlerProperties handlerProperties, String operationType, boolean useBeforeValues){
+	protected void processOperation(Op op,HandlerProperties handlerProperties, String operationType, boolean useBeforeValues,  boolean includeFieldNames){
 		logger.info("Kafka: processOperation");
-		StringBuilder content = prepareOutput(handlerProperties, useBeforeValues, operationType, op);
+		 String tableName = op.getTableName().getOriginalShortName().toLowerCase();
+
+		StringBuilder content = prepareOutput(handlerProperties, useBeforeValues, operationType, op, includeFieldNames);
 		
-		ProducerRecordWrapper event = new ProducerRecordWrapper("test_topic", content.toString().getBytes());
+		ProducerRecordWrapper event = new ProducerRecordWrapper(tableName, content.toString().getBytes());
 		//prepareEventHeader(op, event);
 		handlerProperties.events.add(event);
 	}
@@ -77,7 +79,7 @@ public abstract class OperationHandler {
      * @param op The current operation. 
      * @return StringBuilder
      */
-	private StringBuilder prepareOutput(HandlerProperties handlerProperties,  boolean useBeforeValues, String operationType, Op op){
+	private StringBuilder prepareOutput(HandlerProperties handlerProperties,  boolean useBeforeValues, String operationType, Op op, boolean includeFieldNames){
 		StringBuilder builder = new StringBuilder();
 		
 		if(handlerProperties.includeOpType){
@@ -85,10 +87,10 @@ public abstract class OperationHandler {
 		}
 		
 		if(useBeforeValues) {
-			appendBeforeValues(op, handlerProperties, builder);
+			appendBeforeValues(op, handlerProperties, builder, includeFieldNames);
 		}
 		else {
-			appendAfterValues(op, handlerProperties, builder);
+			appendAfterValues(op, handlerProperties, builder, includeFieldNames);
 		}
 		
 		if(handlerProperties.includeOpTimestamp){
@@ -98,7 +100,7 @@ public abstract class OperationHandler {
 		return builder;
 	}
 	
-	private void appendBeforeValues(Op op,HandlerProperties handlerProperties,StringBuilder builder) {
+	private void appendBeforeValues(Op op,HandlerProperties handlerProperties,StringBuilder builder, boolean includeFieldNames) {
 		int i = 0;
 		for(DsColumn column : op) {
 			builder.append(column.getBeforeValue());
@@ -109,10 +111,15 @@ public abstract class OperationHandler {
 		}
 	}
 	
-	private void appendAfterValues(Op op,HandlerProperties handlerProperties,StringBuilder builder) {
+	private void appendAfterValues(Op op,HandlerProperties handlerProperties,StringBuilder builder, boolean includeFieldNames) {
 		int i = 0;
+		
 		for(DsColumn column : op) {
 			builder.append(column.getAfterValue());
+			if (includeFieldNames){
+				builder.append(op.getTableMeta().getColumnName(i));
+				builder.append(handlerProperties.delimiter);
+			}
 			i++;
 			if(op.getNumColumns() != i){
 				builder.append(handlerProperties.delimiter);
