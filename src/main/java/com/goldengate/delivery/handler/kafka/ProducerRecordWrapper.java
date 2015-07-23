@@ -37,7 +37,8 @@ public class ProducerRecordWrapper {
 		 }
 	}
 	public ProducerRecordWrapper(String topic,  byte[] val){
-		rec = new ProducerRecord<byte[], byte[]> (topic, val);
+		this(topic, null, val);
+		//rec = new ProducerRecord<byte[], byte[]> (topic, val);
 	}
 	public ProducerRecord<byte[], byte[]> get(){
 		return rec;
