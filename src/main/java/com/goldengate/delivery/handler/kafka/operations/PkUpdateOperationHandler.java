@@ -19,7 +19,7 @@ public class PkUpdateOperationHandler extends OperationHandler{
 
 	@Override
 	public void process(Op op, HandlerProperties handlerProperties) {
-		processOperation(op, handlerProperties, handlerProperties.pKUpdateKey,false);
+		processOperation(op, handlerProperties, handlerProperties.pKUpdateKey,false, false);
 		handlerProperties.totalUpdates++;
 	}
 	

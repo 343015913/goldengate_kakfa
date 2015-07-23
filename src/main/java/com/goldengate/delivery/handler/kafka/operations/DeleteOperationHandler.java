@@ -20,7 +20,7 @@ public class DeleteOperationHandler extends OperationHandler{
 	@Override
 	public void process(Op op, HandlerProperties handlerProperties) {
 		
-		processOperation(op, handlerProperties, handlerProperties.deleteOpKey,true);
+		processOperation(op, handlerProperties, handlerProperties.deleteOpKey,true, false);
 		handlerProperties.totalDeletes++;
 		
 	}

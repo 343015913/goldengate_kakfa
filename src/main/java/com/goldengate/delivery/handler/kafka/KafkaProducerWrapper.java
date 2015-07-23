@@ -27,6 +27,7 @@ public class KafkaProducerWrapper {
 	private String propFileName = "kafka.properties";
 	private KafkaProducer<byte[],byte[]> producer;
 	private boolean sync; 
+	private boolean encrypt; 
 	
 	final private static Logger logger = LoggerFactory.getLogger(KafkaProducerWrapper.class);
 	//TODO fix IOException nonsense
@@ -71,9 +72,17 @@ public class KafkaProducerWrapper {
   }
 	//TODO async vs sync
 	public void send(ProducerRecordWrapper record ) throws InterruptedException, ExecutionException {
+		
 		logger.info("Kafka: KafkaProducerWrapper:Send");
+		byte[] bytes; 
+		/*if (encrypt){
+			
+			
+		}else{
+			bytes = record.get(); 
+		}*/
 		//ProducerRecord<byte[],byte[]> record = new ProducerRecord<byte[],byte[]> (msg.topic, msg.key, msg.message);
-		if (true || sync){
+		if ( sync){
 		   producer.send(record.get()).get();
 		}
 		else{
@@ -85,6 +94,7 @@ public class KafkaProducerWrapper {
 	private Properties getProducerProps(){
 		Properties props = new Properties();
 		sync = Boolean.parseBoolean(config.getProperty("sync", "false"));
+		encrypt = Boolean.parseBoolean(config.getProperty("encryption", "true"));
 		// TODO Check for mandatory properties 
 		// TODO add defaults 
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, config.getProperty("brokerList",  "52.4.197.159:9092"));
