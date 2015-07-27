@@ -21,6 +21,7 @@ public class EncryptedMessage {
 	public EncryptedMessage(byte[] _encryptedMessage, byte[] _encryptedSecretKey, byte[] _encryptedIV){
 		assert _encryptedSecretKey.length == ENC_KEY_LENGTH_BITS : "Wrong encryptedSecretKey length:" + _encryptedSecretKey.length;
 		assert _encryptedIV.length == ENC_IV_LENGTH_BYTES : "Wrong encryptedIV length: " + _encryptedIV.length ;
+		 System.out.println("Enc Secret Key = " + _encryptedSecretKey);
 		encryptedMessage = _encryptedMessage ;
 		encryptedSecretKey = _encryptedSecretKey;
 		encryptedIV = _encryptedIV;
