@@ -9,11 +9,27 @@ import java.util.List;
 import java.util.Properties;
 import java.lang.Byte;
 
+import kafka.consumer.ConsumerConfig;
+import kafka.consumer.KafkaStream;
+import kafka.javaapi.consumer.ConsumerConnector;
+import kafka.consumer.ConsumerIterator;
+import kafka.consumer.KafkaStream;
+
+import org.apache.commons.codec.binary.Hex;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+
+
 
 import java.util.concurrent.ExecutionException;
 
@@ -26,6 +42,7 @@ public class KafkaProducerWrapper {
 	private InputStream inputStream;
 	private String propFileName = "kafka.properties";
 	private KafkaProducer<byte[],byte[]> producer;
+	//private  ConsumerConnector consumer;
 	private boolean sync; 
 	private boolean encrypt; 
 	
@@ -33,23 +50,58 @@ public class KafkaProducerWrapper {
 	//TODO fix IOException nonsense
 	public static void main(String [ ] args)
 	{
-		
+		String topic = "test_topic13";
 		KafkaProducerWrapper producer;
+		  ConsumerConnector consumer;
 		try {
 			   producer = new KafkaProducerWrapper();
 		  
 		     List<ProducerRecordWrapper> events = new ArrayList<ProducerRecordWrapper>();	;
-		     ProducerRecordWrapper event = new ProducerRecordWrapper("test_topic", "test message".getBytes());
-		     events.add(event);
+		     ProducerRecordWrapper event = new ProducerRecordWrapper(topic, "test message".getBytes());
+		     for (int i = 0; i < 10; i++){
+		         events.add(event);
+		     }
 		
 			for (ProducerRecordWrapper rec: events){
 				producer.send(rec);
 			}
-		} catch (Exception e1) {
+			System.out.println(event);
+			Thread.sleep(4000);
+			Properties props = new Properties();
+		     props.put("metadata.broker.list", "52.4.197.159:9092");
+		     props.put("zookeeper.connect", "52.4.197.159:2181");
+		     props.put("group.id", "test6");
+		     props.put("autooffset.reset", "smallest");
+		     props.put("enable.auto.commit", "true");
+		     props.put("auto.commit.interval.ms", "1000");
+		     props.put("session.timeout.ms", "30000");
+		     /*
+		     props.put("key.serializer", "org.apache.kafka.common.serializers.ByteArraySerializer");
+		     props.put("value.serializer", "org.apache.kafka.common.serializers.ByteArraySerializer");
+		     props.put("key.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer");
+		     props.put("value.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer");*/
+		     props.put("key.serializer", "org.apache.kafka.common.serializers.StringSerializer");
+		     props.put("value.serializer", "org.apache.kafka.common.serializers.StringSerializer");
+		     /*props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+		     props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");*/
+		     props.put("partition.assignment.strategy", "roundrobin");
+		     consumer = kafka.consumer.Consumer.createJavaConsumerConnector(new ConsumerConfig(props))	;
+		//consumer.subscribe("test_topic3");
+		
+		Map<String, Integer> topicCountMap = new HashMap<String, Integer>();
+	    topicCountMap.put(topic, 1);
+		Map<String, List<KafkaStream<byte[], byte[]>>> consumerMap = consumer.createMessageStreams(topicCountMap);
+        List<KafkaStream<byte[], byte[]>> streams = consumerMap.get(topic);
+        KafkaStream<byte[], byte[]> m_stream = streams.get(0);
+        ConsumerIterator<byte[], byte[]> it = m_stream.iterator();
+        while (it.hasNext())
+            System.out.println("Consumer message "  + new String(Hex.encodeHexString(it.next().message())));
+        //System.out.println("Shutting down Thread: " + m_threadNumber);
+	    
+         } catch (Exception e1) {
 			
 			logger.error("Unable to deliver events " +  e1);
 		}
-		
 		
 		
 	}
@@ -91,7 +143,7 @@ public class KafkaProducerWrapper {
 		}
 	}
 	
-	private Properties getProducerProps(){
+	public Properties getProducerProps(){
 		Properties props = new Properties();
 		sync = Boolean.parseBoolean(config.getProperty("sync", "false"));
 		encrypt = Boolean.parseBoolean(config.getProperty("encryption", "true"));

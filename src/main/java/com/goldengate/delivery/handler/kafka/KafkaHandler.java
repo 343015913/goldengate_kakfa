@@ -16,6 +16,9 @@ import org.slf4j.LoggerFactory;
 
 
 
+
+
+
 import com.goldengate.atg.datasource.AbstractHandler;
 import com.goldengate.atg.datasource.DsConfiguration;
 import com.goldengate.atg.datasource.DsEvent;
@@ -25,6 +28,8 @@ import com.goldengate.atg.datasource.GGDataSource.Status;
 import com.goldengate.atg.datasource.adapt.Op;
 import com.goldengate.atg.datasource.meta.DsMetaData;
 import com.goldengate.delivery.handler.kafka.operations.OperationHandler;
+import com.goldengate.delivery.handler.kafka.util.EncryptedMessage;
+import com.goldengate.delivery.handler.kafka.util.Encryptor;
 import com.goldengate.delivery.handler.kafka.util.OperationTypes;
 import com.goldengate.delivery.handler.kafka.KafkaProducerWrapper;
 import com.goldengate.delivery.handler.kafka.ProducerRecordWrapper;
@@ -55,6 +60,25 @@ import com.goldengate.delivery.handler.kafka.ProducerRecordWrapper;
  * 
  * */
 public class KafkaHandler  extends AbstractHandler{
+	
+	public static void main(String [ ] args) throws Exception
+	{
+	     KafkaProducerWrapper producer;
+		//try {
+			   producer = new KafkaProducerWrapper();
+		  //  } catch (IOException e) {
+			//   System.out.println("Exception: " + e);
+		    //}
+      try { 
+    	  String input = "My test: This is a test string to make sure the encyption works. Need to make it longer. Very long. Just to make sure!";
+		 // EncryptedMessage msg = Encryptor.encrypt(input);
+		  ProducerRecordWrapper event = new ProducerRecordWrapper("test_table2", input.getBytes());
+		  producer.send(event);
+      
+	 } catch (Exception e1) {		
+ 	   System.out.println("Caught expecption:" + e1);
+		}
+    }
 
 	 final private static Logger logger = LoggerFactory.getLogger(KafkaHandler.class);
 	
