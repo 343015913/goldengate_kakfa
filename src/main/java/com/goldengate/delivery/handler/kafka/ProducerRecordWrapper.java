@@ -4,6 +4,7 @@ package com.goldengate.delivery.handler.kafka;
 import com.goldengate.delivery.handler.kafka.util.EncryptedMessage;
 import com.goldengate.delivery.handler.kafka.util.Encryptor;
 
+import org.apache.commons.codec.binary.Hex;
 import org.apache.kafka.common.errors.SerializationException;
 
 import java.io.ByteArrayOutputStream;
@@ -28,6 +29,8 @@ public class ProducerRecordWrapper {
 	    	 payload = val;
 	      }
 	      logger.info("Send message: " + payload) ;
+	      logger.info("Send message: " +  Hex.encodeHexString(payload)) ;
+	      
 		  rec = new ProducerRecord<byte[], byte[]> (topic, key, payload);
 		} catch (Exception e) {
 		      // avro serialization can throw AvroRuntimeException, NullPointerException,

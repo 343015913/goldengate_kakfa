@@ -66,6 +66,7 @@ public class Encryptor {
           // Encrypt the symmetric key initialization vector with the public key.
           byte[] ivBytes = symmetricEncryptor.getInitializationVector().getIV();
           byte[] encryptedIV = asymmetricEncriptor.encrypt(ivBytes);
+          System.out.println("IV = " + Hex.encodeHexString(ivBytes));
           
           return new EncryptedMessage(encryptedMessage, encryptedSecretKey, encryptedIV);
 
@@ -81,9 +82,10 @@ public class Encryptor {
     	  try {
                receivedSecretKeyBytes = asymmetricDecryptor.decrypt(msg.getKey());
           } catch (Exception e1) {		
-   	        System.out.println("Error encrpying expecption:" + e1);
+   	        System.out.println("Error decrypting expecption:" + e1);
 		  }
-    	  System.out.println("receivedSecretKeyBytes:" + receivedSecretKeyBytes);
+    	  System.out.println("receivedSecretKeyBytes:" + Hex.encodeHexString(msg.getKey()));
+    	  System.out.println("Decrypted SecretKey:" + Hex.encodeHexString(receivedSecretKeyBytes));
 		  
           SecretKey receivedSecretKey = new SecretKeySpec(receivedSecretKeyBytes, SECRET_KEY_ALGORITHM);
           assert receivedSecretKey.getEncoded().length == SECRET_KEY_LENGTH_BITS: "Secret key is " + receivedSecretKey.getEncoded().length + " long, expecting " + SECRET_KEY_LENGTH_BITS;
@@ -153,6 +155,7 @@ class SymmetricEncryptor
     SecureRandom random = new SecureRandom();
     generator.init(KEY_LENGTH_BITS, random);
     System.out.println("Generate Key");
+    //TODO: Rremove this
     return new SecretKeySpec(Hex.decodeHex("cb024600dce7148b8ddc5d6c111fbd85".toCharArray()),  KEY_ALGORITHM);
     //return generator.generateKey();
   }
@@ -160,7 +163,9 @@ class SymmetricEncryptor
   private static IvParameterSpec generateInitializationVector()
   {
     SecureRandom random = new SecureRandom();
-    return new IvParameterSpec(random.generateSeed(IV_LENGTH_BYTES));
+  //TODO: Rremove this
+    //return new IvParameterSpec(random.generateSeed(IV_LENGTH_BYTES));
+    return new IvParameterSpec("beb6f54c39089a9d".getBytes());
   }
 
   private static Cipher newCipher(SecretKey symmetricKey, IvParameterSpec iv) throws Exception
@@ -206,8 +211,11 @@ class SymmetricDecryptor
 //
 class AsymmetricEncryptor
 {
+	//TODO: Put padding back
   public static final String CIPHER_ALGORITHM = "RSA/ECB/PKCS1Padding";
+  //public static final String CIPHER_ALGORITHM = "RSA/ECB/NoPadding";
 
+  
   private Cipher _cipher;
 
   public AsymmetricEncryptor(PublicKey publicKey) throws Exception
@@ -234,7 +242,9 @@ class AsymmetricEncryptor
 //
 class AsymmetricDecryptor
 {
+	//TODO: Put padding back
   public static final String CIPHER_ALGORITHM = "RSA/ECB/PKCS1Padding";
+ // public static final String CIPHER_ALGORITHM = "RSA/ECB/NoPadding";
 
   private Cipher _cipher;
 
