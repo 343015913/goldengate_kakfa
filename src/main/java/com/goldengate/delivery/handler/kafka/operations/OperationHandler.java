@@ -115,12 +115,13 @@ public abstract class OperationHandler {
 		int i = 0;
 		
 		for(DsColumn column : op) {
-			builder.append(column.getAfterValue());
+			
 			if (includeFieldNames){
 				builder.append(op.getTableMeta().getColumnName(i));
 				builder.append(handlerProperties.delimiter);
 			}
 			i++;
+			builder.append(column.getAfterValue());
 			if(op.getNumColumns() != i){
 				builder.append(handlerProperties.delimiter);
 			}

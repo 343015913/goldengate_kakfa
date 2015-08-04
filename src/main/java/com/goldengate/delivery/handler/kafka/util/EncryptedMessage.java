@@ -4,15 +4,16 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 // TODO: Should this by part of Encryptor? What if Cipher in Encryptor changes? 
 public class EncryptedMessage {
-	//public static final int    KEY_LENGTH_BITS  = 256;
-	//public static final int    IV_LENGTH_BYTES  = 16;
-	//public static final int    ENC_KEY_LENGTH_BITS  = SymmetricEncryptor.KEY_LENGTH_BITS; //
-	//public static final int    ENC_IV_LENGTH_BYTES  = SymmetricEncryptor.IV_LENGTH_BYTES; //
+
 	public static final int    ENC_KEY_LENGTH_BITS  = Encryptor.SECRET_KEY_LENGTH_BITS / 8; 
 	public static final int    ENC_IV_LENGTH_BYTES  = Encryptor.SECRET_KEY_LENGTH_BITS / 8; 
 
+	final private static Logger logger = LoggerFactory.getLogger(EncryptedMessage.class);
 	
 	private byte[] encryptedMessage;
 	private byte[] encryptedSecretKey;
@@ -21,7 +22,7 @@ public class EncryptedMessage {
 	public EncryptedMessage(byte[] _encryptedMessage, byte[] _encryptedSecretKey, byte[] _encryptedIV){
 		assert _encryptedSecretKey.length == ENC_KEY_LENGTH_BITS : "Wrong encryptedSecretKey length:" + _encryptedSecretKey.length;
 		assert _encryptedIV.length == ENC_IV_LENGTH_BYTES : "Wrong encryptedIV length: " + _encryptedIV.length ;
-		 System.out.println("Enc Secret Key = " + _encryptedSecretKey);
+		logger.debug("Enc Secret Key = " + _encryptedSecretKey);
 		encryptedMessage = _encryptedMessage ;
 		encryptedSecretKey = _encryptedSecretKey;
 		encryptedIV = _encryptedIV;
