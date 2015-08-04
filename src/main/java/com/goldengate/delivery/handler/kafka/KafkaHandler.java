@@ -34,55 +34,52 @@ import com.goldengate.delivery.handler.kafka.util.OperationTypes;
 import com.goldengate.delivery.handler.kafka.KafkaProducerWrapper;
 import com.goldengate.delivery.handler.kafka.ProducerRecordWrapper;
 
+//TODO: Fix the desc
 /**
  * KafkaHandler is an extension of GoldenGate Java Adapters - "EventHandlers".
- * 
- * This handler connects to a running Flume instance via 
- * Avro/Thrift RPC. It operates on the column values received from the operations,
- * creates Flume events out of the column values and publishes the events to
- * Flume when the transaction commit occurs.
+ * It operates on the column values received from the operations,
+ * creates Kafka messages out of the column values and publishes the events to
+ * Kafka when the transaction commit occurs.
  * 
  * In "tx" mode, the events will be buffered till the transaction commit is received 
  * and all the events will be published in batch, once the transaction is committed.
  * In "op" mode, the events will be published on every operation/record basis.
  * 
+ * The Kafka Java Client (as of Kafka 0.8.2) is asynchronous and support message batching/buffering. 
+ * As such, the "tx" and "op" modes should have comparable performance
+ * 
  * Considering a table "TCUST" with columns "CUST_ID", "CUST_NAME", "ADDRESS" with a 
- * record being inserted into it say "10001","Flume Admin","Los Angles".
+ * record being inserted into it say "10001","Kafka Admin","Los Angles".
  * The final data published into Flume would be similar to the following.
  * (Assuming "," as the configured delimiter)
  * ### OperationType,Col-1, Col-2, Col-3, Operation Timestamp  ###
- * I,10001,Flume Admin,Los Angles,2014-12-18 08:28:02.000000
+ * I,10001,Kafka Admin,Los Angles,2014-12-18 08:28:02.000000
  * 
  * The Operation Type and Operation Timestamp are configurable. 
  * By default both Operation Type and Operation Timestamp will be part of the delimited separated values.
  * 
- * @author Vedanth KR
+ * @author Eugene Miretsky
  * 
  * */
 public class KafkaHandler  extends AbstractHandler{
-	
+	 final private static Logger logger = LoggerFactory.getLogger(KafkaHandler.class);
+		
+	// TODO: Move it to a test class
 	public static void main(String [ ] args) throws Exception
 	{
-	     KafkaProducerWrapper producer;
-		//try {
-			   producer = new KafkaProducerWrapper();
-		  //  } catch (IOException e) {
-			//   System.out.println("Exception: " + e);
-		    //}
+	 KafkaProducerWrapper producer;
+	  producer = new KafkaProducerWrapper();
+
       try { 
     	  String input = "My test: This is a test string to make sure the encyption works. Need to make it longer. Very long. Just to make sure!";
-		 // EncryptedMessage msg = Encryptor.encrypt(input);
 		  ProducerRecordWrapper event = new ProducerRecordWrapper("test_table2", input.getBytes());
 		  producer.send(event);
       
 	 } catch (Exception e1) {		
- 	   System.out.println("Caught expecption:" + e1);
-		}
+ 	   logger.error("Unable to process operation.", e1);
+	 }
     }
 
-	 final private static Logger logger = LoggerFactory.getLogger(KafkaHandler.class);
-	
-	
 	/** Producer for Kakfa */
 	private KafkaProducerWrapper producer; 
 	
@@ -130,24 +127,11 @@ public class KafkaHandler  extends AbstractHandler{
 
 	@Override
 	public void init(DsConfiguration arg0, DsMetaData arg1) {
-		logger.info("Initializing Kafka Handler: mode=") ;
-		logger.info("Initializing Kafka Handler: mode=" + getMode());
 		super.init(arg0, arg1);
-	/*	
-		if(Rpc.avro.toString().equals(getRpcType())) {
-			// Initialization of Avro RPC client. 
-			this.rpcClient = RpcClientFactory.getDefaultInstance(getHost(), getPort());
-		}
-		//TODO: Yet to be Tested 
-		else if(Rpc.thrift.toString().equals(getRpcType())) {
-			// Initialization of Thrift RPC client. 
-			this.rpcClient = RpcClientFactory.getThriftInstance(getHost(), getPort());
-		}
-		*/
 		try {
 		   producer = new KafkaProducerWrapper();
 	    } catch (IOException e) {
-		   System.out.println("Exception: " + e);
+		   logger.error("Exception: " + e);
 	    } 
 		// Setting initial properties in HandlerProperties object, which will be used for communicating the 
 		 // information from Flume AbstractHandler to Operation Handlers 
@@ -158,12 +142,11 @@ public class KafkaHandler  extends AbstractHandler{
 
 	@Override
 	public Status operationAdded(DsEvent e, DsTransaction tx, DsOperation dsOperation) {
-		 logger.info("Operation added event. Operation type = " + dsOperation.getOperationType());
-		 
-		 Status status = Status.OK;
+		
+		Status status = Status.OK;
 		super.operationAdded(e, tx, dsOperation);
 		Op op = new Op(dsOperation, getMetaData().getTableMetaData(dsOperation.getTableName()), getConfig());
-		
+		 logger.debug("Operation added event. Operation type = " + dsOperation.getOperationType()); 
 		/** Get the class defined for the incoming operation type from OperationTypes enum 
 		 * and instantiate the operation handler class.
 		 * Each Operation Handler class creates the flume event.
@@ -190,7 +173,7 @@ public class KafkaHandler  extends AbstractHandler{
 	
 	@Override
 	public Status transactionCommit(DsEvent e, DsTransaction tx) {
-		 logger.info("Transaction commit event ");
+		logger.debug("Transaction commit event ");
 		super.transactionCommit(e, tx);
 		Status status = Status.OK;
 		/** Publish the events to flume using the rpc client once the transaction commit event is received.
