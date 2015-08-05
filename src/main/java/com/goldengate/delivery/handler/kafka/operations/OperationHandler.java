@@ -30,17 +30,17 @@ import com.goldengate.delivery.handler.kafka.HandlerProperties;
  * 1.	TODO: .
  * 2.	Setting Schema Name and Table Name in the Flume Event Headers.
  * 
- * @author Vedanth K R
+ * @author Eugene Miretsky
  *
  */
 public abstract class OperationHandler {
 	
 	 final public static Logger logger = LoggerFactory.getLogger(OperationHandler.class);
-	protected void processOperation(Op op,HandlerProperties handlerProperties, String operationType, boolean useBeforeValues,  boolean includeFieldNames){
+	protected void processOperation(Op op,HandlerProperties handlerProperties, String operationType, boolean useBeforeValues,  boolean includeFieldNames, boolean onlyChanged){
 		logger.info("Kafka: processOperation");
 		 String tableName = op.getTableName().getOriginalShortName().toLowerCase();
 
-		StringBuilder content = prepareOutput(handlerProperties, useBeforeValues, operationType, op, includeFieldNames);
+		StringBuilder content = prepareOutput(handlerProperties, useBeforeValues, operationType, op, includeFieldNames, onlyChanged);
 		
 		ProducerRecordWrapper event = new ProducerRecordWrapper(tableName, content.toString().getBytes());
 		//prepareEventHeader(op, event);
@@ -79,7 +79,7 @@ public abstract class OperationHandler {
      * @param op The current operation. 
      * @return StringBuilder
      */
-	private StringBuilder prepareOutput(HandlerProperties handlerProperties,  boolean useBeforeValues, String operationType, Op op, boolean includeFieldNames){
+	private StringBuilder prepareOutput(HandlerProperties handlerProperties,  boolean useBeforeValues, String operationType, Op op, boolean includeFieldNames, boolean onlyChanged){
 		StringBuilder builder = new StringBuilder();
 		
 		if(handlerProperties.includeOpType){
@@ -90,7 +90,7 @@ public abstract class OperationHandler {
 			appendBeforeValues(op, handlerProperties, builder, includeFieldNames);
 		}
 		else {
-			appendAfterValues(op, handlerProperties, builder, includeFieldNames);
+			appendAfterValues(op, handlerProperties, builder, includeFieldNames, onlyChanged);
 		}
 		
 		if(handlerProperties.includeOpTimestamp){
@@ -111,19 +111,20 @@ public abstract class OperationHandler {
 		}
 	}
 	
-	private void appendAfterValues(Op op,HandlerProperties handlerProperties,StringBuilder builder, boolean includeFieldNames) {
+	private void appendAfterValues(Op op,HandlerProperties handlerProperties,StringBuilder builder, boolean includeFieldNames,  boolean onlyChanged) {
 		int i = 0;
 		
 		for(DsColumn column : op) {
-			
-			if (includeFieldNames){
-				builder.append(op.getTableMeta().getColumnName(i));
-				builder.append(handlerProperties.delimiter);
-			}
-			i++;
-			builder.append(column.getAfterValue());
-			if(op.getNumColumns() != i){
-				builder.append(handlerProperties.delimiter);
+			if (!onlyChanged || column.isChanged()){
+			   if (includeFieldNames){
+				    builder.append(op.getTableMeta().getColumnName(i));
+				    builder.append(handlerProperties.delimiter);
+			   }
+			   i++;
+			   builder.append(column.getAfterValue());
+			   if(op.getNumColumns() != i){
+				  builder.append(handlerProperties.delimiter);
+			   }
 			}
 		}
 	}
