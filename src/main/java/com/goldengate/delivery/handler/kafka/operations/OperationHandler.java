@@ -116,15 +116,18 @@ public abstract class OperationHandler {
 		
 		for(DsColumn column : op) {
 			if (!onlyChanged || column.isChanged()){
+				logger.info("------- column name: " + op.getTableMeta().getColumnName(i));
+				logger.info("---------- column value : " + column.getAfterValue());
+			   if(op.getNumColumns() != 0){
+					  builder.append(handlerProperties.delimiter);
+			   }
 			   if (includeFieldNames){
 				    builder.append(op.getTableMeta().getColumnName(i));
 				    builder.append(handlerProperties.delimiter);
 			   }
 			   i++;
 			   builder.append(column.getAfterValue());
-			   if(op.getNumColumns() != i){
-				  builder.append(handlerProperties.delimiter);
-			   }
+			
 			}
 		}
 	}
