@@ -40,7 +40,7 @@ import com.goldengate.delivery.handler.kafka.ProducerRecordWrapper;
 public class KafkaProducerWrapper {
 	private Properties config;
 	private InputStream inputStream;
-	private String propFileName = "kafka.properties";
+	//private String propFileName = "kafka.properties";
 	private KafkaProducer<byte[],byte[]> producer;
 	//private  ConsumerConnector consumer;
 	private boolean sync; 
@@ -48,68 +48,14 @@ public class KafkaProducerWrapper {
 	
 	final private static Logger logger = LoggerFactory.getLogger(KafkaProducerWrapper.class);
 	//TODO fix IOException nonsense
-	public static void main(String [ ] args)
-	{
-		String topic = "test_topic13";
-		KafkaProducerWrapper producer;
-		  ConsumerConnector consumer;
-		try {
-			   producer = new KafkaProducerWrapper();
-		  
-		     List<ProducerRecordWrapper> events = new ArrayList<ProducerRecordWrapper>();	;
-		     ProducerRecordWrapper event = new ProducerRecordWrapper(topic, "test message".getBytes());
-		     for (int i = 0; i < 10; i++){
-		         events.add(event);
-		     }
-		
-			for (ProducerRecordWrapper rec: events){
-				producer.send(rec);
-			}
-			System.out.println(event);
-			Thread.sleep(4000);
-			Properties props = new Properties();
-		     props.put("metadata.broker.list", "52.4.197.159:9092");
-		     props.put("zookeeper.connect", "52.4.197.159:2181");
-		     props.put("group.id", "test6");
-		     props.put("autooffset.reset", "smallest");
-		     props.put("enable.auto.commit", "true");
-		     props.put("auto.commit.interval.ms", "1000");
-		     props.put("session.timeout.ms", "30000");
-		     /*
-		     props.put("key.serializer", "org.apache.kafka.common.serializers.ByteArraySerializer");
-		     props.put("value.serializer", "org.apache.kafka.common.serializers.ByteArraySerializer");
-		     props.put("key.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer");
-		     props.put("value.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer");*/
-		     props.put("key.serializer", "org.apache.kafka.common.serializers.StringSerializer");
-		     props.put("value.serializer", "org.apache.kafka.common.serializers.StringSerializer");
-		     /*props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-		     props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");*/
-		     props.put("partition.assignment.strategy", "roundrobin");
-		     consumer = kafka.consumer.Consumer.createJavaConsumerConnector(new ConsumerConfig(props))	;
-		//consumer.subscribe("test_topic3");
-		
-		Map<String, Integer> topicCountMap = new HashMap<String, Integer>();
-	    topicCountMap.put(topic, 1);
-		Map<String, List<KafkaStream<byte[], byte[]>>> consumerMap = consumer.createMessageStreams(topicCountMap);
-        List<KafkaStream<byte[], byte[]>> streams = consumerMap.get(topic);
-        KafkaStream<byte[], byte[]> m_stream = streams.get(0);
-        ConsumerIterator<byte[], byte[]> it = m_stream.iterator();
-        while (it.hasNext())
-            System.out.println("Consumer message "  + new String(Hex.encodeHexString(it.next().message())));
-        //System.out.println("Shutting down Thread: " + m_threadNumber);
-	    
-         } catch (Exception e1) {
-			
-			logger.error("Unable to deliver events " +  e1);
-		}
-		
-		
-	}
-	public KafkaProducerWrapper() throws IOException{
+	
+	public KafkaProducerWrapper(String propFileName) throws IOException{
+
 		logger.info("Kafka: Create KafkaProducerWrapper");
-		initConfig();
+		initConfig(propFileName);
+	//	ProducerConfig prodConfig = new ProducerConfig(config);
 		 try {
-			 producer = new KafkaProducer<byte[],byte[]>(getProducerProps());
+			 producer = new KafkaProducer<byte[],byte[]>(config);
 			 Runtime.getRuntime().addShutdownHook(new Thread() {
 				   @Override
 				   public void run() {
@@ -170,9 +116,9 @@ public class KafkaProducerWrapper {
 
 		return props;
 	}
-    private void initConfig() throws IOException{
+    private void initConfig(String propFileName) throws IOException{
        config = new Properties();
-		/*
+		
 		try {
 		  inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
 		  if (inputStream != null) {
@@ -184,6 +130,6 @@ public class KafkaProducerWrapper {
 			System.out.println("Exception: " + e);
 		} finally {
 			inputStream.close();
-		}*/
+		}
     }
 }

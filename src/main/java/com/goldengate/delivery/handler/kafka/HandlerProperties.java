@@ -10,8 +10,8 @@ import java.util.List;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
 public class HandlerProperties {
-
-	public List<ProducerRecordWrapper> events; //TODO change to some sort of Kafka event
+    
+	public List<ProducerRecordWrapper> events; 
 	public String delimiter;
 	public String insertOpKey;
 	public String updateOpKey;
