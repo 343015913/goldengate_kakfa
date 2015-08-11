@@ -46,7 +46,8 @@ import com.goldengate.delivery.handler.kafka.ProducerRecordWrapper;
  * In "op" mode, the events will be published on every operation/record basis.
  * 
  * The Kafka Java Client (as of Kafka 0.8.2) is asynchronous and support message batching/buffering. 
- * As such, the "tx" and "op" modes should have comparable performance
+ * As such, the "tx" and "op" modes should have comparable performance.
+ * 
  * 
  * Considering a table "TCUST" with columns "CUST_ID", "CUST_NAME", "ADDRESS" with a 
  * record being inserted into it say "10001","Kafka Admin","Los Angles".
@@ -61,27 +62,23 @@ import com.goldengate.delivery.handler.kafka.ProducerRecordWrapper;
  * @author Eugene Miretsky
  * 
  * */
+
+  //TODO: Look into removing event buffering for "tx" mode - it has no performance impact as the new Kafka producer does it's own buffering
+  // However, it is possible that under some use cases we want to sedt events only after a transaction has been commited.  
 public class KafkaHandler  extends AbstractHandler{
 	 final private static Logger logger = LoggerFactory.getLogger(KafkaHandler.class);
 		
 	// TODO: Move it to a test class
-	public static void main(String [ ] args) throws Exception
-	{
-	 KafkaProducerWrapper producer;
-	  producer = new KafkaProducerWrapper();
 
-      try { 
-    	  String input = "My test: This is a test string to make sure the encyption works. Need to make it longer. Very long. Just to make sure!";
-		  ProducerRecordWrapper event = new ProducerRecordWrapper("test_table2", input.getBytes());
-		  producer.send(event);
-      
-	 } catch (Exception e1) {		
- 	   logger.error("Unable to process operation.", e1);
-	 }
-    }
 
 	/** Producer for Kakfa */
 	private KafkaProducerWrapper producer; 
+	
+	/** 
+	 * Config file for Kafka Producer http://kafka.apache.org/082/javadoc/org/apache/kafka/clients/producer/KafkaProducer.html
+	 */
+	private String kafkaConfigFile;
+	private final String KAFKA_CONFIG_FILE = "kafka.properties";
 	
 	/** 
 	 * Eg: 
@@ -127,9 +124,10 @@ public class KafkaHandler  extends AbstractHandler{
 
 	@Override
 	public void init(DsConfiguration arg0, DsMetaData arg1) {
+		kafkaConfigFile = KAFKA_CONFIG_FILE;  // set default value
 		super.init(arg0, arg1);
 		try {
-		   producer = new KafkaProducerWrapper();
+		   producer = new KafkaProducerWrapper(kafkaConfigFile);
 	    } catch (IOException e) {
 		   logger.error("Exception: " + e);
 	    } 
@@ -266,6 +264,13 @@ public class KafkaHandler  extends AbstractHandler{
 		this.handlerProperties.includeOpType = this.includeOpType;
 	}
 
+	public String getKafkaConfigFile() {
+		return kafkaConfigFile;
+	}
+
+	public void setKafkaConfigFile(String delimiter) {
+		this.kafkaConfigFile = delimiter;
+	}
 	public String getDelimiter() {
 		return delimiter;
 	}
