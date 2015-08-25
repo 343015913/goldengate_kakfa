@@ -120,7 +120,6 @@ public abstract class OperationHandler {
 				logger.info("---------- column After value : " + column.getAfterValue());
 				logger.info("---------- column Bafore value : " + column.getBeforeValue());
 				logger.info("---------- column  value : " + column.getValue());
-				
 			   if(op.getNumColumns() != 0){
 					  builder.append(handlerProperties.delimiter);
 			   }
