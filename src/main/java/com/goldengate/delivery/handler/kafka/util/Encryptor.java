@@ -3,6 +3,7 @@ package com.goldengate.delivery.handler.kafka.util;
 
 import com.goldengate.delivery.handler.kafka.KafkaHandler;
 import  com.goldengate.delivery.handler.kafka.util.EncryptedMessage;
+import  com.goldengate.delivery.handler.kafka.util.key.*;
 
 import java.nio.file.*;
 import java.security.*;
@@ -13,30 +14,31 @@ import javax.crypto.spec.*;
 
 import java.util.Random;
 
+
 import org.apache.commons.codec.binary.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Encryptor {
-	  //private static final String PUBLIC_KEY_FILENAME  = "public_key.der";
-	  //private static final String PRIVATE_KEY_FILENAME = "private_key.der";
-	  private static final String PUBLIC_KEY_FILENAME  = "public_key.der";
-	  private static final String PRIVATE_KEY_FILENAME = "private_key.der";
-	  private static final String SECRET_KEY_ALGORITHM = "AES";
-	  public static final int SECRET_KEY_LENGTH_BITS = 1024;
-	  private static final String PRIVATE_KEY_HEX_STRING = "30820278020100300d06092a864886f70d0101010500048202623082025e02010002818100c3c501301d5e2c0320b74a1eb7f24a1fd2a2c2051f40a66c0ebca16916f1a1a9df859ac52b01f0e0702d05a38612bae087029ec10e228b5486facf5298f0da1d28dbbcd0b596b81e21fa2b296c48fa7641a3d8187c199b13a42ee96c64445bab92c673a9594185de9049a98e00e6bfbd3fbc54c680a74b18f7b222f44c812475020301000102818100a2eab08964f738b345a7a2e41b7a639b4604326866d0bb6e537940ee1eace937600f64744ecd27b2ef475858f43b640f73eb8747ebc66da2e34d97f909d3edfe3e9d4c34417e91d8a37268d523adcde39bc680a7878642412ccda098c2cc09a2a8854ee2318a0ab973e2fc7894be8fd562f2ba7a026a6f87d77de4e1457afe81024100f12fb18c11319c11ae66e5ca5ed5958313d9ae751381421ba0c84074ccad4fb76cea1a013b25dc2771c780a3e41f5ce7b8f9ccd8eba3e5056cdb50c0a8bf0961024100cfcb32bdbb5951217f5b518a3be20a6bf0ab887334c8f2f7f3b5d47915d67a562ca12624c43baa2646e81c02227d9ad519ac6219ea9715330762224c26440f9502405193f732d031fe7f00856f5e16db99599fa2365f053ce8365e18bdac83fa6f0734c0ae11128788c292ba8f296024b790ed4118e79a347267765d6c1fee33c7a1024100b75442af4cc4efa48b35a94a39ad239eba16cceb3fedef17be28758e632af882611bc88875ad626024fd1200fc272f5cc62ae5de91afbc5f6a2b35b153ad86c50241009487945cf01bdf78cb0d183b6b5005c30981364fa142b17fe372a123dcfc55bb897371e5624150bdd728e6fdc2bb6393a24d7505bda2f06b52f64f52858e3a9d";
+public abstract class Encryptor {
+	 
+	  protected static final String SECRET_KEY_ALGORITHM = "AES";
+	  public static final String ENCRYPTOR_CONFIG = "crypto.encryptor";
 
+	  
+	  protected KeyProvider provider;
 	  final private static Logger logger = LoggerFactory.getLogger(Encryptor.class);
 	  
-	  // Test
+	  /*
 	  public static void main(String [ ] args)
 		{
           try { 
+        	KeyProvider provider = new TestKeyProvider();
+        	Encryptor encryptor = new Encryptor(provider);
 		    String input = "My test: This is a test string to make sure the encyption works. Need to make it longer. Very long. Just to make sure!";
-		    EncryptedMessage msg = Encryptor.encrypt(input);
+		    EncryptedMessage msg = encryptor.encrypt(input);
 		    byte[] enc_bytes = msg.toByteArray();
 		    EncryptedMessage msg2   = new EncryptedMessage(enc_bytes);
-		    String output =  Encryptor.DecryptToString(msg2);
+		    String output =  encryptor.DecryptToString(msg2);
 		    assert input == output : "Input != Output";
        } catch (Exception e1) {		
     	   System.out.println("Caught expecption:" + e1);
@@ -44,71 +46,62 @@ public class Encryptor {
 		  
 			
 		}
+		*/
 	 
-	  public static EncryptedMessage encrypt(String message) throws Exception {
-		 return encrypt(message.getBytes());
+	  
+	  public Encryptor(KeyProvider _provider){
+		  provider = _provider; 
+		  
 	  }
-      public static EncryptedMessage encrypt(byte[] messageBytes) throws Exception{
-    	// Encrypt the message with a new symmetric key.
-          SymmetricEncryptor symmetricEncryptor = new SymmetricEncryptor();
-          byte[] encryptedMessage = symmetricEncryptor.encrypt(messageBytes);
-          
-          // Read public key from file, for encrypting symmetric key.
-          PublicKey publicKey = AsymmetricKeyReader.readPublicKey(PUBLIC_KEY_FILENAME);
-
-          // Encrypt the symmetric key with the public key.
-          AsymmetricEncryptor asymmetricEncriptor = new AsymmetricEncryptor(publicKey);
-          byte[] secretKeyBytes = symmetricEncryptor.getKey().getEncoded();
-          byte[] encryptedSecretKey = asymmetricEncriptor.encrypt(secretKeyBytes);
-
-          logger.debug("Run  = " + new Random().nextInt(100));
-          logger.debug("Key = " + Hex.encodeHexString(secretKeyBytes));
-          logger.debug("encrypted Secret Key = " + Hex.encodeHexString(encryptedSecretKey));
-
-          // Encrypt the symmetric key initialization vector with the public key.
-          byte[] ivBytes = symmetricEncryptor.getInitializationVector().getIV();
-          byte[] encryptedIV = asymmetricEncriptor.encrypt(ivBytes);
-          logger.debug("IV = " + Hex.encodeHexString(ivBytes));
-          
-          return new EncryptedMessage(encryptedMessage, encryptedSecretKey, encryptedIV);
-
+	  public  byte[]  encrypt(String message,  String[] public_keys) throws Exception {
+		 return encrypt(message.getBytes(), public_keys);
 	  }
-      public static byte[] Decrypt(EncryptedMessage msg)  throws Exception {
-    	// Read private key from file.
-    	 
-          //PrivateKey privateKey = AsymmetricKeyReader.readPrivateKey(PRIVATE_KEY_FILENAME);
-          PrivateKey privateKey = AsymmetricKeyReader.readPrivateKey(Hex.decodeHex(PRIVATE_KEY_HEX_STRING.toCharArray()));
-    	  AsymmetricDecryptor asymmetricDecryptor = new AsymmetricDecryptor(privateKey);
-    	  byte[] receivedSecretKeyBytes ="d".getBytes();
-    	  try {
-               receivedSecretKeyBytes = asymmetricDecryptor.decrypt(msg.getKey());
-          } catch (Exception e1) {		
-   	        System.out.println("Error decrypting expecption:" + e1);
+	  public  byte[]  encrypt(String message,  String public_key) throws Exception {
+			 return encrypt(message.getBytes(), public_key);
 		  }
-    	  logger.debug("receivedSecretKeyBytes:" + Hex.encodeHexString(msg.getKey()));
-    	  logger.debug("Decrypted SecretKey:" + Hex.encodeHexString(receivedSecretKeyBytes));
+      abstract  public  byte[] encrypt(byte[] messageBytes, String[] public_keys) throws Exception;
+      
+      public  byte[] encrypt(byte[] messageBytes, String public_key) throws Exception{
+    	  String[] arr = {public_key};
+    	  return encrypt(messageBytes, arr);
+      }
+      abstract public  byte[] decrypt(byte[] payload)  throws Exception;
+      public  String decryptToString(byte[] payload)  throws Exception {
+    	  byte[] receivedMessageBytes = decrypt(payload);
+    	  String receivedMessage = new String(receivedMessageBytes, "UTF8");
+         //System.out.printf("output message: %s\n", receivedMessage);
+          return receivedMessage;
+      }
+      protected byte[] decryptImp(byte[] encryptedMessage, byte[] encryptedKey, byte[] encryptedIV, String keyName)  throws Exception{
+
+    	  PrivateKey privateKey = AsymmetricKeyReader.readPrivateKey(provider.getKeyVersion(keyName).getMaterial());
+    	 // try {
+    	  AsymmetricDecryptor asymmetricDecryptor = new AsymmetricDecryptor(privateKey);
+    	  //byte[] receivedSecretKeyBytes ="d".getBytes();
+    	  
+    	  byte[]    receivedSecretKeyBytes = asymmetricDecryptor.decrypt(encryptedKey);
+         
+    	  logger.info("receivedSecretKeyBytes:" + Hex.encodeHexString(encryptedKey ));
+    	  logger.info("Decrypted SecretKey:" + Hex.encodeHexString(receivedSecretKeyBytes));
 		  
           SecretKey receivedSecretKey = new SecretKeySpec(receivedSecretKeyBytes, SECRET_KEY_ALGORITHM);
-          assert receivedSecretKey.getEncoded().length == SECRET_KEY_LENGTH_BITS: "Secret key is " + receivedSecretKey.getEncoded().length + " long, expecting " + SECRET_KEY_LENGTH_BITS;
+         // assert receivedSecretKey.getEncoded().length == SECRET_KEY_LENGTH_BITS: "Secret key is " + receivedSecretKey.getEncoded().length + " long, expecting " + SECRET_KEY_LENGTH_BITS;
           // Decrypt the symmetric key initialization vector with the private key.
-          byte[] receivedIVBytes = asymmetricDecryptor.decrypt(msg.getIV());
+          byte[] receivedIVBytes = asymmetricDecryptor.decrypt(encryptedIV);
           IvParameterSpec receivedIV = new IvParameterSpec(receivedIVBytes);
 
           // Decrypt the message.
           SymmetricDecryptor symmetricDecryptor = new SymmetricDecryptor(receivedSecretKey, receivedIV);
-          byte[] receivedMessageBytes = symmetricDecryptor.decrypt(msg.getMessage() );
+          byte[] receivedMessageBytes = symmetricDecryptor.decrypt(encryptedMessage);
 
           // The message that was received.
          // System.out.printf("output message: %s\n", receivedMessage);
           return receivedMessageBytes; 
-    	  
+    	 // } catch (Exception e1) {		
+     	   //     System.out.println("Error decrypting expecption:" + e1);
+  		 // }
       }
-      public static String DecryptToString(EncryptedMessage msg)  throws Exception {
-    	  byte[] receivedMessageBytes = Decrypt(msg);
-    	  String receivedMessage = new String(receivedMessageBytes, "UTF8");
-          System.out.printf("output message: %s\n", receivedMessage);
-          return receivedMessage;
-      }
+      
 
 	  
 }
@@ -116,7 +109,8 @@ public class Encryptor {
 
 class SymmetricEncryptor
 {
-  public static final String KEY_ALGORITHM    = "AES";
+  
+ static final String KEY_ALGORITHM    = "AES";
   public static final String CIPHER_ALGORITHM = "AES/CBC/PKCS5Padding";
   //public static final int    KEY_LENGTH_BITS  = 256;
   //TODO Install Java Cryptography Extension to allow 256 bits
@@ -280,12 +274,12 @@ class AsymmetricKeyReader
   
   final private static Logger logger = LoggerFactory.getLogger(AsymmetricKeyReader.class);
 
-  public static PrivateKey readPrivateKey(String filenameDer) throws Exception
+  /*public static PrivateKey readPrivateKey(String filenameDer) throws Exception
   {
-    byte[] keyBytes = readAllBytes(filenameDer);
+      byte[] keyBytes = readAllBytes(filenameDer);
     logger.debug("Key = " +  Hex.encodeHexString(keyBytes));
     return readPrivateKey(keyBytes);
-  }
+  }*/
   public static PrivateKey readPrivateKey(byte [] keyBytes) throws Exception
   {
    
@@ -293,12 +287,12 @@ class AsymmetricKeyReader
     PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
     return keyFactory.generatePrivate(spec);
   }
-
+/*
   public static PublicKey readPublicKey(String filenameDer) throws Exception
   {
     byte[] keyBytes = readAllBytes(filenameDer);
     return readPublicKey(keyBytes);
-  }
+  }*/
   public static PublicKey readPublicKey(byte[] keyBytes) throws Exception{
 	  KeyFactory keyFactory = newKeyFactory();
 	  X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);

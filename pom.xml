@@ -34,6 +34,11 @@
        <version>4.12</version>
        <scope>test</scope>
      </dependency>
+     <dependency>
+	       <groupId>org.apache.avro</groupId>
+	         <artifactId>avro</artifactId>
+		   <version>1.7.7</version>
+	   </dependency>
 
   </dependencies>
   <properties>
@@ -70,7 +75,33 @@
 	      <configuration>
 	        <outputDirectory>${project.build.directory}/kafka-lib</outputDirectory>
 	      </configuration>
-     </plugin>
+      </plugin>
+      <plugin>
+	        <groupId>org.apache.avro</groupId>
+		  <artifactId>avro-maven-plugin</artifactId>
+		    <version>1.7.7</version>
+		      <executions>
+			          <execution>
+					        <phase>generate-sources</phase>
+						      <goals>
+							              <goal>schema</goal>
+								            </goals>
+									          <configuration>
+											          <sourceDirectory>${project.basedir}/src/main/avro/</sourceDirectory>
+												          <outputDirectory>${project.basedir}/src/main/java/</outputDirectory>
+													        </configuration>
+														    </execution>
+														      </executions>
+													      </plugin>
+													      <plugin>
+														        <groupId>org.apache.maven.plugins</groupId>
+															  <artifactId>maven-compiler-plugin</artifactId>
+															    <configuration>
+																        <source>1.7</source>
+																	    <target>1.7</target>
+																	      </configuration>
+																      </plugin>
+																            
     </plugins>
   </build>
   <name>ogg-kafka</name>
