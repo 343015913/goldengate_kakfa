@@ -60,7 +60,7 @@ public abstract class OperationHandler {
 		 //schema = new Schema.Parser().parse(new File("GenericRecord.avsc"));
 	 }
 	 
-	 protected void processOperation(Op op,HandlerProperties handlerProperties, String operationType, boolean useBeforeValues,  boolean includeFieldNames, boolean onlyChanged){
+	/* protected void processOperation(Op op,HandlerProperties handlerProperties, String operationType, boolean useBeforeValues,  boolean includeFieldNames, boolean onlyChanged){
 		logger.info("Kafka: processOperation");
 		 String tableName = op.getTableName().getOriginalShortName().toLowerCase();
 		 //ArrayList<ColumnMetaData> colms = op.getTableMeta().getColumnMetaData();
@@ -70,13 +70,13 @@ public abstract class OperationHandler {
 			 logger.info("\t\t Data Type : " + col.getDataType());
 			 logger.info("\t\t Binary Length  : " + col.getBinaryLength());
 
-		 }
+		 }*/
 	//	StringBuilder content = prepareOutput(handlerProperties, useBeforeValues, operationType, op, includeFieldNames, onlyChanged);
 		
 		//ProducerRecordWrapper event = new ProducerRecordWrapper(tableName, content.toString().getBytes());
 		//prepareEventHeader(op, event);
 		//handlerProperties.events.add(event);
-	}
+	//}
 	
 
 	/** Adds a header into the given Record based on the Mutation's
@@ -104,7 +104,18 @@ public abstract class OperationHandler {
 	  }
 	
 	public void process(Op op, HandlerProperties handlerProperties){
-		String tableName = op.getTableName().getOriginalShortName().toLowerCase();
+		logger.info("Kafka: processOperation");
+		 String tableName = op.getTableName().getOriginalShortName().toLowerCase();
+		 //ArrayList<ColumnMetaData> colms = op.getTableMeta().getColumnMetaData();
+		 for (ColumnMetaData col:  op.getTableMeta().getColumnMetaData()){
+			 logger.info("\t Column Name : " + col.getColumnName());
+			 logger.info("\t\t Native Data Type : " + col.getNativeDataType());
+			 logger.info("\t\t Data Type : " + col.getDataType());
+			 logger.info("\t\t Binary Length  : " + col.getBinaryLength());
+
+		 }
+		 
+		//String tableName = op.getTableName().getOriginalShortName().toLowerCase();
 		Object obj = avroRecord(op, handlerProperties); 
 		//ProducerRecordWrapper event = new ProducerRecordWrapper(tableName, avroRecord(op, handlerProperties));
 		//handlerProperties.events.add(event);
