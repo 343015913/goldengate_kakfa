@@ -5,11 +5,11 @@
  */
 package com.goldengate.delivery.handler.kafka;
 
-import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.kafka.clients.producer.ProducerRecord;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,12 +21,17 @@ import com.goldengate.atg.datasource.DsTransaction;
 import com.goldengate.atg.datasource.GGDataSource.Status;
 import com.goldengate.atg.datasource.adapt.Op;
 import com.goldengate.atg.datasource.meta.DsMetaData;
-import com.goldengate.delivery.handler.kafka.operations.OperationHandler;
-import com.rogers.kafka.serializers.EncryptedMessage;
-import com.rogers.kafka.serializers.Encryptor;
-import com.goldengate.delivery.handler.kafka.util.OperationTypes;
-import com.goldengate.delivery.handler.kafka.KafkaProducerWrapper;
+
+import com.goldengate.atg.datasource.adapt.Tx;
+import com.goldengate.atg.datasource.meta.TableMetaData;
+import com.goldengate.atg.datasource.meta.TableName;
+
+
 import com.goldengate.delivery.handler.kafka.ProducerRecordWrapper;
+
+import com.rogers.goldengate.handlers.Handler;
+import com.rogers.goldengate.handlers.KafkaAvroHandler;
+import com.rogers.goldengate.api.mutations.Mutation;
 
 //TODO: Fix the desc
 /**
@@ -66,14 +71,13 @@ public class KafkaHandler extends AbstractHandler {
 
 	// TODO: Move it to a test class
 
-	/** Producer for Kakfa */
-	private KafkaProducerWrapper producer;
 
 	/**
 	 * Config file for Kafka Producer
 	 * http://kafka.apache.org/082/javadoc/org/apache
 	 * /kafka/clients/producer/KafkaProducer.html
 	 */
+	//TODO: Should be generic...for Kafka/HDFS/etc
 	private String kafkaConfigFile;
 	private final String KAFKA_CONFIG_FILE = "kafka.properties";
 
@@ -89,83 +93,75 @@ public class KafkaHandler extends AbstractHandler {
 	 * Collection to store kafka messages until the "transaction commit" event
 	 * is received in "tx" mode, upon which the list will be cleared
 	 */
-	private List<ProducerRecordWrapper> events = new ArrayList<ProducerRecordWrapper>();
+	//private List<ProducerRecordWrapper> events = new ArrayList<ProducerRecordWrapper>();
 	private HandlerProperties handlerProperties;
 
+	
+	private Handler handler; 
 	@Override
 	public void init(DsConfiguration arg0, DsMetaData arg1) {
+		// TODO: Do something with the config file
 		kafkaConfigFile = KAFKA_CONFIG_FILE; // set default value
+		handler = new KafkaAvroHandler(kafkaConfigFile);
 		super.init(arg0, arg1);
-		try {
-			producer = new KafkaProducerWrapper(kafkaConfigFile);
-		} catch (IOException e) {
-			logger.error("Exception: " + e);
-		}
-		// Setting initial properties in HandlerProperties object, which will be
-		// used for communicating the
-		// information from Flume AbstractHandler to Operation Handlers
-		//
-		initializeHandlerProperties();
+		// TODO: anything we need to do here?
 		logger.info("Done Initializing Kafka Handler");
 	}
 
 	@Override
-	public Status operationAdded(DsEvent e, DsTransaction tx,
-			DsOperation dsOperation) {
-
-		Status status = Status.OK;
-		super.operationAdded(e, tx, dsOperation);
-		Op op = new Op(dsOperation, getMetaData().getTableMetaData(
-				dsOperation.getTableName()), getConfig());
+	public Status operationAdded(DsEvent e, DsTransaction transaction, DsOperation operation) {
+		
 		logger.debug("Operation added event. Operation type = "
-				+ dsOperation.getOperationType());
-		/**
-		 * Get the class defined for the incoming operation type from
-		 * OperationTypes enum and instantiate the operation handler class. Each
-		 * Operation Handler class creates the flume event.
-		 * */
-		OperationTypes operationTypes = OperationTypes.valueOf(dsOperation
-				.getOperationType().toString());
-		OperationHandler operationHandler = operationTypes
-				.getOperationHandler();
-		if (operationHandler != null) {
-			try {
-				operationHandler.process(op, handlerProperties);
-				/** Increment the total number of operations */
-				handlerProperties.totalOperations++;
-			} catch (Exception e1) {
-				status = Status.ABEND;
-				logger.error("Unable to process operation.", e1);
-			}
-		} else {
-			status = Status.ABEND;
-			logger.error("Unable to instantiate operation handler.");
-		}
+				+ operation.getOperationType());
+        Status status = Status.OK;                                                                    
+        super.operationAdded(e, transaction, operation);                                              
+    
+        if(isOperationMode()) {
+            // Tx/Op/Col adapters wrap metadata & values behind a single, simple                      
+            // interface if using the DataSourceListener API (via AbstractHandler).                   
+            final Tx tx = new Tx(transaction, getMetaData(), getConfig());                            
+            final TableMetaData tMeta = getMetaData().getTableMetaData(operation.getTableName());     
+            final Op op = new Op(operation, tMeta, getConfig());                                      
+            status = processOp(tx, op); // process data...
+        }
 
-		return status;
+        return status;
+	
 	}
 
 	@Override
-	public Status transactionCommit(DsEvent e, DsTransaction tx) {
-		logger.debug("Transaction commit event ");
-		super.transactionCommit(e, tx);
-		Status status = Status.OK;
-		/**
-		 * Publish the events to flume using the rpc client once the transaction
-		 * commit event is received.
-		 * 
-		 * In "op" mode, Event will be published to kafka on every
-		 * "operationAdded" event, as transaction commit would be invoked for
-		 * every operation.
-		 * 
-		 * In "tx" mode, Events will be buffered on every "opeartionAdded" event
-		 * and published to flume once the transaction commit event is received.
-		 * 
-		 * */
-		status = publishEvents();
+	public Status transactionCommit(DsEvent e, DsTransaction transaction) {
+		logger.debug("Transaction commit event ");                           
+        super.transactionCommit(e, transaction);
+        Status status = Status.OK;  
+        
+        // Increment the number of transactions
 		handlerProperties.totalTxns++;
+                                                                     
+        Tx tx = new Tx(transaction, getMetaData(), getConfig());                                      
+        
+        // In 'operation mode', all the operations would have been processed when                     
+        // 'operationAdded' is called. In 'transaction mode', they are processed                      
+        // when the commit event is received.
+        if(!isOperationMode()) {                                                                      
+            for(Op op: tx) {
+                status = processOp(tx, op); // process data...                                        
+                if (status != Status.OK){                                                             
+                    //Break out of this loop                                                          
+                    break;                                                                            
+                }
+            }
+        }
+        
+          logger.debug("  Received transaction commit event, transaction count="
+                    + handlerProperties.totalTxns
+                    + ", pos=" + tx.getTranID()
+                    + " (total_ops= "+ tx.getTotalOps()
+                    + ", buffered="+ tx.getSize() + ")"
+                    + ", ts=" + tx.getTimestamp());
 
-		return status;
+        return status;
+		
 	}
 
 	@Override
@@ -183,7 +179,10 @@ public class KafkaHandler extends AbstractHandler {
 	@Override
 	public String reportStatus() {
 		logger.info("Reporting Status ");
+		
 		StringBuilder sb = new StringBuilder();
+		//TODO:
+		/*
 		sb.append("Status report: mode=").append(getMode());
 		sb.append(", transactions=").append(handlerProperties.totalTxns);
 		sb.append(", operations=").append(handlerProperties.totalOperations);
@@ -192,25 +191,22 @@ public class KafkaHandler extends AbstractHandler {
 		sb.append(", deletes=").append(handlerProperties.totalDeletes);
 
 		logger.info("Final Status " + sb.toString());
+		*/
 		return sb.toString();
 	}
 
 	@Override
 	public void destroy() {
 		logger.info("Destroy event");
-		/**
-		 * Close the connection to flume.
-		 * */
-		// this.rpcClient.close();
 		super.destroy();
 	}
-
+/*
 	private Status publishEvents() {
 		logger.info("Publishing events to Kafka. Events size = " + this.events);
 		Status status = Status.OK;
-		/**
-		 * Publishing the events to Kafka.
-		 * */
+		
+		 // Publishing the events to Kafka.
+		 
 		if (!this.events.isEmpty()) {
 			try {
 				for (ProducerRecordWrapper rec : this.handlerProperties.events) {
@@ -228,12 +224,45 @@ public class KafkaHandler extends AbstractHandler {
 		}
 		return status;
 	}
-
+	*/
+	/**
+     * Private method to distribute the current operation to a handler and write the                  
+     * operation data to an HDFS file.
+     * @param currentTx The current transaction.                                                      
+     * @param op The current operation.
+     * @return Status.OK on success, else Status.ABEND                                                
+     */
+    private Status processOp(Tx currentTx, Op op) {  
+    	Status status = Status.OK;  
+        if(logger.isDebugEnabled()){ 
+            logger.debug("Process operation: table=[" + op.getTableName() + "]"                       
+                + ", op pos=" + op.getPosition()
+                + ", tx pos=" + currentTx.getTranID()                                                 
+                + ", op ts=" + op.getTimestamp());                                                    
+        }                                                                                             
+        try { 
+           TableName  tname = op.getTableName();
+            TableMetaData tMeta = getMetaData().getTableMetaData(tname);
+            Mutation mutation = Mutation.fromOp(op);
+            handler.processOp(mutation);
+        }catch(RuntimeException e){  
+        	     status = Status.ABEND;
+                 logger.error("Failed to Process operation: table=[" + op.getTableName() + "]"             
+                   + ", op pos=" + op.getPosition()                                                      
+                   + ", tx pos=" + currentTx.getTranID()                                                 
+                   + ", op ts=" + op.getTimestamp() 
+                   + " with error: " + e);	
+        }
+                                      
+                                                                                                      
+        return status;
+    }
+/*
 	private void initializeHandlerProperties() {
 		this.handlerProperties = new HandlerProperties();
 		this.handlerProperties.events = this.events;
 		this.handlerProperties.includeOpTimestamp = this.includeOpTimestamp;
-	}
+	}*/
 
 	public String getKafkaConfigFile() {
 		return kafkaConfigFile;
@@ -243,13 +272,13 @@ public class KafkaHandler extends AbstractHandler {
 		this.kafkaConfigFile = delimiter;
 	}
 
-	public List<ProducerRecordWrapper> getEvents() {
+	/*public List<ProducerRecordWrapper> getEvents() {
 		return events;
 	}
 
 	public void setEvents(List<ProducerRecordWrapper> events) {
 		this.events = events;
-	}
+	}*/
 
 	public HandlerProperties getHandlerProperties() {
 		return handlerProperties;
