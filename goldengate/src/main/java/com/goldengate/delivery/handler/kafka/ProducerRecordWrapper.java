@@ -1,6 +1,6 @@
 package com.goldengate.delivery.handler.kafka;
 
-import com.rogers.kafka.serializers.KafkaSecureByteArraySerializer;
+//import com.rogers.kafka.serializers.KafkaSecureByteArraySerializer;
 
 import java.io.InputStream;
 import java.util.Properties;
@@ -8,7 +8,7 @@ import java.util.Properties;
 //import com.goldengate.delivery.handler.kafka.util.EncryptedMessage;
 //import com.goldengate.delivery.handler.kafka.util.Encryptor;
 
-import org.apache.commons.codec.binary.Hex;
+//import org.apache.commons.codec.binary.Hex;
 import org.apache.kafka.common.errors.SerializationException;
 
 import java.io.ByteArrayOutputStream;
