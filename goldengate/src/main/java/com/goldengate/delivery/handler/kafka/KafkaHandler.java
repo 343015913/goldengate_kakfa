@@ -108,7 +108,7 @@ public class KafkaHandler extends AbstractHandler {
 	@Override
 	public Status operationAdded(DsEvent e, DsTransaction transaction, DsOperation operation) {
 		
-		logger.debug("Operation added event. Operation type = "
+		logger.info("Operation added event. Operation type = "
 				+ operation.getOperationType());
         Status status = Status.OK;                                                                    
         super.operationAdded(e, transaction, operation);                                              
@@ -128,12 +128,12 @@ public class KafkaHandler extends AbstractHandler {
 
 	@Override
 	public Status transactionCommit(DsEvent e, DsTransaction transaction) {
-		logger.debug("Transaction commit event ");                           
+		logger.info("Transaction commit event ");                           
         super.transactionCommit(e, transaction);
         Status status = Status.OK;  
         
         // Increment the number of transactions
-		handlerProperties.totalTxns++;
+//		handlerProperties.totalTxns++;
                                                                      
         Tx tx = new Tx(transaction, getMetaData(), getConfig());                                      
         
@@ -151,7 +151,7 @@ public class KafkaHandler extends AbstractHandler {
         }
         
           logger.debug("  Received transaction commit event, transaction count="
-                    + handlerProperties.totalTxns
+              //      + handlerProperties.totalTxns
                     + ", pos=" + tx.getTranID()
                     + " (total_ops= "+ tx.getTotalOps()
                     + ", buffered="+ tx.getSize() + ")"
@@ -231,8 +231,8 @@ public class KafkaHandler extends AbstractHandler {
      */
     private Status processOp(Tx currentTx, Op op) {  
     	Status status = Status.OK;  
-        if(logger.isDebugEnabled()){ 
-            logger.debug("Process operation: table=[" + op.getTableName() + "]"                       
+        if(logger.isDebugEnabled() || true){ 
+            logger.info("Process operation: table=[" + op.getTableName() + "]"                       
                 + ", op pos=" + op.getPosition()
                 + ", tx pos=" + currentTx.getTranID()                                                 
                 + ", op ts=" + op.getTimestamp());  
@@ -240,7 +240,7 @@ public class KafkaHandler extends AbstractHandler {
               int index = 0;
               for(DsColumn column : op) { 
             		ColumnMetaData cMeta = tMeta.getColumnMetaData(index++); 
-            		logger.debug(" cMeta.getOriginalColumnName() " + 
+            		logger.info(" cMeta.getOriginalColumnName() " + 
             		cMeta.getOriginalColumnName() + ". column.getAfterValue() -> "+ 
             		column.getAfterValue()+", column.getBeforeValue() -> " + 
             		column.getBeforeValue()); 
@@ -252,7 +252,12 @@ public class KafkaHandler extends AbstractHandler {
             Mutation mutation = Mutation.fromOp(op);
             handler.processOp(mutation);
         }catch(RuntimeException e){  
-        	     status = Status.ABEND;
+                 logger.info("Failed to Process operation: table=[" + op.getTableName() + "]"             
+                   + ", op pos=" + op.getPosition()                                                      
+                   + ", tx pos=" + currentTx.getTranID()                                                 
+                   + ", op ts=" + op.getTimestamp() 
+                   + " with error: " + e);	
+                  //	     status = Status.ABEND;
                  logger.error("Failed to Process operation: table=[" + op.getTableName() + "]"             
                    + ", op pos=" + op.getPosition()                                                      
                    + ", tx pos=" + currentTx.getTranID()                                                 

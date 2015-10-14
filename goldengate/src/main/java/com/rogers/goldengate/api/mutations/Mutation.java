@@ -6,9 +6,12 @@ import java.io.Serializable;
 
 import com.goldengate.atg.datasource.DsColumn;
 import com.goldengate.atg.datasource.adapt.Op;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public abstract class Mutation implements Serializable { 
+	final private static Logger logger = LoggerFactory.getLogger(Mutation.class);
       String tableName; 
       String schemaName;
       long tx_id;  //TODO: figure out how we set it. Do we need it? 
@@ -61,6 +64,8 @@ public abstract class Mutation implements Serializable {
              case  DO_DELETE: 
         	   return new DeleteMutation(tableName, schemaName);
              case DO_UPDATE: 
+             case DO_UPDATE_FIELDCOMP: 
+             case DO_UPDATE_AC: 
             	row = createRow(op, true);
         	    return new UpdateMutation(tableName, schemaName, row);
              case DO_UPDATE_FIELDCOMP_PK: 
@@ -72,21 +77,31 @@ public abstract class Mutation implements Serializable {
       }
       static Row createRow(Op op, boolean onlyChanged ){
     	  Row row = new Row();
+          TableMetaData tbl_meta = op.getTableMeta();; 
+            logger.info("create row");
    
 		  int i = 0;
 		     for(DsColumn column : op) {
-		    	 if (!onlyChanged || column.isChanged()){
-		    		 String name = op.getTableMeta().getColumnName(i); 
+                        ColumnMetaData col_meta = tbl_meta.getColumnMeta(i);; 
+                        // logger.info("column = " + op.getTableMeta().getColumnName(i) + ", changed = " + column.isChanged() + ", val= " + column.getAfterValue()  );
+		    	 if (!onlyChanged || column.isChanged() || col_meta.isKeyCol){
+		    		 String name = col_meta.getColumnName(); 
 		    		 String str_val = column.getAfterValue();
 		    		 Column col = strToColumn(str_val);
+                                 //logger.info("Mutation column = " + col.getValue()  );
 		    		 row.addColumn(name,col);
 		    	 }
+                        i++;
 		     } 
+            logger.info("row: " + row.toString());
 		   return row;
       }
       // TODO: Should to Proper type conversaion
       static Column strToColumn(String str){
-    	  return new Column(str);	  
+         // logger.info("strToColumn: str=" + str  );
+    	  Column col =  new Column(str);	 
+         // logger.info("\t column = " + col.getValue()  );
+          return col; 
       }
       
     	  
