@@ -9,11 +9,11 @@ package com.goldengate.delivery.handler.kafka;
 import java.util.ArrayList;
 import java.util.List;
 
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.goldengate.atg.datasource.AbstractHandler;
+import com.goldengate.atg.datasource.DsColumn;
 import com.goldengate.atg.datasource.DsConfiguration;
 import com.goldengate.atg.datasource.DsEvent;
 import com.goldengate.atg.datasource.DsOperation;
@@ -21,14 +21,11 @@ import com.goldengate.atg.datasource.DsTransaction;
 import com.goldengate.atg.datasource.GGDataSource.Status;
 import com.goldengate.atg.datasource.adapt.Op;
 import com.goldengate.atg.datasource.meta.DsMetaData;
-
 import com.goldengate.atg.datasource.adapt.Tx;
+import com.goldengate.atg.datasource.meta.ColumnMetaData;
 import com.goldengate.atg.datasource.meta.TableMetaData;
 import com.goldengate.atg.datasource.meta.TableName;
-
-
 import com.goldengate.delivery.handler.kafka.ProducerRecordWrapper;
-
 import com.rogers.goldengate.handlers.Handler;
 import com.rogers.goldengate.handlers.KafkaAvroHandler;
 import com.rogers.goldengate.api.mutations.Mutation;
@@ -238,10 +235,19 @@ public class KafkaHandler extends AbstractHandler {
             logger.debug("Process operation: table=[" + op.getTableName() + "]"                       
                 + ", op pos=" + op.getPosition()
                 + ", tx pos=" + currentTx.getTranID()                                                 
-                + ", op ts=" + op.getTimestamp());                                                    
+                + ", op ts=" + op.getTimestamp());  
+              TableMetaData tMeta = getMetaData().getTableMetaData(op.getTableName()); 
+              int index = 0;
+              for(DsColumn column : op) { 
+            		ColumnMetaData cMeta = tMeta.getColumnMetaData(index++); 
+            		logger.debug(" cMeta.getOriginalColumnName() " + 
+            		cMeta.getOriginalColumnName() + ". column.getAfterValue() -> "+ 
+            		column.getAfterValue()+", column.getBeforeValue() -> " + 
+            		column.getBeforeValue()); 
+              } 
         }                                                                                             
         try { 
-           TableName  tname = op.getTableName();
+            TableName  tname = op.getTableName();
             TableMetaData tMeta = getMetaData().getTableMetaData(tname);
             Mutation mutation = Mutation.fromOp(op);
             handler.processOp(mutation);
