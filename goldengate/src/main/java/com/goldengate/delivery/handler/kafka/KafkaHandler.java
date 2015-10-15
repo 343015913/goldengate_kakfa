@@ -197,67 +197,27 @@ public class KafkaHandler extends AbstractHandler {
 		logger.info("Destroy event");
 		super.destroy();
 	}
-/*
-	private Status publishEvents() {
-		logger.info("Publishing events to Kafka. Events size = " + this.events);
-		Status status = Status.OK;
-		
-		 // Publishing the events to Kafka.
-		 
-		if (!this.events.isEmpty()) {
-			try {
-				for (ProducerRecordWrapper rec : this.handlerProperties.events) {
-					this.producer.send(rec);
-				}
-			} catch (Exception e1) {
-				status = Status.ABEND;
-				logger.error("Unable to deliver events. Events size : "
-						+ events.size(), e1);
-			}
 
-			this.handlerProperties.events.clear();
-		} else {
-			logger.warn("No events available to publish.");
-		}
-		return status;
-	}
-	*/
 	/**
-     * Private method to distribute the current operation to a handler and write the                  
-     * operation data to an HDFS file.
+     * Private method to handle operations and write them to the target using a specifc handler
      * @param currentTx The current transaction.                                                      
      * @param op The current operation.
      * @return Status.OK on success, else Status.ABEND                                                
      */
     private Status processOp(Tx currentTx, Op op) {  
     	Status status = Status.OK;  
-        if(logger.isDebugEnabled() || true){ 
-            logger.info("Process operation: table=[" + op.getTableName() + "]"                       
+        logger.debug("Process operation: table=[" + op.getTableName() + "]"                       
                 + ", op pos=" + op.getPosition()
                 + ", tx pos=" + currentTx.getTranID()                                                 
                 + ", op ts=" + op.getTimestamp());  
-              TableMetaData tMeta = getMetaData().getTableMetaData(op.getTableName()); 
-              int index = 0;
-              for(DsColumn column : op) { 
-            		ColumnMetaData cMeta = tMeta.getColumnMetaData(index++); 
-            		logger.info(" cMeta.getOriginalColumnName() " + 
-            		cMeta.getOriginalColumnName() + ". column.getAfterValue() -> "+ 
-            		column.getAfterValue()+", column.getBeforeValue() -> " + 
-            		column.getBeforeValue()); 
-              } 
-        }                                                                                             
+                                                                                            
         try { 
             TableName  tname = op.getTableName();
             TableMetaData tMeta = getMetaData().getTableMetaData(tname);
             Mutation mutation = Mutation.fromOp(op);
             handler.processOp(mutation);
-        }catch(RuntimeException e){  
-                 logger.info("Failed to Process operation: table=[" + op.getTableName() + "]"             
-                   + ", op pos=" + op.getPosition()                                                      
-                   + ", tx pos=" + currentTx.getTranID()                                                 
-                   + ", op ts=" + op.getTimestamp() 
-                   + " with error: " + e);	
-                  //	     status = Status.ABEND;
+        }catch(RuntimeException e){  	
+                 status = Status.ABEND;
                  logger.error("Failed to Process operation: table=[" + op.getTableName() + "]"             
                    + ", op pos=" + op.getPosition()                                                      
                    + ", tx pos=" + currentTx.getTranID()                                                 
@@ -268,12 +228,6 @@ public class KafkaHandler extends AbstractHandler {
                                                                                                       
         return status;
     }
-/*
-	private void initializeHandlerProperties() {
-		this.handlerProperties = new HandlerProperties();
-		this.handlerProperties.events = this.events;
-		this.handlerProperties.includeOpTimestamp = this.includeOpTimestamp;
-	}*/
 
 	public String getKafkaConfigFile() {
 		return kafkaConfigFile;
@@ -282,14 +236,6 @@ public class KafkaHandler extends AbstractHandler {
 	public void setKafkaConfigFile(String delimiter) {
 		this.kafkaConfigFile = delimiter;
 	}
-
-	/*public List<ProducerRecordWrapper> getEvents() {
-		return events;
-	}
-
-	public void setEvents(List<ProducerRecordWrapper> events) {
-		this.events = events;
-	}*/
 
 	public HandlerProperties getHandlerProperties() {
 		return handlerProperties;

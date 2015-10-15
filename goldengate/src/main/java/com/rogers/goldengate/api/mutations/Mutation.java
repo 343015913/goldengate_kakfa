@@ -6,6 +6,9 @@ import java.io.Serializable;
 
 import com.goldengate.atg.datasource.DsColumn;
 import com.goldengate.atg.datasource.adapt.Op;
+import com.goldengate.atg.datasource.meta.ColumnMetaData;
+import com.goldengate.atg.datasource.meta.TableMetaData;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,30 +80,25 @@ public abstract class Mutation implements Serializable {
       }
       static Row createRow(Op op, boolean onlyChanged ){
     	  Row row = new Row();
-          TableMetaData tbl_meta = op.getTableMeta();; 
-            logger.info("create row");
-   
+          TableMetaData tbl_meta = op.getTableMeta();;  
 		  int i = 0;
-		     for(DsColumn column : op) {
-                        ColumnMetaData col_meta = tbl_meta.getColumnMeta(i);; 
-                        // logger.info("column = " + op.getTableMeta().getColumnName(i) + ", changed = " + column.isChanged() + ", val= " + column.getAfterValue()  );
-		    	 if (!onlyChanged || column.isChanged() || col_meta.isKeyCol){
+		  for(DsColumn column : op) {
+                 ColumnMetaData col_meta = tbl_meta.getColumnMetaData(i);; 
+                 logger.debug("column = " + op.getTableMeta().getColumnName(i) + ", changed = " + column.isChanged() + ", val= " + column.getAfterValue()  );
+		    	 if (!onlyChanged || column.isChanged() || col_meta.isKeyCol()){
 		    		 String name = col_meta.getColumnName(); 
 		    		 String str_val = column.getAfterValue();
-		    		 Column col = strToColumn(str_val);
-                                 //logger.info("Mutation column = " + col.getValue()  );
+		    		 Column col = strToColumn(str_val);                    
 		    		 row.addColumn(name,col);
 		    	 }
-                        i++;
-		     } 
+               i++;
+		    } 
             logger.info("row: " + row.toString());
-		   return row;
+		    return row;
       }
       // TODO: Should to Proper type conversaion
       static Column strToColumn(String str){
-         // logger.info("strToColumn: str=" + str  );
     	  Column col =  new Column(str);	 
-         // logger.info("\t column = " + col.getValue()  );
           return col; 
       }
       

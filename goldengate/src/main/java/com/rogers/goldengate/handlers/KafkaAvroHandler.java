@@ -45,7 +45,7 @@ public class KafkaAvroHandler extends KafkaHandler {
 	 
 	final private static Logger logger = LoggerFactory
 			.getLogger(KafkaAvroHandler.class);
-	
+	//TODO: Serilaizer should be a generic
 	MutationSerializer serialiazer ;
 
 	public KafkaAvroHandler(String configFile) {
