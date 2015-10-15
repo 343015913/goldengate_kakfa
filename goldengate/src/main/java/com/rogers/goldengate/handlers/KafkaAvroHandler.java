@@ -58,6 +58,8 @@ public class KafkaAvroHandler extends KafkaHandler {
 		 String topic = getSchemaSubject(op);
          byte[] bytes = serialiazer.serialize(op);
          logger.info("KafkaHandler: Send Message to topic: " + topic);
+         logger.info("\t message =  " + bytes);
+         logger.info("\t string message =  " + new String(bytes));
 		 send(topic, bytes);                                                                                    
 	    }
 	
