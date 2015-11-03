@@ -1,0 +1,516 @@
+//
+// to stream data into the cluster open up netcat and echo sample GGRowRecrods to it, one per line.
+//
+// nc -lk 9999
+// 2014-10-07T12:20:09Z;foo;1
+// 2014-10-07T12:21:09Z;foo;29
+// 2014-10-07T12:22:10Z;foo;1
+// 2014-10-07T12:23:11Z;foo;29
+package ute_test
+import scala.language.dynamics
+import java.net._
+import java.io._
+import scala.io._
+import java.util.Properties
+import java.util.Date
+import java.util.Random
+import java.util.TimeZone
+import kafka.producer.{ProducerConfig, KeyedMessage, Producer}
+import com.github.nscala_time.time.Imports._
+import org.apache.spark._
+import org.apache.spark.SparkContext._
+import org.apache.spark.streaming._
+import org.apache.spark.streaming.dstream._
+import org.apache.spark.streaming.StreamingContext._
+import org.apache.spark.streaming.kafka._
+import com.datastax.spark.connector._
+import com.datastax.spark.connector.streaming._
+import com.datastax.spark.connector.cql.CassandraConnector
+import com.datastax.spark.connector.mapper._
+import ute.util._
+import scala.collection.mutable.HashMap
+import com.datastax.spark.connector._
+ class DBObject extends Dynamic with Serializable {
+  private val map = new HashMap[String, Any]
+  def selectDynamic(name: String): Any = {
+    return map(name.toLowerCase)
+  }
+  def updateDynamic(name:String)(value: Any) = {
+    map(name.toLowerCase) = value
+  }
+  def addField(name:String, value: Any) = this.updateDynamic(name)(value)
+  def print{
+    map.foreach(v => println(s"${v._1}:${v._2}"))
+  }
+ // CassandraRow 
+ // def toTuple = 
+  def isEmpty = this.map.isEmpty
+
+}
+import com.datastax.spark.connector.cql.TableDef
+import scala.reflect.ClassTag
+import scala.reflect._
+import scala.reflect.runtime.universe._
+class DBObjectColumnMapper (implicit tag: TypeTag[DBObject]) extends ColumnMapper[DBObject] {
+  val MaxFields = 20
+   override def classTag = implicitly[ClassTag[DBObject]]
+   private def indexedColumnRefs(n: Int) =
+    (0 until n).map(IndexedColumnRef)
+    private def indexedColumnNames(n: Int) =
+   (1 until n).map{ num => (s"_${num}",IndexedColumnRef( num -1) )}
+    
+  override def columnMap(tableDef: TableDef): ColumnMap = {
+
+    val GetterRegex = "_([0-9]+)".r
+   // val cls = implicitly[ClassTag[T]].runtimeClass
+
+    val constructor =
+      indexedColumnRefs(MaxFields)
+
+    val getters = indexedColumnNames(MaxFields).toMap
+
+    val setters =
+      Map.empty[String, ColumnRef]
+
+    SimpleColumnMap(constructor, getters, setters)
+  }
+
+}
+ object DBObject {
+       implicit val columnMapper =
+         new DBObjectColumnMapper
+}
+
+
+ 
+// Generic GG Row Recrod - needs a Schema to parse the vals array
+case class GGRowRecord( op:String, time:DateTime, vals:Array[String]) { 
+//  lazy val columns= {
+  //  this.vals.map{case (_) => _}
+    
+  //}
+  def   parseWith(schema:Schema) :DBObject =  {
+    val obj = new DBObject
+   
+    this.vals.view.zipWithIndex.foreach{ case (record, i) =>  obj.addField(schema(i).name, TypeCast.castTo(record, schema(i).dataType)) }
+   // val tmp = this.vals.view.zipWithIndex.flatMap()
+   //val bla = this.vals.view.zipWithIndex.map{ case (record, i) => Tuple2(schema(i).name, TypeCast.castTo(record, schema(i).dataType)) }
+   // this.vals
+    obj.addField("ID", 2)
+    obj
+  //}
+ /* def selectDynamic(key: String) = {
+    key match {
+      case "data" => this.time
+      case name: String => this.vals 
+    }*/
+ 
+  }
+}
+   
+// Golden Gate Table stuff
+case class Column( val name:String = "", val dataType:DataType = Unknown, val skip:Boolean = false) // Schema column
+case class Schema(val columns: Array[Column]){
+  def fieldNames: Array[String] = columns.map(_.name)
+  private lazy val nameToColumn: Map[String, Column] = columns.map(f => f.name -> f).toMap
+  lazy val toCPairs = columns.map{ case Column(name,dataType, skip)=> 
+           val c_type = dataType match {
+               case StringType => "text"
+               case IntegerType => "bigint"
+               case DateType =>  "timestamp"
+               case _ => throw new RuntimeException(s"Unsupported C* type")
+            } 
+            name -> c_type
+  }
+  def apply(index: Integer): Column = this.columns(index)
+}
+case class GGTable( val src_name:String, val target_name:String, val schema:Schema){
+  def parseRows(rows:DStream[GGRowRecord]) = rows.map(_.parseWith(this.schema)).filter { !_.isEmpty }
+  def writeRowsToC(rows:DStream[GGRowRecord], sparkContext: SparkContext) = {
+     // rows.foreach{println _}
+     var new_rows = parseRows(rows)
+     //var bla = sc.parallelize(Seq((30.3, "cat"), (40, "fox")))
+     //new_rows.saveToCassandra(Config.cassandraKeyspace, this.target_name, SomeColumns(this.schema.fieldNames:_*))
+     new_rows.print()
+
+    
+     
+      //def conf = sparkContext.getConf
+   //  val connector: CassandraConnector = CassandraConnector(conf)
+     // val writer = com.datastax.spark.connector.writer.TableWriter(connector, 
+       //   Config.cassandraKeyspace, this.target_name, SomeColumns("id"),  com.datastax.spark.connector.writer.WriteConf.fromSparkConf(conf))
+     // println(s"Column names ${writer.columnNames}")
+  }
+ 
+}
+// TODO: This should obviously be in its own file
+object Config {
+  val sparkMasterHost = "127.0.0.1"
+  val cassandraHost = "ec2-54-88-81-221.compute-1.amazonaws.com"
+  val cassandraKeyspace = "demo"
+  val cassandraCfCounters = "event_counters"
+  val cassandraCfEvents = "event_log"
+  val zookeeperHost = "52.4.197.159:2181"
+  val kafkaHost = "52.4.197.159:9092"
+//  val kafkaTopic = "events"
+  val kafkaTopic = "flume_test"
+  val kafkaTopics = List[String]("table_blg_argmnt", "table_customer", "table_contact")
+  val kafkaConsumerGroup = "spark-streaming-test"
+  val tcpHost = "localhost"
+  val tcpPort = 9999
+  val topicsToTables = Map("table_blg_argmnt" -> "Agreement", "table_customer" -> "Customer", "table_contact" -> "Contact")//TODO: vals should be a Tuple?
+  val tables = Map(
+            "table_blg_argmnt" -> 
+                  GGTable(
+                         "table_blg_argmnt", "agreement",
+                            Schema( Array(
+                                Column("Id", IntegerType, false),
+                                Column("Dev", IntegerType, false),
+                                Column("Last_Update", DateType, false),
+                                Column("Hier_Name_Ind", IntegerType, false),
+                                Column("Name", StringType, false),
+                                Column("S_Name", StringType, false),
+                                Column("Status", StringType, false),
+                                Column("Description", StringType, false),
+                                Column("S_Description", StringType, false),
+                                Column("Blg_Evt_Gen_Sts", IntegerType, false),
+                                Column("Bar_Id", StringType, false),
+                                Column("S_Bar_Id", StringType, false),
+                                Column("Status_Date", DateType, false),
+                                Column("BLG_ARGMNT2FIN_ACCNT", IntegerType, false),
+                                Column("BA_PARENT2BUS_ORG", IntegerType, false),
+                                Column("BA_CHILD2BUS_ORG", IntegerType, false),
+                                Column("BLG_ARGMNT2PAY_MEANS", IntegerType, false),
+                                Column("PRIMARY_BLG_ARGMNT2SITE", IntegerType, false),
+                                Column("PRIMARY_BLG_ARGMNT2E_ADDR", IntegerType, false),
+                                Column("BLG_STATUS2HGBST_ELM", IntegerType, false),
+                                Column("X_RCIS_ID", StringType, false),
+                                Column("BLG_ARGMNT2BOH_BE", IntegerType, false),
+                                Column("X_DECLINE_OL_BILL", IntegerType, false),
+                                Column("X_DECLINE_OL_BILL_DATE", DateType, false),
+                                Column("X_EMAIL", StringType, false),
+                                Column("X_WEB_USER_IND", IntegerType, false),
+                                Column("X_OLB_IND", StringType, false),
+                                Column("X_LAST_PAPER_CHRG_NOTIFY_DATE", DateType, false),
+                                Column("X_OLB_CHARGE_WAIVE_IND", StringType, false),
+                                Column("X_OLB_CHARGE_WAIVE_RSN", StringType, false),
+                                Column("X_OLB_DATE", DateType, false),
+                                Column("X_LAST_UPDATE_BILL_TYPE", DateType, false),
+                                Column("X_OLB_WAIVE_RSN2HGBST_ELM", IntegerType, false)            
+                            ))
+                         ),
+              "table_customer" -> 
+                  GGTable("table_customer", "customer",
+                            Schema( Array(
+                                Column("Id", IntegerType, false),
+                                Column("CUSTOMER_ID", StringType, false),
+                                Column("S_CUSTOMER_ID", StringType, false),
+                                Column("NAME", StringType, false),
+                                Column("S_NAME", StringType, false),
+                                Column("ACQUISITION_DATE", DateType, false),
+                                Column("RSC_PL_CD", StringType, false),
+                                Column("TYPE", StringType, false),
+                                Column("SUBTYPE", StringType, false),
+                                Column("RANK", IntegerType, false),
+                                Column("PRIVACY_PREF", StringType, false),
+                                Column("MARKET_CHANNEL", StringType, false),
+                                Column("DEV", IntegerType, false),
+                                Column("OWNED_ORG2BUS_ORG", IntegerType, false),
+                                Column("CUSTOMER2ROLLUP", IntegerType, false),
+                                Column("CUSTOMER2BOH_BE", IntegerType, false),
+                                Column("CUSTOMER2CURRENCY", IntegerType, false),
+                                Column("CUSTOMER2HGBST_ELM", IntegerType, false),
+                                Column("CUST_TYPE2HGBST_ELM", IntegerType, false),
+                                Column("X_RCIS_CREATION_DT", DateType, false),
+                                Column("X_CONV_IND", IntegerType, false),
+                                Column("X_WEB_SITE", StringType, false),
+                                Column("X_EMPLOYEE_ID", StringType, false),
+                                Column("X_SPECIAL_DISC", StringType, false),
+                                Column("X_BUSINESS_TYPE", StringType, false),
+                                Column("X_COMP_SIZE", StringType, false),
+                                Column("X_REVENUE", StringType, false),
+                                Column("X_INDUSTRY_TYPE", StringType, false),
+                                Column("X_SERVICE_MODEL", StringType, false),
+                                Column("X_SUB_MARKET", StringType, false),
+                                Column("X_PPV_PIN", StringType, false),
+                                Column("X_RC_FREQ", StringType, false),
+                                Column("X_V21_CYCLE_BAN", StringType, false),
+                                Column("X_BCB_IND", IntegerType, false),
+                                Column("ACT_CRDT2CCLASS_INST", IntegerType, false),
+                                Column("SUB_TYPE2HGBST_ELM", IntegerType, false),
+                                Column("MARKET2HGBST_ELM", IntegerType, false),
+                                Column("X_COMP_SIZE2HGBST_ELM", IntegerType, false),
+                                Column("X_REVENUE2HGBST_ELM", IntegerType, false),
+                                Column("X_INDUSTRY_TYPE2HGBST_ELM", IntegerType, false),
+                                Column("X_SERVICE_MODEL2HGBST_ELM", IntegerType, false),
+                                Column("X_BUSINESS_TYPE2HGBST_ELM", IntegerType, false),
+                                Column("X_CUSTOMER2X_COMP_CODE_NAME", IntegerType, false),
+                                Column("X_SPECIAL_DISC2HGBST_ELM", IntegerType, false),
+                                Column("X_RC_FREQ2HGBST_ELM", IntegerType, false)
+                             ))
+                         )                  
+         )
+}
+
+//case class GGRowRecrod(bucket:Long, time:Date, name:String, count:Long)
+
+case class GGRowRecrodCount(bucket:Long, name:String, count:Long)
+
+object StreamConsumer {
+
+  def setup() : (SparkContext, StreamingContext, CassandraConnector) = {
+    val sparkConf = new SparkConf(true)
+      .set("spark.cassandra.connection.host", Config.cassandraHost)
+      .set("spark.cleaner.ttl", "3600")
+     .setMaster("local[4]")
+      .setAppName(getClass.getSimpleName)
+
+    // Connect to the Spark cluster:
+    val sc = new SparkContext(sparkConf)
+    val ssc = new StreamingContext(sc, Seconds(1))
+    val cc = CassandraConnector(sc.getConf)
+    createSchema(cc, Config.cassandraKeyspace)
+      val collection = sc.parallelize(Seq(("cat", 30), ("fox", 40))) 
+     
+      //collection.saveToCassandra("test", "words", SomeColumns("word", "count"))
+    return (sc, ssc, cc)
+  }
+
+  def parseDate(str:String) : DateTime = {
+
+    //return javax.xml.bind.DatatypeConverter.parseDateTime(str).getTime()
+    //return DateTime.parse(str )
+    return DateTime.parse(str,    DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss.SSSSSS"))
+    //val fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss.SSSSSS")//2015-05-13 16:19:36.728160
+    //eturn fmt.parse(str )
+  }
+
+  def minuteBucket(d:Date) : Long = {
+    return d.getTime() / (60 * 1000)
+  }
+
+  def parseMessage(msg:String) : GGRowRecord = {
+    val arr = msg.split(";")
+    //val time = parseDate(arr.last)
+    val time = DateTime.now
+    val op = arr.head
+    val vals = arr.slice(1,arr.length - 2)
+    println(GGRowRecord(op, time, vals))
+    return GGRowRecord(op, time, vals)
+  }
+
+  def createSchema(cc:CassandraConnector, keySpaceName:String) = {
+    cc.withSessionDo { session =>
+      Config.tables.foreach{ case (name,table) =>
+        session.execute(s"DROP TABLE IF EXISTS ${keySpaceName}.${table.target_name};")
+         // NOTE: This is for testing. Creating tables dynamically is not a good idea
+         var cql = "CREATE TABLE IF NOT EXISTS " +
+                      s"${keySpaceName}.${table.target_name} (${table.schema.toCPairs.map{case(k,v) => s"${k} ${v}"}.mkString(", ")}" +
+                      s", PRIMARY KEY(${table.schema.toCPairs(0)._1}));"
+          println(cql)
+                      session.execute(cql);
+           session.execute("CREATE TABLE IF NOT EXISTS " +
+                      s"${keySpaceName}.count (word text, count bigint, " +
+                      s"PRIMARY KEY(word));")
+                      session.execute("CREATE TABLE IF NOT EXISTS " +
+                      s"${keySpaceName}.words (word text, count bigint, " +
+                      s"PRIMARY KEY(word));")
+        
+      }
+     /* session.execute(s"DROP TABLE IF EXISTS ${keySpaceName}.${logs};")
+      session.execute(s"DROP TABLE IF EXISTS ${keySpaceName}.${counters};")
+
+      session.execute("CREATE TABLE IF NOT EXISTS " +
+                      s"${keySpaceName}.${logs} (name text, bucket bigint, count bigint, time timestamp, " +
+                      s"PRIMARY KEY((name, bucket), time));")
+
+      session.execute("CREATE TABLE IF NOT EXISTS " +
+                      s"${keySpaceName}.${counters} (name text, bucket bigint, count counter, " +
+                      s"PRIMARY KEY(name, bucket));")*/
+    }
+  }
+
+  def process(ssc : StreamingContext, input : DStream[String], topic: String, sc: SparkContext) {
+    // for testing purposes you can use the alternative input below
+    println(s"process topic: ${topic}")
+    input.print()
+    println (s"input size = ${input.count().foreach(rdd => println(rdd)) }")
+    var table =  Config.tables.get(topic)// TODO: return option, getOrElse?
+    val parsedGGRowRecrods = input.map(parseMessage)
+    parsedGGRowRecrods.print()
+     parsedGGRowRecrods.foreach(GGRowRecrod => GGRowRecrod.collect().foreach(x => println(x.vals.mkString) ))
+    //table.foreach(_.writeRowsToC(parsedGGRowRecrods))
+     println(s"table = ${table}")
+    table.foreach(_.writeRowsToC(parsedGGRowRecrods, sc))
+    val words = input.flatMap(_.split(" "))
+    val pairs = words.map(word => (word, 1))
+    val wordCounts = pairs.reduceByKey(_ + _).map{t => Seq(t._1, t._2)}
+    wordCounts.print()
+//    wordCounts.saveToCassandra("demo", "count")
+
+    //val bucketedGGRowRecrods = parsedGGRowRecrods.map(GGRowRecrod => ((GGRowRecrod.bucket, GGRowRecrod.name), GGRowRecrod))
+    //val bucketedCounts = bucketedGGRowRecrods.combineByKey(
+    //  (GGRowRecrod:GGRowRecrod) => GGRowRecrod.count,
+    //  (count:Long, GGRowRecrod:GGRowRecrod) => (count + GGRowRecrod.count),
+    //  (c1:Long, c2:Long) => (c1 + c2),
+    //  new HashPartitioner(1))
+
+   // val flattenCounts = bucketedCounts.map((agg) => GGRowRecrodCount(agg._1._1, agg._1._2, agg._2))
+
+   // parsedGGRowRecrods.print()
+   // parsedGGRowRecrods.foreach(GGRowRecrod => GGRowRecrod.collect().foreach(x => println(x.vals.mkString) ))
+    //parsedGGRowRecrods.saveToCassandra(Config.cassandraKeyspace, Config.cassandraCfEvents)
+    //flattenCounts.saveToCassandra(Config.cassandraKeyspace, Config.cassandraCfCounters)
+
+    // https://twitter.com/pwendell/status/580242656082546688
+    //sys.ShutdownHookThread {
+    //  ssc.stop(true, true)
+   // }
+
+    //ssc.start()
+    //ssc.awaitTermination()
+  }
+}
+
+object KafkaConsumer {
+  case class WordCount(word: String, count: Long)
+
+  def main(args: Array[String]) {
+    val (sc, ssc, cc) = StreamConsumer.setup()
+    val kafkaParams: Map[String, String] = Map("group.id" -> Config.kafkaConsumerGroup, "zookeeper.connect" -> Config.zookeeperHost, "auto.offset.reset"  -> "smallest")
+    Config.kafkaTopics.foreach( (topic: String) => {
+      println(s"Create Stream for topic: ${topic}")
+      val input = KafkaUtils.createStream(
+        ssc,
+        //kafkaParams,
+        Config.zookeeperHost,
+        Config.kafkaConsumerGroup,
+
+       Map(topic -> 1)).map(_._2)
+      //val lines = mutable.Queue[ org.apache.spark.rdd.RDD[String]]()
+     
+        //lines+= sc.parallelize(Seq("I:2015-05-13 12:19:36.721172:123:bla","I:2015-05-13 12:19:36.721172:123:bla"))
+          //val input = ssc.queueStream(lines)
+        println("Input!!!")
+       input.print()
+       input.foreach(x => println(s"RDD:${x}"))
+       input.foreach(rdd => rdd.collect().foreach{x =>println(s"Line:${x}")})
+         // println("Lines!!!")
+       //lines.foreach{rdd => rdd.foreach{println(_)}} 
+     //  val val1 = new KeyValue(1, "bla")
+            val val1 = new DBObject
+
+       val1.addField("word", "laaa")
+       val1.addField("laaa", "word")
+       val1.addField("random", "word")
+      //val lines = mutable.Queue[ org.apache.spark.rdd.RDD[DBObject]]()
+      //        val lines = mutable.Queue[ org.apache.spark.rdd.RDD[WordCount]]()
+
+      val lines =sc.parallelize(Seq(val1, val1))
+     //  val lines =sc.parallelize(Seq(WordCount("dog", 50), WordCount("cow", 60)))
+       // val lines =sc.parallelize(Seq(("cat", 30), ("fox", 40)))
+      // lines +=sc.parallelize(Seq(WordCount("dog", 50), WordCount("cow", 60)))
+      // val bla = ssc.queueStream(lines)
+     //new_rows.saveToCassandra(Config.cassandraKeyspace, this.target_name, SomeColumns(this.schema.fieldNames:_*))
+       def conf = sc.getConf
+     val connector: CassandraConnector = CassandraConnector(conf)
+      //val writer = com.datastax.spark.connector.writer.TableWriter(cc, 
+        //  Config.cassandraKeyspace, "words",AllColumns,  com.datastax.spark.connector.writer.WriteConf.fromSparkConf(conf))
+    //  println(s"Column names ${writer.columnNames.mkString(", ")}")   
+      //  bla.foreachRDD(rdd => rdd.sparkContext.runJob(rdd, (writer.write _)))
+      //bla.saveToCassandra(Config.cassandraKeyspace, "words",AllColumns)
+      println("Before save to cassandra")
+      lines.saveToCassandra(Config.cassandraKeyspace, "words",AllColumns)
+      println("After save to cassandra")
+       StreamConsumer.process(ssc, input, topic, sc)
+       
+       
+       sys.ShutdownHookThread {
+         ssc.stop(true, true)
+       }
+
+       ssc.start()
+       ssc.awaitTermination()
+     })
+    }
+}
+
+
+object TcpConsumer {
+  def main(args: Array[String]) {
+    val (sc, ssc, cc) = StreamConsumer.setup()
+    val input = ssc.socketTextStream(Config.tcpHost, Config.tcpPort)
+    //StreamConsumer.process(ssc, input)
+    sys.ShutdownHookThread {
+      ssc.stop(true, true)
+    }
+
+    ssc.start()
+    ssc.awaitTermination()
+  }
+}
+
+object EventGenerator {
+
+  val eventNames = Array("thyrotome", "radioactivated", "toreutics", "metrological",
+    "adelina", "architecturally", "unwontedly", "histolytic", "clank", "unplagiarised",
+    "inconsecutive", "scammony", "pelargonium", "preaortic", "goalmouth", "adena",
+    "murphy", "vaunty", "confetto", "smiter", "chiasmatype", "fifo", "lamont", "acnode",
+    "mutating", "unconstrainable", "donatism", "discept")
+
+  def currentTimestamp() : String = {
+    val tz = TimeZone.getTimeZone("UTC")
+    val sdf = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
+    sdf.setTimeZone(tz)
+    val dateString = sdf.format(new java.util.Date)
+    return dateString
+  }
+
+  def randomEventName() : String = {
+    val rand = new Random(System.currentTimeMillis())
+    val random_index = rand.nextInt(eventNames.length)
+    return eventNames(random_index)
+  }
+
+  def generateEvent() : String = {
+    // message in the form of "2014-10-07T12:20:08Z;foo;1"
+    val eventCount = scala.util.Random.nextInt(10).toString()
+    return currentTimestamp() + ";" + randomEventName() + ";" + eventCount
+  }
+}
+
+object KafkaProducer {
+ def main(args: Array[String]) {
+   val props = new Properties()
+   props.put("metadata.broker.list", Config.kafkaHost)
+   props.put("serializer.class", "kafka.serializer.StringEncoder")
+   println("")
+   val config = new ProducerConfig(props)
+   val producer = new Producer[String, String](config)
+
+   while(true) {
+     val event = EventGenerator.generateEvent();
+     println(event)
+     producer.send(new KeyedMessage[String, String](Config.kafkaTopic, event))
+     Thread.sleep(100)
+   }
+ }
+}
+
+object TcpProducer {
+  def main(args: Array[String]) {
+    val server = new ServerSocket(Config.tcpPort)
+
+    while (true) {
+      val socket = server.accept()
+      val outstream = new PrintStream(socket.getOutputStream())
+      while (!outstream.checkError()) {
+        val event = EventGenerator.generateEvent();
+        println(event)
+        outstream.println(event)
+        Thread.sleep(100)
+      }
+      socket.close()
+    }
+  }
+}
