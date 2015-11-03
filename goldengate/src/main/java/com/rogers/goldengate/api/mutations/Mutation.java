@@ -80,7 +80,7 @@ public abstract class Mutation implements Serializable {
       }
       static Row createRow(Op op, boolean onlyChanged ){
     	  Row row = new Row();
-          TableMetaData tbl_meta = op.getTableMeta();;  
+          TableMetaData tbl_meta = op.getTableMeta(); 
 		  int i = 0;
 		  for(DsColumn column : op) {
                  ColumnMetaData col_meta = tbl_meta.getColumnMetaData(i);; 

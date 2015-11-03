@@ -81,7 +81,7 @@ public class KafkaSecureProducerTest {
 	//@Test
 	public void testProducer() {	
 		//TODO: Add more tests for wrong configs - no valid keys, etc.  
-		KafkaSecureProducerTest test = new KafkaSecureProducerTest();
+		
 		initProducer();
 		try{
 		  ProducerRecord rec = new ProducerRecord<byte[], byte[]> (topic, null, TEST_STRING.getBytes());
@@ -121,6 +121,7 @@ public class KafkaSecureProducerTest {
 	    } 
        
 	}
+	//TODO: Rewrite using JUNIT
 	public static void main(String [ ] args) {
 		KafkaSecureProducerTest test = new KafkaSecureProducerTest();
 		test.testProducer();
