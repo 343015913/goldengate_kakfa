@@ -4,7 +4,7 @@ package com.rogers.cdc.handlers;
 import com.rogers.cdc.api.mutations.MutationMapper;
 
 //TODO this should be an interface
-abstract public class Handler<Op, OpMapper extends MutationMapper<Op>> {
+abstract public class Handler<Op, Table, OpMapper extends MutationMapper<Op, Table>> {
 	protected OpMapper opMapper;
 	protected Handler(OpMapper _opMapper){
 		opMapper = _opMapper;

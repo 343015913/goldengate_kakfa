@@ -28,6 +28,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 
 
 
+
 import com.rogers.cdc.api.mutations.Column;
 import com.rogers.cdc.api.mutations.DeleteMutation;
 import com.rogers.cdc.api.mutations.InsertMutation;
@@ -35,6 +36,7 @@ import com.rogers.cdc.api.mutations.Mutation;
 import com.rogers.cdc.api.mutations.PassThroughMutationMapper;
 import com.rogers.cdc.api.mutations.Row;
 import com.rogers.cdc.api.mutations.UpdateMutation;
+import com.rogers.cdc.api.schema.Table;
 import com.rogers.cdc.handlers.Handler;
 import com.rogers.cdc.handlers.KafkaAvroHandler;
 import com.rogers.cdc.kafka.KafkaUtil;
@@ -51,8 +53,10 @@ public class KafkaAvroHandlerTest {
 	private KafkaMutationAvroConsumer consumer;
 
 	
-	 String table = "testTable";
-     String schema = "testSchema";
+	// String table = "testTable";
+     //String schema = "testSchema";
+	//TODO: Add Schema
+     Table table = new Table("testSchema", "testTable", null, null);
      Row.RowVal[] update_cols = {new Row.RowVal("name", new Column("Jon")),
              new Row.RowVal("age", new Column("28")),
              new Row.RowVal("balance", new Column("5.23"))
@@ -61,9 +65,9 @@ public class KafkaAvroHandlerTest {
           new Row.RowVal("age", new Column("28")),
           new Row.RowVal("balance", new Column("5.23"))
       };
-     UpdateMutation updateM  = new UpdateMutation(table, schema, new Row(update_cols));
-     InsertMutation insertM  = new InsertMutation(table, schema, new Row(insert_cols));
-     DeleteMutation deleteM  = new DeleteMutation(table, schema);
+     UpdateMutation updateM  = new UpdateMutation(table, new Row(update_cols));
+     InsertMutation insertM  = new InsertMutation(table,  new Row(insert_cols));
+     DeleteMutation deleteM  = new DeleteMutation(table);
 
     private static String randGroupName(String topic){
     	return "test_group_" + topic + System.currentTimeMillis();
@@ -71,7 +75,7 @@ public class KafkaAvroHandlerTest {
     
 	//@Test
    void testProducer() {	
-		Handler<Mutation, PassThroughMutationMapper> handler = new KafkaAvroHandler(new PassThroughMutationMapper(), KAFKA_CONFIG_FILE);  
+		Handler<Mutation, Table, PassThroughMutationMapper> handler = new KafkaAvroHandler(new PassThroughMutationMapper(), KAFKA_CONFIG_FILE);  
 		try{
 			handler.processOp(updateM);
 			handler.processOp(insertM);
@@ -83,7 +87,7 @@ public class KafkaAvroHandlerTest {
 	
 	//@Test
 	void  testConsumer(){
-		final String topic = KafkaUtil.genericTopic(schema, table);
+		final String topic = KafkaUtil.genericTopic(table);
 		final String zkConnect = "52.4.197.159:2181";
 		final String groupId = randGroupName(topic);
           try {

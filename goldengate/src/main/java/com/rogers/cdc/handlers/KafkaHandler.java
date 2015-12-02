@@ -9,7 +9,7 @@ import com.rogers.cdc.api.mutations.MutationMapper;
 import com.rogers.kafka.Producer;
 
 //TODO: Make me Generic with plugable serialzier
-public abstract class KafkaHandler<Op, OpMapper extends MutationMapper<Op>> extends Handler<Op, OpMapper> {
+public abstract class KafkaHandler<Op, Table, OpMapper extends MutationMapper<Op, Table>> extends Handler<Op, Table, OpMapper> {
 	  final private static Logger logger = LoggerFactory
 			.getLogger(KafkaHandler.class);
 	  

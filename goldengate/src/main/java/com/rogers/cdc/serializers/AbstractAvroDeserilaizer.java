@@ -20,6 +20,7 @@ import com.rogers.cdc.api.mutations.Mutation;
 import com.rogers.cdc.api.mutations.PkUpdateMutation;
 import com.rogers.cdc.api.mutations.Row;
 import com.rogers.cdc.api.mutations.UpdateMutation;
+import com.rogers.cdc.api.schema.Table;
 import com.rogers.cdc.exceptions.SerializationException;
 
 
@@ -72,28 +73,29 @@ public class AbstractAvroDeserilaizer extends AbstructAvroSerDe {
     private Mutation toMutation(GenericRecord rec, byte type){
     	String tableName =  rec.get("table").toString();
 	   String schemaName = rec.get("schema").toString();
+	   Table table = new Table(schemaName, tableName, null,null);
 	  
 	    Mutation mutation; 
 	  
     	switch(type){
            case Mutation.InsertByte:
            {
-        	    mutation =  new InsertMutation(tableName, schemaName, createRows(rec));
+        	    mutation =  new InsertMutation(table, createRows(rec));
 
         	   break;
            }
            case  Mutation.DeleteByte: {
-        	   mutation =  new DeleteMutation(tableName, schemaName);
+        	   mutation =  new DeleteMutation(table);
    	           break;
            }
            case Mutation.UpdateByte: 
            {
-        	   mutation =  new UpdateMutation(tableName, schemaName, createRows(rec));
+        	   mutation =  new UpdateMutation(table, createRows(rec));
 
         	   break;
            }
            case Mutation.UpdatePKByte: 
-        	   mutation =  new PkUpdateMutation(tableName, schemaName);
+        	   mutation =  new PkUpdateMutation(table);
         	   break;
            default:
         	   throw new IllegalArgumentException("AvroDesirializer unknown op type");                                                                            

@@ -25,15 +25,17 @@ public class TypedMutationMapper extends AbstractMutationMapper {
 	AbstractSQLTypeConverter<DsColumn> typeConvertor;
 
 	@Override
-	protected Column convertColumn(DsColumn column, int colType) {
+	protected Object convertColumn(DsColumn column, int colType) throws IOException{
 		try {
-		   SQLDataConverter.convertFieldValue(typeConvertor, column, colType);
+		   return SQLDataConverter.convertFieldValue(typeConvertor, column, colType);
 		} catch (IOException e) {
-	        logger.warn("Ignoring record because processing failed:", e);
+			logger.warn("Ignoring record due to SQL error:", e);
+	        throw new IOException("failed to convert " + column + "to SQL type " + colType);
 	    } 
 		catch (SQLException e) {
 			logger.warn("Ignoring record due to SQL error:", e);
-	   }
+			throw new IOException("failed to convert " + column + "to SQL type " + colType);
+	    }
 	}
 	 @Override
 	   protected Table toTable(TableMetaData tb){

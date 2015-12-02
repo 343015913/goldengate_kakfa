@@ -40,11 +40,11 @@ public abstract class Mutation implements Serializable {
       public abstract MutationType getType();
       
       public String getTableName(){
-    	  return table.name;
+    	  return table.getName();
       } 
       // TODO: rename to DatabaseName
       public String getSchemaName(){
-    	  return table.databaseName;
+    	  return table.getDatabaseName();
       }
       public byte getMagicByte(){
     	  return magicByte; 

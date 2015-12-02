@@ -19,7 +19,7 @@ import io.confluent.kafka.serializers.AbstractKafkaAvroSerializer;
 
 
 // Accepts any representation of a CDC operation (Op) together with a Mapper that mappes Op to Mutation
-public class KafkaAvroHandler<Op, Table, OpMapper extends MutationMapper<Op,  Table>> extends KafkaHandler<Op, OpMapper> {	 
+public class KafkaAvroHandler<Op, Table, OpMapper extends MutationMapper<Op,  Table>> extends KafkaHandler<Op, Table, OpMapper> {	 
 	 public  static  byte  PROTO_MAGIC_V0 = 0x0; 
 	 
 	final private static Logger logger = LoggerFactory
@@ -37,17 +37,17 @@ public class KafkaAvroHandler<Op, Table, OpMapper extends MutationMapper<Op,  Ta
 	 @Override
 	 public  void processOp(Op op) {  
 		 try { 
-            Mutation mutation = opMapper.toMutation(op);
-		 } catch  (IOException e)  {
-			 logger.error("KafkaAvroHandler Failed to processes operation: " + op + " with error: " + e );
-			 
-		 }
-		 String topic = getSchemaSubject(mutation);
-         byte[] val = valSerialiazer.serialize(mutation);
-         logger.info("KafkaHandler: Send Message to topic: " + topic);
-         logger.debug("\t message =  " + val);
-         logger.debug("\t string message =  " + new String(val));
-		 send(topic,null ,val);                                                                                    
+               Mutation mutation = opMapper.toMutation(op);
+
+		       String topic = getSchemaSubject(mutation);
+               byte[] val = valSerialiazer.serialize(mutation);
+               logger.info("KafkaHandler: Send Message to topic: " + topic);
+               logger.debug("\t message =  " + val);
+               logger.debug("\t string message =  " + new String(val));
+		       send(topic,null ,val);    
+		    } catch  (IOException e)  {
+			   logger.error("KafkaAvroHandler Failed to processes operation: " + op + " with error: " + e ); 
+		    }
 	    }
 	
 	

@@ -158,7 +158,7 @@ public class GGSQLTypeConverter implements AbstractSQLTypeConverter<DsColumn> {
 	@Override
 	public byte[] getBlob(DsColumn col) throws SQLException{
 		// TODO Auto-generated method stub
-		this.getByte(col);
+		this.getBytes(col);
 		return null;
 	}
 
