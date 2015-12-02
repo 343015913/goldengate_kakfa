@@ -1,15 +1,13 @@
 package com.rogers.kafka.crypto.key;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
 import java.io.IOException;
-import java.lang.UnsupportedOperationException;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.kafka.common.config.ConfigException;
-
-import com.rogers.kafka.crypto.key.KeyProvider.KeyVersion;
 
 //import com.goldengate.delivery.handler.kafka.util.key.KeyProvider.KeyVersion;
 /**

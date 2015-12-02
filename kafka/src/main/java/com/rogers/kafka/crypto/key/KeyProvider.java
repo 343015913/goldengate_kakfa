@@ -1,20 +1,16 @@
 package com.rogers.kafka.crypto.key;
 
 
-import java.util.Map;
-import java.util.List;
 import java.io.IOException;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.Date;
-import java.security.NoSuchAlgorithmException;
-
+import java.util.List;
+import java.util.Map;
 //import com.google.gson.stream.JsonReader;
 //import com.google.gson.stream.JsonWriter;
 //import org.apache.commons.io.Charsets;
 //import org.apache.commons.io.
-
 import javax.crypto.KeyGenerator;
 
 /**

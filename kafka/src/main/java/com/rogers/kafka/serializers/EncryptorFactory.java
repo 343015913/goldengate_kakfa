@@ -10,7 +10,6 @@ public class EncryptorFactory {
 
 	    public static Encryptor getEncryptor(String name, KeyProvider provider){
 
-
 	    	Encryptor encryptor; 
 	    	switch(name){
 	    	case "binary":

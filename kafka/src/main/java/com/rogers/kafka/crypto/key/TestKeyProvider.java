@@ -6,8 +6,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.rogers.kafka.crypto.key.KeyProvider.KeyVersion;
-
 import org.apache.kafka.common.config.ConfigException;
 /**
  * A Key Provider for simple testings

@@ -1,17 +1,8 @@
 package com.rogers.kafka.crypto.key;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.ServiceLoader;
 
 import org.apache.kafka.common.config.ConfigException;
-
-
-
 
 /**
  * A factory to create a list of KeyProvider based on the path given in a
@@ -21,7 +12,6 @@ import org.apache.kafka.common.config.ConfigException;
 //TODO: Create factory using service loader 
 public  class KeyProviderFactory {
     public static KeyProvider getKeyProvider(String name, Map<?, ?> configs){
-
 
     	KeyProvider provider; 
     	switch(name){
