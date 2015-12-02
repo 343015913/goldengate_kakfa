@@ -7,11 +7,9 @@ package com.goldengate.delivery.handler.kafka;
 
 import java.util.List;
 
-import org.apache.kafka.clients.producer.ProducerRecord;
-
 public class HandlerProperties {
 
-	public List<ProducerRecordWrapper> events;
+	//public List<ProducerRecordWrapper> events;
 
 	public Boolean includeOpTimestamp;
 

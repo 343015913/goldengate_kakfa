@@ -5,30 +5,25 @@
  */
 package com.goldengate.delivery.handler.kafka;
 
-
-import java.util.ArrayList;
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.goldengate.atg.datasource.AbstractHandler;
-import com.goldengate.atg.datasource.DsColumn;
 import com.goldengate.atg.datasource.DsConfiguration;
 import com.goldengate.atg.datasource.DsEvent;
 import com.goldengate.atg.datasource.DsOperation;
 import com.goldengate.atg.datasource.DsTransaction;
 import com.goldengate.atg.datasource.GGDataSource.Status;
 import com.goldengate.atg.datasource.adapt.Op;
-import com.goldengate.atg.datasource.meta.DsMetaData;
 import com.goldengate.atg.datasource.adapt.Tx;
-import com.goldengate.atg.datasource.meta.ColumnMetaData;
+import com.goldengate.atg.datasource.meta.DsMetaData;
 import com.goldengate.atg.datasource.meta.TableMetaData;
 import com.goldengate.atg.datasource.meta.TableName;
-import com.goldengate.delivery.handler.kafka.ProducerRecordWrapper;
-import com.rogers.goldengate.handlers.Handler;
-import com.rogers.goldengate.handlers.KafkaAvroHandler;
-import com.rogers.goldengate.api.mutations.Mutation;
+import com.goldengate.delivery.handler.kafka.mutationmappers.StringMutationMapper;
+import com.rogers.cdc.api.mutations.MutationMapper;
+import com.rogers.cdc.handlers.Handler;
+import com.rogers.cdc.handlers.KafkaAvroHandler;
+
 
 //TODO: Fix the desc
 /**
@@ -99,9 +94,10 @@ public class KafkaHandler extends AbstractHandler {
 	public void init(DsConfiguration arg0, DsMetaData arg1) {
 		// TODO: Do something with the config file
 		kafkaConfigFile = KAFKA_CONFIG_FILE; // set default value
-		handler = new KafkaAvroHandler(kafkaConfigFile);
+		MutationMapper<Op, TableMetaData> mapper = new StringMutationMapper();// TODO: get this from a config file
+		handler = new KafkaAvroHandler<Op, TableMetaData,  MutationMapper<Op, TableMetaData>>(mapper, kafkaConfigFile);
 		super.init(arg0, arg1);
-		// TODO: anything we need to do here?
+		initializeHandlerProperties();
 		logger.info("Done Initializing Kafka Handler");
 	}
 
@@ -133,7 +129,7 @@ public class KafkaHandler extends AbstractHandler {
         Status status = Status.OK;  
         
         // Increment the number of transactions
-//		handlerProperties.totalTxns++;
+		handlerProperties.totalTxns++;
                                                                      
         Tx tx = new Tx(transaction, getMetaData(), getConfig());                                      
         
@@ -151,7 +147,7 @@ public class KafkaHandler extends AbstractHandler {
         }
         
           logger.debug("  Received transaction commit event, transaction count="
-              //      + handlerProperties.totalTxns
+                    + handlerProperties.totalTxns
                     + ", pos=" + tx.getTranID()
                     + " (total_ops= "+ tx.getTotalOps()
                     + ", buffered="+ tx.getSize() + ")"
@@ -178,17 +174,18 @@ public class KafkaHandler extends AbstractHandler {
 		logger.info("Reporting Status ");
 		
 		StringBuilder sb = new StringBuilder();
-		//TODO:
-		/*
+
 		sb.append("Status report: mode=").append(getMode());
 		sb.append(", transactions=").append(handlerProperties.totalTxns);
 		sb.append(", operations=").append(handlerProperties.totalOperations);
+		/* TODO: operation types are not tracked right now
 		sb.append(", inserts=").append(handlerProperties.totalInserts);
 		sb.append(", updates=").append(handlerProperties.totalUpdates);
 		sb.append(", deletes=").append(handlerProperties.totalDeletes);
+		*/
 
 		logger.info("Final Status " + sb.toString());
-		*/
+
 		return sb.toString();
 	}
 
@@ -205,6 +202,7 @@ public class KafkaHandler extends AbstractHandler {
      * @return Status.OK on success, else Status.ABEND                                                
      */
     private Status processOp(Tx currentTx, Op op) {  
+    	
     	Status status = Status.OK;  
         logger.debug("Process operation: table=[" + op.getTableName() + "]"                       
                 + ", op pos=" + op.getPosition()
@@ -214,8 +212,9 @@ public class KafkaHandler extends AbstractHandler {
         try { 
             TableName  tname = op.getTableName();
             TableMetaData tMeta = getMetaData().getTableMetaData(tname);
-            Mutation mutation = Mutation.fromOp(op);
-            handler.processOp(mutation);
+           // Mutation mutation = Mutation.fromOp(op);
+            handler.processOp(op);
+            handlerProperties.totalOperations++;
         }catch(RuntimeException e){  	
                  status = Status.ABEND;
                  logger.error("Failed to Process operation: table=[" + op.getTableName() + "]"             
@@ -228,7 +227,10 @@ public class KafkaHandler extends AbstractHandler {
                                                                                                       
         return status;
     }
-
+    private void initializeHandlerProperties() {
+        this.handlerProperties = new HandlerProperties();
+        this.handlerProperties.includeOpTimestamp = this.includeOpTimestamp;
+    }
 	public String getKafkaConfigFile() {
 		return kafkaConfigFile;
 	}

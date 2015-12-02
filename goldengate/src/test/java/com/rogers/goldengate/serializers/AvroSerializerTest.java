@@ -1,22 +1,17 @@
 package com.rogers.goldengate.serializers;
 
-import com.rogers.goldengate.api.mutations.*;
+import com.rogers.cdc.api.mutations.*;
+import com.rogers.cdc.serializers.GenericAvroMutationDeserializer;
+import com.rogers.cdc.serializers.GenericAvroMutationSerializer;
+import com.rogers.cdc.serializers.MutationDeserializer;
+import com.rogers.cdc.serializers.MutationSerializer;
+
+
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
-import org.apache.avro.generic.GenericRecord;
 
-/*import com.rogers.kafka.serializers.KafkaSecureByteArrayDeserializer;
-import com.rogers.kafka.serializers.KafkaSecureByteArraySerializer;
-import com.rogers.kafka.serializers.KafkaSecureSerializerTest;
-*/
 import org.junit.Test;
 
 public class AvroSerializerTest {
@@ -39,8 +34,8 @@ public class AvroSerializerTest {
            };
 	    
 	     
-	      MutationSerializer serializer = new AvroMutationSerializer();
-	      MutationDeserializer deserializer = new AvroMutationDeserializer();
+	      MutationSerializer serializer = new GenericAvroMutationSerializer();
+	      MutationDeserializer deserializer = new GenericAvroMutationDeserializer();
 
 	      String table = "test_table";
 	      String schema = "test_schema";

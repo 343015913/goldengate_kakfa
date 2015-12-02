@@ -3,9 +3,9 @@ package com.goldengate.delivery.handler.kafka;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-
 import java.util.Properties;
 
+//TODO: Move the whole GoldenGate part to a different package - this package should not depend on Oracle
 public class KafkaProducerConfig {
 	Properties prop;
 	InputStream inputStream;

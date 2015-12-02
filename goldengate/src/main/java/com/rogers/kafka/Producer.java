@@ -13,7 +13,8 @@ import org.slf4j.LoggerFactory;
 
 
 
-import com.rogers.goldengate.exceptions.ConfigException;
+
+import com.rogers.cdc.exceptions.ConfigException;
 
 public class Producer{
 	private Properties config;

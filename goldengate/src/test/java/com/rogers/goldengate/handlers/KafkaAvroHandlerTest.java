@@ -24,14 +24,21 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 //import org.junit.Test;
 
-import com.rogers.goldengate.api.mutations.Column;
-import com.rogers.goldengate.api.mutations.DeleteMutation;
-import com.rogers.goldengate.api.mutations.InsertMutation;
-import com.rogers.goldengate.api.mutations.Mutation;
-import com.rogers.goldengate.api.mutations.Row;
-import com.rogers.goldengate.api.mutations.UpdateMutation;
-import com.rogers.goldengate.kafka.KafkaUtil;
-import com.rogers.goldengate.kafka.consumers.KafkaMutationAvroConsumer;
+
+
+
+
+import com.rogers.cdc.api.mutations.Column;
+import com.rogers.cdc.api.mutations.DeleteMutation;
+import com.rogers.cdc.api.mutations.InsertMutation;
+import com.rogers.cdc.api.mutations.Mutation;
+import com.rogers.cdc.api.mutations.PassThroughMutationMapper;
+import com.rogers.cdc.api.mutations.Row;
+import com.rogers.cdc.api.mutations.UpdateMutation;
+import com.rogers.cdc.handlers.Handler;
+import com.rogers.cdc.handlers.KafkaAvroHandler;
+import com.rogers.cdc.kafka.KafkaUtil;
+import com.rogers.cdc.kafka.consumers.KafkaMutationAvroConsumer;
 
 
 
@@ -57,28 +64,14 @@ public class KafkaAvroHandlerTest {
      UpdateMutation updateM  = new UpdateMutation(table, schema, new Row(update_cols));
      InsertMutation insertM  = new InsertMutation(table, schema, new Row(insert_cols));
      DeleteMutation deleteM  = new DeleteMutation(table, schema);
-	
-	
-	
-  /*  private static Properties getConsumerConfig() {
-        Properties props = new Properties();
-        props.put("zookeeper.connect", "52.4.197.159:2181");
-        props.put("group.id", randGroupName());
-        props.put("zookeeper.session.timeout.ms", "400");
-        props.put("zookeeper.sync.time.ms", "200");
-        props.put("auto.commit.interval.ms", "1000");
-        props.put("auto.offset.reset","smallest");
-        props.put("crypto.encryptor","avro");
-        return props;
-      
-    }*/
+
     private static String randGroupName(String topic){
     	return "test_group_" + topic + System.currentTimeMillis();
     }
     
 	//@Test
    void testProducer() {	
-		Handler handler = new KafkaAvroHandler(KAFKA_CONFIG_FILE);  
+		Handler<Mutation, PassThroughMutationMapper> handler = new KafkaAvroHandler(new PassThroughMutationMapper(), KAFKA_CONFIG_FILE);  
 		try{
 			handler.processOp(updateM);
 			handler.processOp(insertM);
@@ -135,26 +128,6 @@ public class KafkaAvroHandlerTest {
         	  System.out.print("Error Running consumer test: " + e);
         	  
           }
-		   
-				
-       // try{ 
-        	
-
-         //  VerifiableProperties vProps = new VerifiableProperties(getConsumerConfig());
-           //DefaultDecoder keyDecoder = new DefaultDecoder(vProps);
-  
-           //Map<String, List<KafkaStream<byte[], byte[]>>> consumerMap = consumer.createMessageStreams(topicCountMap, keyDecoder, valueDecoder);
-      
-           //final KafkaStream stream = consumerMap.get(topic).get(0);
-           //ConsumerIterator<byte[], byte[]> it = stream.iterator();
-           //while (it.hasNext()){
-             //System.out.println("Consumer got: " + new String(it.next().message()));
-             //assertEquals("Should get the original string in the consumer",
-        		//   TEST_STRING, new String(it.next().message()));
-           //}
-       // }catch (Exception e) {
-		//	fail("failed to  consume message stream, with error:" + e);
-	    //} 
        
 	}
 	//TODO: add Test back.... there was some error with classPath()
