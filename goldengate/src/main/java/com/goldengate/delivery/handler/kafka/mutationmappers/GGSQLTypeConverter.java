@@ -16,11 +16,14 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.rogers.cdc.api.schema.AbstractSQLTypeConverter;
 import com.goldengate.atg.datasource.DsColumn;
 
 public class GGSQLTypeConverter implements AbstractSQLTypeConverter<DsColumn> {
+	final private static Logger logger = LoggerFactory.getLogger(GGSQLTypeConverter.class);
     // TODO: Default time zone?
 	@Override
 	public boolean getBoolean(DsColumn col) throws SQLException{
@@ -84,8 +87,12 @@ public class GGSQLTypeConverter implements AbstractSQLTypeConverter<DsColumn> {
 	@Override
 	public Double getDouble(DsColumn col) throws SQLException {
 		// TODO:  How does oracle handle strinct floating point precision?
+		logger.debug("\t getDouble ");
 		String val =  getStringInt(col);
-		return Double.parseDouble(val);
+		logger.debug("\t val  = " +  val);
+		Double d = Double.parseDouble(val);
+		logger.debug("\t double  = " +  d);
+		return d ;
 	}
 
 	//@Override
@@ -182,7 +189,9 @@ public class GGSQLTypeConverter implements AbstractSQLTypeConverter<DsColumn> {
 	}
 	
 	private String getStringInt (DsColumn col) throws SQLException{
+		logger.debug("getStringInt");
 		String val = col.getAfterValue();
+		logger.debug("getAfterValue = " +  val);
 		if (val == null){
 			throw new SQLException("column val should not be null");
 		}

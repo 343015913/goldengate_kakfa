@@ -26,7 +26,7 @@ public class TypedMutationMapper extends AbstractMutationMapper {
 
 	@Override
 	protected Object convertColumn(DsColumn column, int colType) throws IOException{
-		  logger.debug("convertColumn = {} colType =  {}" , column.toString(),   colType);
+		  logger.debug("convertColumn = {} colType =  {}" , column,   colType);
 		try {
 		   return SQLDataConverter.convertFieldValue(typeConvertor, column, colType);
 		} catch (IOException e) {
