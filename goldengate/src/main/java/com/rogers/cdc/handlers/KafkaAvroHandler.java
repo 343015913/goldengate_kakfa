@@ -10,11 +10,15 @@ import com.rogers.cdc.api.mutations.MutationMapper;
 import com.rogers.cdc.kafka.KafkaUtil;
 import com.rogers.cdc.serializers.GenericAvroMutationSerializer;
 import com.rogers.cdc.serializers.MutationSerializer;
+import com.rogers.cdc.serializers.SpecificAvroMutationSerializer;
 
+import org.apache.kafka.common.config.AbstractConfig;
+import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.common.serialization.Serializer;
 
 import io.confluent.kafka.serializers.KafkaAvroSerializer;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerializer;
+
 
 
 
@@ -26,13 +30,16 @@ public class KafkaAvroHandler<Op, Table, OpMapper extends MutationMapper<Op,  Ta
 			.getLogger(KafkaAvroHandler.class);
 	//TODO: Serilaizer should be a generic
 	MutationSerializer valSerialiazer ;
-	Serializer keySerialiazer;
+	Serializer<Object> keySerialiazer;
 	//TODO: Add key serialiazer
     
 	public KafkaAvroHandler(OpMapper _opMapper, String configFile) {
 		  super(_opMapper, configFile);
-		  valSerialiazer = new GenericAvroMutationSerializer();
-		  keySerialiazer = new KafkaAvroSerializer(null); 
+		  //TODO: Config file? 
+		  //valSerialiazer = new GenericAvroMutationSerializer();
+		  valSerialiazer = new SpecificAvroMutationSerializer();
+		  keySerialiazer = new KafkaAvroSerializer(); 
+		  keySerialiazer.configure(new AbstractConfig(new ConfigDef(), config).originals(), false);// TODO use AbstractKafkaAvroSerDeConfig when new confluent comes out
 	  }
 	 @Override
 	 public  void processOp(Op op) {  
@@ -40,6 +47,7 @@ public class KafkaAvroHandler<Op, Table, OpMapper extends MutationMapper<Op,  Ta
                Mutation mutation = opMapper.toMutation(op);
 
 		       String topic = getSchemaSubject(mutation);
+		      // byte[] key = keySerialiazer.serialize(mutation.);
                byte[] val = valSerialiazer.serialize(mutation);
                logger.info("KafkaHandler: Send Message to topic: " + topic);
                logger.debug("\t message =  " + val);

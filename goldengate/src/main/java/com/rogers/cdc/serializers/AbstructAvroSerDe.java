@@ -7,7 +7,7 @@ import com.rogers.cdc.api.mutations.Mutation;
 import com.rogers.cdc.avro.InsertMutation;
 
 
-abstract public class AbstructAvroSerDe implements  Serializable{
+abstract public class AbstructAvroSerDe /*implements  Serializable*/{
 	 protected   static final  byte  PROTO_MAGIC_V0 = 0x0; 
 	 protected static final int idSize = 2;
 	 protected static final int opTypeSize = 1;

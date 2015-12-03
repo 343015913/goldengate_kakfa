@@ -40,10 +40,10 @@ public class SpecificAvroMutationSerializer extends AbstractAvroMutationSerialze
 			.getLogger(SpecificAvroMutationSerializer.class);
 	
 	  public static final String SCHEMAS_CACHE_SIZE_CONFIG = "schemas.cache.config";
-	  private static final int SCHEMAS_CACHE_SIZE_DEFAULT = 1000;
+	  //private static final int SCHEMAS_CACHE_SIZE_DEFAULT = 1000;
 	
-	  private SchemaRegistryClient schemaRegistry;
-	  private Serializer serializer;
+	 // private SchemaRegistryClient schemaRegistry;
+	  private Serializer<Object> serializer;
 	
 	
 	 protected  GenericData.Record avroRecord(Mutation op, Schema schema){
@@ -103,21 +103,7 @@ public class SpecificAvroMutationSerializer extends AbstractAvroMutationSerialze
 	@Override
 	//TODO
 	  protected  byte[] serializeAvro( GenericData.Record record,  Schema schema, String topic,  byte opType) throws IOException {
-			    /*EncoderFactory encoderFactory = EncoderFactory.get();
-			    DatumWriter<GenericRecord> writer  = new GenericDatumWriter<GenericRecord>();
-			    writer.setSchema(schema);
-			    ByteArrayOutputStream out = new ByteArrayOutputStream();
-			    out.write(PROTO_MAGIC_V0);
-			    out.write(ByteBuffer.allocate(opTypeSize).put(opType).array() );
-			    out.write(ByteBuffer.allocate(idSize).putShort(schemaId).array());
-			    BinaryEncoder enc = encoderFactory.binaryEncoder(out, null);
-			    writer.write(record, enc);
-			    enc.flush();
-			    return out.toByteArray();
-			    */	
-		      return serializer.serialize(topic, record);
-
-			    
+		      return serializer.serialize(topic, record);   
 			    
 	  }
 

@@ -27,11 +27,11 @@ public class Producer{
 
 	
 
-	public Producer(String propFileName){
+	public Producer(Properties _config){
 
 		logger.info("Kafka: Create KafkaProducerWrapper");
-	
-		initConfig(propFileName);
+	    config = _config; 
+		
 
 		try {
 			producer = new KafkaProducer<byte[], byte[]>(config);
@@ -61,20 +61,5 @@ public class Producer{
 
        producer.send(rec);
     }
-	private void initConfig(String propFileName){
-		config = new Properties();
-
-		try ( InputStream inputStream = getClass().getClassLoader().getResourceAsStream(propFileName)){	
-			if (inputStream != null) {
-				config.load(inputStream);
-			} else {
-				logger.error("Failed to find KafkaProducer config " + propFileName);
-				throw new FileNotFoundException("property file '"
-						+ propFileName + "' not found in the classpath");
-			}
-		} catch (IOException e) {
-			logger.error("Failed to load KafkaProducer config " + propFileName + "with error " + e);
-			throw new ConfigException("Failed to load KafkaProducer config"+ propFileName + "with error" + e);
-		}
-	}
+	
 }

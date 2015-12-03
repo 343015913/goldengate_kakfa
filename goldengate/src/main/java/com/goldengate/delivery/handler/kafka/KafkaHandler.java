@@ -20,6 +20,7 @@ import com.goldengate.atg.datasource.meta.DsMetaData;
 import com.goldengate.atg.datasource.meta.TableMetaData;
 import com.goldengate.atg.datasource.meta.TableName;
 import com.goldengate.delivery.handler.kafka.mutationmappers.StringMutationMapper;
+import com.goldengate.delivery.handler.kafka.mutationmappers.TypedMutationMapper;
 import com.rogers.cdc.api.mutations.MutationMapper;
 import com.rogers.cdc.handlers.Handler;
 import com.rogers.cdc.handlers.KafkaAvroHandler;
@@ -94,7 +95,7 @@ public class KafkaHandler extends AbstractHandler {
 	public void init(DsConfiguration arg0, DsMetaData arg1) {
 		// TODO: Do something with the config file
 		kafkaConfigFile = KAFKA_CONFIG_FILE; // set default value
-		MutationMapper<Op, TableMetaData> mapper = new StringMutationMapper();// TODO: get this from a config file
+		MutationMapper<Op, TableMetaData> mapper = new TypedMutationMapper();// TODO: get this from a config file
 		handler = new KafkaAvroHandler<Op, TableMetaData,  MutationMapper<Op, TableMetaData>>(mapper, kafkaConfigFile);
 		super.init(arg0, arg1);
 		initializeHandlerProperties();
