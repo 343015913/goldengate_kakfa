@@ -23,6 +23,8 @@ import com.rogers.cdc.api.schema.Table;
 public class TypedMutationMapper extends AbstractMutationMapper {
 	final private static Logger logger = LoggerFactory.getLogger(TypedMutationMapper.class);
 	AbstractSQLTypeConverter<DsColumn> typeConvertor;
+	
+	typeConvertor = new GGSQLTypeConverter();
 
 	@Override
 	protected Object convertColumn(DsColumn column, int colType) throws IOException{
