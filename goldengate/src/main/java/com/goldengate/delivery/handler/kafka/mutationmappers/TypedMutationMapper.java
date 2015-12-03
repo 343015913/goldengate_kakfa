@@ -26,6 +26,7 @@ public class TypedMutationMapper extends AbstractMutationMapper {
 
 	@Override
 	protected Object convertColumn(DsColumn column, int colType) throws IOException{
+		  logger.debug("convertColumn = {} colType =  {}" , column.toString(),   colType);
 		try {
 		   return SQLDataConverter.convertFieldValue(typeConvertor, column, colType);
 		} catch (IOException e) {
@@ -54,7 +55,7 @@ public class TypedMutationMapper extends AbstractMutationMapper {
 		   for(ColumnMetaData column : tb.getColumnMetaData()) {
              logger.debug("meta for column = " + column.getColumnName()  );
                if ( column.isKeyCol()){
-              	  pkColumnNames.add(column.getColumnName());
+              	      pkColumnNames.add(column.getColumnName());
               	 
 		    	 }
                  addFieldSchema(builder,column );

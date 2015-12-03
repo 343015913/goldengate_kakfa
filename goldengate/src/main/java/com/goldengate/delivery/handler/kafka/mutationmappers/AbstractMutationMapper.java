@@ -35,7 +35,8 @@ public abstract class AbstractMutationMapper   extends MutationMapper<Op,TableMe
 			  int i = 0;
 			  for(DsColumn column : op) {
 	               ColumnMetaData col_meta = tbl_meta.getColumnMetaData(i);; 
-	               logger.debug("column = " + op.getTableMeta().getColumnName(i) + ", changed = " + column.isChanged() + ", val= " + column.getAfterValue()  );
+	               logger.debug("column = " + op.getTableMeta().getColumnName(i) + ", changed = " + column.isChanged() + ", val= " + column.getAfterValue() );
+	               logger.debug("isKey = " + col_meta.isKeyCol() );
 			    	 //Always include key Column
 	                 if (!onlyChanged || column.isChanged() || col_meta.isKeyCol()){
 			    		 String name = col_meta.getColumnName(); 
