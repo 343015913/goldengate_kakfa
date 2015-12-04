@@ -12,6 +12,11 @@ import java.sql.Timestamp;
 //import java.sql.Timestamp;
 import java.util.Calendar;
 
+import org.joda.time.DateTimeZone;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.DateTimeFormatterBuilder;
+import org.joda.time.format.DateTimeParser;
 /*
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -154,7 +159,20 @@ public class GGSQLTypeConverter implements AbstractSQLTypeConverter<DsColumn> {
 		//   2) INCLUDEREGIONID is set format is YYYY-MM-DD HH:MI.SS.FFFFFF in UTC
 		//   3) INCLUDEREGIONIDWITHOFFSET is set  the format is YYYY-MM-DD HH:MI.SS.FFFFFF TZH:TZM (aka - time zone code is added) 
 		String val =  getStringInt(col);
-		return new TIMESTAMP(val).timestampValue(cal);
+		// One would think that Oracle.sql.TIMESTAMP would be able to parse GG time stamps.... not that case :(
+		// We try a bunch of ways to prase until one hopefully works.
+		
+		try {
+			return new TIMESTAMP(val).timestampValue(cal);
+		} catch (Exception e){
+			DateTimeParser[] parsers = { 
+			        DateTimeFormat.forPattern("YYYY-MM-DD:HH:MI.SS.FFFFFF" ).getParser(),// TimeStamp - for some reason the format is a bit different from the GG doc and JDBC standard
+			       // DateTimeFormat.forPattern( "yyyy-MM-dd" ).getParser() 
+			        		};
+			DateTimeFormatter formatter = new DateTimeFormatterBuilder().append( null, parsers ).toFormatter();
+			return new Timestamp(formatter.parseDateTime(val).toDateTime(DateTimeZone.forTimeZone(cal.getTimeZone())).getMillis());	
+		}
+		
 	}
 
 	@Override
