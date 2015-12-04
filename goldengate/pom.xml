@@ -82,10 +82,17 @@
             <version>${confluent.version}</version>
         </dependency>
         <dependency>
-	<groupId>joda-time</groupId>
-	<artifactId>joda-time</artifactId>
-	<version>2.9</version>
-</dependency>
+	       <groupId>com.oracle</groupId>
+	       <artifactId>ojdbc14</artifactId>
+	       <version>11.2.0.4</version>
+	        <scope>system</scope>
+            <systemPath>${project.basedir}/libs/ojdbc6.jar</systemPath>
+        </dependency>
+        <dependency>
+	      <groupId>joda-time</groupId>
+	      <artifactId>joda-time</artifactId>
+	      <version>2.9</version>
+         </dependency>
        
 	  
 
