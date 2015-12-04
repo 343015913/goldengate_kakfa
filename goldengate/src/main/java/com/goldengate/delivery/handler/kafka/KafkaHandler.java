@@ -115,8 +115,10 @@ public class KafkaHandler extends AbstractHandler {
             // interface if using the DataSourceListener API (via AbstractHandler).                   
             final Tx tx = new Tx(transaction, getMetaData(), getConfig());                            
             final TableMetaData tMeta = getMetaData().getTableMetaData(operation.getTableName());     
-            final Op op = new Op(operation, tMeta, getConfig());                                      
+            final Op op = new Op(operation, tMeta, getConfig());  
+            
             status = processOp(tx, op); // process data...
+            // TODO: Should we flush somewhere here? 
         }
 
         return status;
@@ -146,7 +148,18 @@ public class KafkaHandler extends AbstractHandler {
                 }
             }
         }
-        
+        if (status == Status.OK){
+            logger.debug("Calling flushfor transaction commit pos=" + tx.getTranID());
+            // Transaction is complete.  Flush the data.  Probably safer to hsync but the 
+            // performance is terrible.
+            try { 
+                handler.flush();
+            }catch(RuntimeException err){  	
+                status = Status.ABEND;
+                logger.error("Failed to Process transaction {} with error: {}", tx , err);	
+             }
+        }
+            
           logger.debug("  Received transaction commit event, transaction count="
                     + handlerProperties.totalTxns
                     + ", pos=" + tx.getTranID()

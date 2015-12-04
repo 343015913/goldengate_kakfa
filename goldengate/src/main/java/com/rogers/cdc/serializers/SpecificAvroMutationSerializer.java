@@ -48,18 +48,18 @@ public class SpecificAvroMutationSerializer extends AbstractAvroMutationSerialze
 	
 	 protected  GenericData.Record avroRecord(Mutation op, Schema schema){
 		    GenericData.Record record = new GenericData.Record(schema);
-			addHeader(record, op);
+			//addHeader(record, op);
 			addBody(record,op);
 			return record; 
 	  }
-      protected void addHeader(GenericRecord record, Mutation op) {
+   /*   protected void addHeader(GenericRecord record, Mutation op) {
 			String tableName = op.getTableName();
 		    String schemaName = op.getSchemaName();
 		    byte opType = op.getMagicByte();
-		    record.put("table", tableName);
-		    record.put("schema", schemaName);
-		    record.put("op_type", opType);
-}
+		    //record.put("table", tableName);
+		    //record.put("schema", schemaName);
+		   // record.put("op_type", opType);
+}*/
 	 private  void addBody(GenericRecord record, Mutation op){
 	        switch(op.getType()){
 	           case INSERT:
