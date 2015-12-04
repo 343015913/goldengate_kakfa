@@ -9,15 +9,22 @@ import java.sql.SQLException;
 import java.sql.SQLXML;
 import java.sql.Time;
 import java.sql.Timestamp;
+//import java.sql.Timestamp;
 import java.util.Calendar;
 
+/*
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.DateTimeFormatterBuilder;
+import org.joda.time.format.DateTimeParser;
 import org.joda.time.format.ISODateTimeFormat;
+*/
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import oracle.sql.*;
 
 import com.rogers.cdc.api.schema.AbstractSQLTypeConverter;
 import com.goldengate.atg.datasource.DsColumn;
@@ -27,6 +34,10 @@ public class GGSQLTypeConverter implements AbstractSQLTypeConverter<DsColumn> {
     // TODO: Default time zone?
 	@Override
 	public boolean getBoolean(DsColumn col) throws SQLException{
+		// Oracle doesn't support Booleans, but pl/sql does.... not sure what happens, or if this will ever get called
+		String val =  getStringInt(col);
+		throw new SQLException("boolean type not supported:" + val);
+		/*
 		String val =  getStringInt(col);
 		if  (val == "t")
 			return true;
@@ -36,11 +47,12 @@ public class GGSQLTypeConverter implements AbstractSQLTypeConverter<DsColumn> {
 		else{
 			throw new SQLException("boolean column must be either 't' or 'f', got invalid value:" + val);
 		}
+		*/
 	}
 
 	@Override
 	public byte[] getBytes(DsColumn col) throws SQLException{
-		// TODO Somehow check encoding? 
+		// TODO what encoding? 
 		// Do we care to trim?
 		String val =  getStringInt(col);
 		return val.getBytes() ;
@@ -48,6 +60,7 @@ public class GGSQLTypeConverter implements AbstractSQLTypeConverter<DsColumn> {
 
 	@Override
 	public String getString(DsColumn col) throws SQLException{
+		// TODO: should we use Oracle.sql.CHAR here?
 		String val =  getStringInt(col);
 		return val;
 	}
@@ -62,37 +75,32 @@ public class GGSQLTypeConverter implements AbstractSQLTypeConverter<DsColumn> {
 	@Override
 	public Short getShort(DsColumn col) throws SQLException {
 		String val =  getStringInt(col);
-		return Short.parseShort(val);
+		return new NUMBER(val).shortValue();
 	}
 
 	@Override
 	public Integer getInt(DsColumn col) throws SQLException{
 		String val =  getStringInt(col);
-		return Integer.parseInt(val);
+		return new NUMBER(val).intValue();
 	}
 
 	@Override
 	public Long getLong(DsColumn col) throws SQLException{
 
 		String val =  getStringInt(col);
-		return Long.parseLong(val);
+		return new NUMBER(val).longValue();
 	}
 
 	@Override
 	public Float getFloat(DsColumn col) throws SQLException {
 		String val =  getStringInt(col);
-		return Float.parseFloat(val);
+		return new NUMBER(val).floatValue();
 	}
 
 	@Override
 	public Double getDouble(DsColumn col) throws SQLException {
-		// TODO:  How does oracle handle strinct floating point precision?
-		logger.debug("\t getDouble ");
 		String val =  getStringInt(col);
-		logger.debug("\t val  = " +  val);
-		Double d = Double.parseDouble(val);
-		logger.debug("\t double  = " +  d);
-		return d ;
+		return new NUMBER(val).doubleValue();
 	}
 
 	//@Override
@@ -110,42 +118,51 @@ public class GGSQLTypeConverter implements AbstractSQLTypeConverter<DsColumn> {
 		// TODO What about scale? Make sure that GG passes a proper string representation of a BigDecimal 
 
 		String val =  getStringInt(col);
-		BigDecimal res = new  BigDecimal(val);
-		
-		return res;
+		return new NUMBER(val).bigDecimalValue();
 	}
 
 	@Override
 	public Time getTime(DsColumn col, Calendar cal) throws SQLException {
 
 		String val =  getStringInt(col);
-		DateTime dt = new DateTime(DateTimeZone.UTC);
-		//Time res = new Time(cal.getTime().getTime());
-		DateTimeFormatter sdf =  ISODateTimeFormat.time();
-		return new Time(sdf.parseDateTime(val).toDateTime(DateTimeZone.UTC).getMillis());
+		return new DATE(val).timeValue(cal);
 	}
 
 	@Override
 	public Timestamp getTimestamp(DsColumn col, Calendar cal) throws SQLException{
-		// For TIMESTAMP WITH TIME ZONE in Oracle, 3 options
-		// 1) Default GG Extract aborts 
-		// 2) INCLUDEREGIONID is set format is YYYY-MM-DD HH:MI.SS.FFFFFF
-		// 3) INCLUDEREGIONIDWITHOFFSET is set  the format is YYYY-MM-DD HH:MI.SS.FFFFFF TZH:TZM (aka - time zone code is added) 
-		// We intend to support options #2 only....yet, the date we get seems to be in ISO 8601 format anyway. So I guess we can support both 2 and 3
-		String val =  getStringInt(col);
+		// How Oracle handles timestamps seems to be a mystery: http://stackoverflow.com/questions/14700962/default-jdbc-date-format-when-reading-date-as-a-string-from-resultset
+		// What I have been able to figure out from GoldenGate doc...
+		// 
+		/*String val =  getStringInt(col);
 		DateTimeFormatter sdf =  ISODateTimeFormat.dateTime();
+		//DateTimeFormat.forPattern("YYYY-MM-DD:HH:MI.SS.FFFFFF"); // TimeStamp - for some reason the format is a bit differnt....
+		DateTimeParser[] parsers = { 
+		        DateTimeFormat.forPattern("YYYY-MM-DD:HH:MI.SS.FFFFFF" ).getParser(),// TimeStamp - for some reason the format is a bit differnt....
+		        DateTimeFormat.forPattern( "yyyy-MM-dd" ).getParser() 
+		        		};
+		DateTimeFormatter formatter = new DateTimeFormatterBuilder().append( null, parsers ).toFormatter();
 
-		return new Timestamp(sdf.parseDateTime(val).toDateTime(DateTimeZone.UTC).getMillis());
+		return new Timestamp(sdf.parseDateTime(val).toDateTime(DateTimeZone.UTC).getMillis());*/
+		
+		
+		/// NVM - just using oracle.sql types to parse everything
+		
+		// TODO: How do we know if there is a timezone? Maybe we can get it from getGGDataType/getGGDataSubType
+		// Use TIMESTAMPTZ/TIMESTAMPLTZ  for time zones
+		// GG specific behavior For TIMESTAMP WITH TIME ZONE, 3 options
+		//   1) Default GG Extract aborts 
+		//   2) INCLUDEREGIONID is set format is YYYY-MM-DD HH:MI.SS.FFFFFF in UTC
+		//   3) INCLUDEREGIONIDWITHOFFSET is set  the format is YYYY-MM-DD HH:MI.SS.FFFFFF TZH:TZM (aka - time zone code is added) 
+		String val =  getStringInt(col);
+		return new TIMESTAMP(val).timestampValue(cal);
 	}
 
 	@Override
 	public Date getDate(DsColumn col, Calendar cal) throws SQLException{
-		// TODO Auto-generated method stub
-		//String val =  getStringInt(col);
-		String val =  getStringInt(col);
-		DateTimeFormatter sdf =  ISODateTimeFormat.date();
+		// TODO Oracle doc seems to say that DATE also stores time info...? http://docs.oracle.com/cd/B19306_01/server.102/b14225/ch4datetime.htm#i1006050
 
-		return new Date(sdf.parseDateTime(val).toDateTime(DateTimeZone.UTC).getMillis());
+		String val =  getStringInt(col);
+		return new DATE(val).dateValue(cal);
 	}
 
 	@Override
@@ -158,29 +175,33 @@ public class GGSQLTypeConverter implements AbstractSQLTypeConverter<DsColumn> {
 
 	@Override
 	public String getNClob(DsColumn col) throws SQLException{
-		String val =  getStringInt(col);
+		//String val =  getStringInt(col);
 		throw new SQLException("NClob column not supported ");
 	}
 
 	@Override
 	public byte[] getBlob(DsColumn col) throws SQLException{
-		// TODO Auto-generated method stub
-		this.getBytes(col);
-		return null;
+		// TODO How do we convert a string to a Blob? Which encoding do we user?
+		//Cannot user Oracle.sql.blob because it expects a connection
+		throw new SQLException("BLOB column not supported ");
+		//this.getBytes(col);
+		//return null;
 	}
 
 	@Override
 	public String getURL(DsColumn col) throws SQLException{
 		// TODO Do some extra checks here?
-		String val =  getStringInt(col);
-		return val;
+		throw new SQLException("URL column not supported ");
+	//	String val =  getStringInt(col);
+		//return val;
 	}
 
 	@Override
 	public String getSQLXML(DsColumn col) throws SQLException{
 		// TODO Some extra checks
-		String val =  getStringInt(col);
-		return val;
+		throw new SQLException("SQLXML column not supported ");
+		//String val =  getStringInt(col);
+		//return val;
 	}
 
 	@Override
@@ -191,7 +212,6 @@ public class GGSQLTypeConverter implements AbstractSQLTypeConverter<DsColumn> {
 	private String getStringInt (DsColumn col) throws SQLException{
 		logger.debug("getStringInt");
 		String val = col.getAfterValue();
-		logger.debug("getAfterValue = " +  val);
 		if (val == null){
 			throw new SQLException("column val should not be null");
 		}
