@@ -166,7 +166,7 @@ public class GGSQLTypeConverter implements AbstractSQLTypeConverter<DsColumn> {
 			return new TIMESTAMP(val).timestampValue(cal);
 		} catch (Exception e){
 			DateTimeParser[] parsers = { 
-			        DateTimeFormat.forPattern("YYYY-MM-DD:HH:MI.SS.FFFFFF" ).getParser(),// TimeStamp - for some reason the format is a bit different from the GG doc and JDBC standard
+			        DateTimeFormat.forPattern("YYYY-MM-DD:HH:MM.SS.FFFFFF" ).getParser(),// TimeStamp - for some reason the format is a bit different from the GG doc and JDBC standard
 			       // DateTimeFormat.forPattern( "yyyy-MM-dd" ).getParser() 
 			        		};
 			DateTimeFormatter formatter = new DateTimeFormatterBuilder().append( null, parsers ).toFormatter();
