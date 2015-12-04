@@ -159,7 +159,7 @@
             <configuration>
             	<outputDirectory>${project.build.directory}/kafka-lib</outputDirectory>
             	<excludeGroupIds>com.goldengate.atg</excludeGroupIds>
-                <includeArtifactIds>com.oracle,kafka-schema-registry-client,kafka-avro-serializer,kafka-clients,avro,avro-ipc,commons-lang,kafka,jackson-core-asl,jackson-mapper-asl,libthrift,netty,slf4j-api</includeArtifactIds>
+                <includeArtifactIds>ojdbc14,kafka-schema-registry-client,kafka-avro-serializer,kafka-clients,avro,avro-ipc,commons-lang,kafka,jackson-core-asl,jackson-mapper-asl,libthrift,netty,slf4j-api</includeArtifactIds>
             </configuration>
           </execution>
         </executions>
