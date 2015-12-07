@@ -45,14 +45,16 @@ public class KafkaAvroHandler<Op, Table, OpMapper extends MutationMapper<Op,  Ta
 	 public  void processOp(Op op) {  
 		 try { 
                Mutation mutation = opMapper.toMutation(op);
-
-		       String topic = getSchemaSubject(mutation);
+               //TODO!!!! Rmove the if, it's just for testing
+               if (mutation.getType() == com.rogers.cdc.api.mutations.MutationType.INSERT) {
+		          String topic = getSchemaSubject(mutation);
 		      // byte[] key = keySerialiazer.serialize(mutation.);
-               byte[] val = valSerialiazer.serialize(topic, mutation);
-               logger.info("KafkaHandler: Send Message to topic: " + topic);
-               logger.debug("\t message =  " + val);
-               logger.debug("\t string message =  " + new String(val));
-		       send(topic,null ,val);    
+                  byte[] val = valSerialiazer.serialize(topic, mutation);
+                  logger.info("KafkaHandler: Send Message to topic: " + topic);
+                  logger.debug("\t message =  " + val);
+                  logger.debug("\t string message =  " + new String(val));
+		          send(topic,null ,val);
+               }
 		    } catch  (IOException e)  {
 			   logger.error("KafkaAvroHandler Failed to processes operation: " + op + " with error: " + e ); 
 		    }

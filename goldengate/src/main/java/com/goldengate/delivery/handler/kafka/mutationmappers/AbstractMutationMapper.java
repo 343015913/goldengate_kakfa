@@ -66,8 +66,8 @@ public abstract class AbstractMutationMapper   extends MutationMapper<Op,TableMe
 	            case DO_UPDATE: 
 	            case DO_UPDATE_FIELDCOMP: 
 	            case DO_UPDATE_AC: 
-	           	   row = createRow(op, true);
-	       	       return new UpdateMutation(table, row);
+	           	   //TODO row = createRow(op, true);
+	       	       //return new UpdateMutation(table, row);
 	            case DO_UPDATE_FIELDCOMP_PK: 
 	      	        return new PkUpdateMutation(table);
 	             default:
