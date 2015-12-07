@@ -37,12 +37,17 @@ import io.confluent.kafka.serializers.KafkaAvroSerializer;
 public class SpecificAvroMutationSerializer extends AbstractSpecificAvroSerDe implements MutationSerializer{ 
 	final private static Logger logger = LoggerFactory
 			.getLogger(SpecificAvroMutationSerializer.class);
+	  private Serializer<Object> serializer;
 	
-	  public static final String SCHEMAS_CACHE_SIZE_CONFIG = "schemas.cache.config";
+	 // public static final String SCHEMAS_CACHE_SIZE_CONFIG = "schemas.cache.config";
 	  //private static final int SCHEMAS_CACHE_SIZE_DEFAULT = 1000;
 	
 	 // private SchemaRegistryClient schemaRegistry;
-	  private Serializer<Object> serializer;
+	  
+	  SpecificAvroMutationSerializer(){
+		  serializer = new KafkaAvroSerializer();
+	  }
+
 	  @Override
 		 public byte[] serialize(String topic, Mutation op) {  
 			 // TODO topic shouldn't be handled here
