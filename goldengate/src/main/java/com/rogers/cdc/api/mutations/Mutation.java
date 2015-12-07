@@ -53,6 +53,13 @@ public abstract class Mutation implements Serializable {
     	  return (T) this;
     	  
       }
+      public Table getTable(){
+    	  return table; 
+    	  
+      }
+      /*public Object pKey(){
+    	  table.getPKList();
+      }*/
      
       public void validate(){
     	  //TODO: Need to make sure it was initilzied properly. 

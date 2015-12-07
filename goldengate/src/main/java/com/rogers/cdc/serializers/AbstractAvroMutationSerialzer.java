@@ -14,7 +14,8 @@ import com.rogers.cdc.exceptions.SerializationException;
 //1) Representation of Update/Insert/Delete Mutations: The Specific serializer uses the same schema for all 3 - if the val is empty, it's a delete Mutation 
 //2) The Specific serializer uses Confluent.io serializer, the Generic one does it's own serialization
 //3) Diffrent headers
-public abstract class AbstractAvroMutationSerialzer extends AbstructAvroSerDe implements MutationSerializer{
+/*
+public abstract class AbstractAvroMutationSerialzer extends AbstractGenericAvroSerDe implements MutationSerializer{
 	protected void addHeader(GenericRecord record, Mutation op) {
 		String tableName = op.getTableName();
 	    String schemaName = op.getSchemaName();
@@ -42,3 +43,4 @@ public abstract class AbstractAvroMutationSerialzer extends AbstructAvroSerDe im
 
 	}
 }
+*/

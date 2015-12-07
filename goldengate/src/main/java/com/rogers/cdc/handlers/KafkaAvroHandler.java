@@ -48,7 +48,7 @@ public class KafkaAvroHandler<Op, Table, OpMapper extends MutationMapper<Op,  Ta
 
 		       String topic = getSchemaSubject(mutation);
 		      // byte[] key = keySerialiazer.serialize(mutation.);
-               byte[] val = valSerialiazer.serialize(mutation);
+               byte[] val = valSerialiazer.serialize(topic, mutation);
                logger.info("KafkaHandler: Send Message to topic: " + topic);
                logger.debug("\t message =  " + val);
                logger.debug("\t string message =  " + new String(val));

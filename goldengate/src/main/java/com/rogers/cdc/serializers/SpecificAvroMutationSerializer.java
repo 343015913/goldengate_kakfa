@@ -34,8 +34,7 @@ import io.confluent.kafka.serializers.AbstractKafkaAvroSerializer;
 import io.confluent.kafka.serializers.KafkaAvroSerializer;
 //import io.confluent.kafka.serializers.NonRecordContainer;
 
-public class SpecificAvroMutationSerializer extends AbstractAvroMutationSerialzer implements
-		MutationSerializer {
+public class SpecificAvroMutationSerializer extends AbstractSpecificAvroSerDe implements MutationSerializer{ 
 	final private static Logger logger = LoggerFactory
 			.getLogger(SpecificAvroMutationSerializer.class);
 	
@@ -44,7 +43,23 @@ public class SpecificAvroMutationSerializer extends AbstractAvroMutationSerialze
 	
 	 // private SchemaRegistryClient schemaRegistry;
 	  private Serializer<Object> serializer;
-	
+	  @Override
+		 public byte[] serialize(String topic, Mutation op) {  
+			 // TODO topic shouldn't be handled here
+		     //String topic = getSchemaSubject(op);
+			 Schema schema = getSchema(op);
+			 byte opType = op.getMagicByte();
+			
+			 GenericData.Record record = avroRecord(op, schema);
+			 byte[] bytes;
+			 try{ 
+				 bytes = serializer.serialize(topic, record);
+			 }catch (Exception e){
+				 throw new SerializationException("Failed to serialze Avro object, with error: " + e);
+			 }
+		     return bytes; 
+
+		 }
 	
 	 protected  GenericData.Record avroRecord(Mutation op, Schema schema){
 		    GenericData.Record record = new GenericData.Record(schema);
@@ -52,14 +67,6 @@ public class SpecificAvroMutationSerializer extends AbstractAvroMutationSerialze
 			addBody(record,op);
 			return record; 
 	  }
-   /*   protected void addHeader(GenericRecord record, Mutation op) {
-			String tableName = op.getTableName();
-		    String schemaName = op.getSchemaName();
-		    byte opType = op.getMagicByte();
-		    //record.put("table", tableName);
-		    //record.put("schema", schemaName);
-		   // record.put("op_type", opType);
-}*/
 	 private  void addBody(GenericRecord record, Mutation op){
 	        switch(op.getType()){
 	           case INSERT:
@@ -98,14 +105,6 @@ public class SpecificAvroMutationSerializer extends AbstractAvroMutationSerialze
 		serializer = new KafkaAvroSerializer();
 		serializer.configure(configs, false); // This usually gets called by Kafka...but we have to call it here since we never pass the serialzer to Kafk	
 	}
-
-
-	@Override
-	//TODO
-	  protected  byte[] serializeAvro( GenericData.Record record,  Schema schema, String topic,  byte opType) throws IOException {
-		      return serializer.serialize(topic, record);   
-			    
-	  }
 
 	@Override
 	public void close() {

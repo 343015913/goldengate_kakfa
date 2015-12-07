@@ -23,10 +23,11 @@ public interface MutationSerializer extends Closeable {
     public void configure(Map<String, ?> configs);
 
     /**
+     * @param Topic
      * @param Mutation
      * @return serialized bytes
      */
-    public byte[] serialize( Mutation op);
+    public byte[] serialize( String topic, Mutation op);
 
 
     /**

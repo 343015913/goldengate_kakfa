@@ -2,6 +2,7 @@ package com.rogers.goldengate.serializers;
 
 import com.rogers.cdc.api.mutations.*;
 import com.rogers.cdc.api.schema.Table;
+import com.rogers.cdc.kafka.KafkaUtil;
 import com.rogers.cdc.serializers.GenericAvroMutationDeserializer;
 import com.rogers.cdc.serializers.GenericAvroMutationSerializer;
 import com.rogers.cdc.serializers.MutationDeserializer;
@@ -10,7 +11,9 @@ import com.rogers.cdc.serializers.MutationSerializer;
 
 
 
+
 import static org.junit.Assert.assertEquals;
+
 
 
 
@@ -43,12 +46,13 @@ public class AvroSerializerTest {
 	      //String table = "test_table";
 	      //String schema = "test_schema";
 	      Table table = new Table("testSchema", "testTable", null, null);
+	      String topic = KafkaUtil.genericTopic(table);
 	      UpdateMutation updateM  = new UpdateMutation(table,  new Row(update_cols));
 	      InsertMutation insertM  = new InsertMutation(table,  new Row(insert_cols));
 	      DeleteMutation deleteM  = new DeleteMutation(table);
 	      
 	      
-	      output  = serializer.serialize(updateM);
+	      output  = serializer.serialize(topic, updateM);
 	      res = deserializer.deserialize(output);
 	      
 	      /*  assertEquals("Update Mutation Test: table name should be the same",
@@ -63,7 +67,7 @@ public class AvroSerializerTest {
 	      assertEquals("Update Mutation Test: name should be the same",
 	    		  (String) update_cols[2].getCol().getValue() ,  (String)((UpdateMutation)res).getColumnVal("balance") );
 	      
-	      output  = serializer.serialize(insertM);
+	      output  = serializer.serialize(topic, insertM);
 	      res = deserializer.deserialize(output);
 	      
 	      
@@ -78,7 +82,7 @@ public class AvroSerializerTest {
 	      assertEquals("Insert Mutation Test: name should be the same",
 	    		  (String) insert_cols[2].getCol().getValue() ,  (String)((InsertMutation)res).getColumnVal("balance") );
 	      
-	      output  = serializer.serialize(deleteM);
+	      output  = serializer.serialize(topic, deleteM);
 	      res = deserializer.deserialize(output);
 	      /* assertEquals("Delete Mutation Test: table name should be the same",
 	    		  table ,  res.getTableName() );

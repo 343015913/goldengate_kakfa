@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" output="target/classes" path="src/main/java">
+		<attributes>
+			<attribute name="optional" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry excluding="**" kind="src" output="target/classes" path="src/main/resources">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="target/test-classes" path="src/test/java">
+		<attributes>
+			<attribute name="optional" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/Users/eugene.miretsky/Downloads/Oracle/V74535-01/ggs_Adapters_Linux_x64/ggjava/ggjava.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/Users/eugene.miretsky/Downloads/Oracle/V74535-01/ggs_Adapters_Linux_x64/ggjava/docs/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/Users/eugene.miretsky/Downloads/Oracle/V74535-01/ggs_Adapters_Linux_x64/ggjava/resources/lib/ggaddons-12.1.2.1.0.003.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/Users/eugene.miretsky/Downloads/Oracle/V74535-01/ggs_Adapters_Linux_x64/ggjava/docs/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/Users/eugene.miretsky/Downloads/Oracle/V74535-01/ggs_Adapters_Linux_x64/ggjava/resources/lib/ggcache-12.1.2.1.0.003.jar" sourcepath="/Users/eugene.miretsky/Downloads/Oracle/V74535-01/ggs_Adapters_Linux_x64/ggjava/docs/api"/>
+	<classpathentry kind="lib" path="/Users/eugene.miretsky/Downloads/Oracle/V74535-01/ggs_Adapters_Linux_x64/ggjava/resources/lib/ggcmdui-12.1.2.1.0.003.jar"/>
+	<classpathentry kind="lib" path="/Users/eugene.miretsky/Downloads/Oracle/V74535-01/ggs_Adapters_Linux_x64/ggjava/resources/lib/ggcoh-12.1.2.1.0.003.jar"/>
+	<classpathentry kind="lib" path="/Users/eugene.miretsky/Downloads/Oracle/V74535-01/ggs_Adapters_Linux_x64/ggjava/resources/lib/ggdbutil-12.1.2.1.0.003.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/Users/eugene.miretsky/Downloads/Oracle/V74535-01/ggs_Adapters_Linux_x64/ggjava/docs/api/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/Users/eugene.miretsky/Downloads/Oracle/V74535-01/ggs_Adapters_Linux_x64/ggjava/resources/lib/ggjms-12.1.2.1.0.003.jar"/>
+	<classpathentry kind="lib" path="/Users/eugene.miretsky/Downloads/Oracle/V74535-01/ggs_Adapters_Linux_x64/ggjava/resources/lib/ggtrail-12.1.2.1.0.003.jar"/>
+	<classpathentry kind="lib" path="/Users/eugene.miretsky/Downloads/Oracle/V74535-01/ggs_Adapters_Linux_x64/ggjava/resources/lib/gguserexitapi-12.1.2.1.0.003.jar"/>
+	<classpathentry kind="lib" path="/Users/eugene.miretsky/Downloads/Oracle/V74535-01/ggs_Adapters_Linux_x64/ggjava/resources/lib/ggutil-12.1.2.1.0.003.jar"/>
+	<classpathentry kind="lib" path="/Users/eugene.miretsky/Downloads/Oracle/V74535-01/ggs_Adapters_Linux_x64/AdapterExamples/big-data/kafka/goldengate/target/kafka-lib/ogg-kafka-adapter-1.0.jar"/>
+	<classpathentry kind="lib" path="libs/ojdbc6.jar"/>
+	<classpathentry kind="output" path="target/classes"/>
+</classpath>

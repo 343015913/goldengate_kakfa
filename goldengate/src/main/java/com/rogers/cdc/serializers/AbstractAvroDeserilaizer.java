@@ -24,7 +24,7 @@ import com.rogers.cdc.api.schema.Table;
 import com.rogers.cdc.exceptions.SerializationException;
 
 
-public class AbstractAvroDeserilaizer extends AbstructAvroSerDe {
+public class AbstractAvroDeserilaizer extends AbstractGenericAvroSerDe {
 	final private static Logger logger = LoggerFactory
 			.getLogger(AbstractAvroDeserilaizer.class);
 	 

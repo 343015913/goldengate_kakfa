@@ -22,7 +22,7 @@ import com.rogers.cdc.exceptions.InvalidTypeException;
 import com.rogers.cdc.exceptions.SerializationException;
 
 
-public class GenericAvroMutationSerializer extends AbstractAvroMutationSerialzer  {
+public class GenericAvroMutationSerializer extends AbstractGenericAvroSerDe implements MutationSerializer {
  
 	final private static Logger logger = LoggerFactory
 			.getLogger(GenericAvroMutationSerializer.class);
@@ -41,6 +41,29 @@ public class GenericAvroMutationSerializer extends AbstractAvroMutationSerialzer
 		public void close(){
 			
 		}
+    @Override
+	 public byte[] serialize(String topic, Mutation op) {  
+		 // TODO topic shouldn't be handled here
+	     //String topic = getSchemaSubject(op);
+		 Schema schema = getSchema(op);
+		 byte opType = op.getMagicByte();
+		
+		 GenericData.Record record = avroRecord(op, schema);
+		 byte[] bytes;
+		 try{ 
+			 bytes = serializeAvro(record, schema, topic, opType);
+		 }catch (IOException e){
+			 throw new SerializationException("Failed to serialze Avro object, with error: " + e);
+		 }
+	     return bytes; 
+
+	 }
+	 protected void addHeader(GenericRecord record, Mutation op) {
+			String tableName = op.getTableName();
+		    String schemaName = op.getSchemaName();
+		    record.put("table", tableName);
+		    record.put("schema", schemaName);
+		  }
 	
 	 // TODO: The switch statment is ugly. Move it to a helper OpProc class, with a subclass for each type
 	    private  void addBody(GenericRecord record, Mutation op){
@@ -127,7 +150,7 @@ public class GenericAvroMutationSerializer extends AbstractAvroMutationSerialzer
 	}
 	
 
-	@Override
+	//@Override
 	  protected  byte[] serializeAvro( GenericData.Record record,  Schema schema, String topic,  byte opType) throws IOException {
 		        short schemaId = getSchemaId(topic, schema);
 			    EncoderFactory encoderFactory = EncoderFactory.get();
