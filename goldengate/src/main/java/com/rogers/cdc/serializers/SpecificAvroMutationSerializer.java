@@ -44,7 +44,7 @@ public class SpecificAvroMutationSerializer extends AbstractSpecificAvroSerDe im
 	
 	 // private SchemaRegistryClient schemaRegistry;
 	  
-	  SpecificAvroMutationSerializer(){
+	  public SpecificAvroMutationSerializer(){
 		  serializer = new KafkaAvroSerializer();
 	  }
 
