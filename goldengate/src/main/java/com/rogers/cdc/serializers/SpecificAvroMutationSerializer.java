@@ -52,14 +52,19 @@ public class SpecificAvroMutationSerializer extends AbstractSpecificAvroSerDe im
 		 public byte[] serialize(String topic, Mutation op) {  
 			 // TODO topic shouldn't be handled here
 		     //String topic = getSchemaSubject(op);
+		  
 			 Schema schema = getSchema(op);
 			 byte opType = op.getMagicByte();
 			
 			 GenericData.Record record = avroRecord(op, schema);
 			 byte[] bytes;
+      	   logger.error("Try to serialize: topic = {}, \n mutation = {}, \n schema = {}, \n recrod = {}  ", topic, op, schema, record);
+
 			 try{ 
 				 bytes = serializer.serialize(topic, record);
 			 }catch (Exception e){
+	        	   logger.error("The operation type PKUPDATE on table=[" + op.getTableName() + "]" + "is not supported");
+
 				 throw new SerializationException("Failed to serialze Avro object, with error: " + e);
 			 }
 		     return bytes; 
