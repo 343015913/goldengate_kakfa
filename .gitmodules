@@ -1,3 +1,9 @@
 [submodule "confluent/schema-registry"]
 	path = confluent/schema-registry
 	url = https://github.com/confluentinc/schema-registry.git
+[submodule "confluent/common"]
+	path = confluent/common
+	url = https://github.com/confluentinc/common.git
+[submodule "confluent/rest-utils"]
+	path = confluent/rest-utils
+	url = https://github.com/confluentinc/rest-utils.git
