@@ -22,7 +22,7 @@
 	 <dependency>
 		<groupId>org.apache.kafka</groupId>
 		<artifactId>kafka-clients</artifactId>
-		<version>0.8.2.0</version>
+		<version>0.9.0.0</version>
 	</dependency>
 	 <dependency>
 		<groupId>org.apache.kafka</groupId>
@@ -94,6 +94,7 @@
             <artifactId>common-config</artifactId>
             <version>${confluent.version}</version>
         </dependency>
+
         <dependency>
 	       <groupId>com.oracle</groupId>
 	       <artifactId>ojdbc14</artifactId>
