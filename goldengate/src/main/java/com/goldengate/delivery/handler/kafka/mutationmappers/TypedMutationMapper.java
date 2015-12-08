@@ -66,7 +66,10 @@ public class TypedMutationMapper extends AbstractMutationMapper {
 		  DsType type =  column.getDataType();
 		  int sqlType = type.getJDBCType();
 		  String fieldName = column.getColumnName();
-		  boolean optional = column.isNullable();
+		  
+		  boolean optional = column.isNullable(); 
+		  // isNullable  always seem to be false.... and then the code breaks when the value is null. So assume it's always nullable 
+		  optional = true; 
 		  int scale = type.getScale();
 		  SQLDataConverter.addFieldSchema(builder,sqlType,fieldName, optional, scale); 
 		  
