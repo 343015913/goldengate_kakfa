@@ -225,7 +225,7 @@ public class GGSQLTypeConverter implements AbstractSQLTypeConverter<DsColumn> {
 
 	@Override
 	public boolean isNull(DsColumn col) throws SQLException{
-		return col.isValueNull();
+		return col.getAfter().isValueNull();
 	}
 	
 	private String getStringInt (DsColumn col) throws SQLException{
