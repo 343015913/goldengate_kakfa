@@ -64,7 +64,7 @@ public class SpecificAvroMutationSerializer extends AbstractSpecificAvroSerDe im
 			 try{ 
 				 bytes = serializer.serialize(topic, record);
 			 }catch (Exception e){
-	        	   logger.error("The operation type PKUPDATE on table=[" + op.getTableName() + "]" + "is not supported");
+	        	   logger.error("Confluent KafkaAvroSerializer serialization error: " + e);
 
 				 throw new SerializationException("Failed to serialze Avro object, with error: " + e);
 			 }
