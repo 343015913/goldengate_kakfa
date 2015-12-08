@@ -54,7 +54,7 @@ public class SpecificAvroMutationSerializer extends AbstractSpecificAvroSerDe im
 		     //String topic = getSchemaSubject(op);
 		  
 			 Schema schema = getSchema(op);
-			 byte opType = op.getMagicByte();
+			// byte opType = op.getMagicByte();
 			 logger.debug("Try to serialize: topic = {}, \n mutation = {}, \n schema = {}  ", topic, op, schema);
 			
 			 GenericData.Record record = avroRecord(op, schema);
@@ -74,28 +74,30 @@ public class SpecificAvroMutationSerializer extends AbstractSpecificAvroSerDe im
 	
 	 protected  GenericData.Record avroRecord(Mutation op, Schema schema){
 		    GenericData.Record record = new GenericData.Record(schema);
-			//addHeader(record, op);
-			//addBody(record,op);
-
+		    logger.debug("\t avroRecord()  ");
+		    
 	        switch(op.getType()){
 	           case INSERT:
 	           case UPDATE:
 	           {
+	        	   logger.debug("\t Insert/Update  ");
 	        	   RowMutation mutation =  op.getMutation();
 	        	   this.processRowOp(mutation,record);
 	        	   return record; 
 	        	  // break;
 	           }
 	           case  DELETE: {  
+	        	   logger.debug("\t Delete  ");
 	        	   //Nothing is sent for delete
 	        	   return null; 
 	        	   //break;
 	           }         
 	           case PKUPDATE:
+	        	   logger.debug("\t PKUPDATE ");
 	        	   // Just writing the new Pkey value. The only value is sent in the key. 
 	        	   RowMutation mutation =  op.getMutation();
 	        	   this.processRowOp(mutation,record);
-	        	  return  record;
+	        	   return  record;
 	        	   //break;
 	        	  /// logger.error("The operation type PKUPDATE on table=[" + op.getTableName() + "]" + "is not supported");
 	        	  // throw new IllegalArgumentException("KafkaAvroHandler::addBody PKUPDATE operation not supported");   

@@ -48,7 +48,7 @@ public class KafkaAvroHandler<Op, Table, OpMapper extends MutationMapper<Op,  Ta
                Mutation mutation = opMapper.toMutation(op);
                //TODO!!!! Rmove the if, it's just for testing
                if (mutation.getType() == com.rogers.cdc.api.mutations.MutationType.INSERT) {
-            	   logger.debug("processes insert mutation " , op);
+            	  logger.debug("processes insert mutation " , op);
 		          String topic = getSchemaSubject(mutation);
 		          // byte[] key = keySerialiazer.serialize(mutation.);
                   byte[] val = valSerialiazer.serialize(topic, mutation);
