@@ -62,7 +62,28 @@ public class SpecificAvroMutationSerializer extends AbstractSpecificAvroSerDe im
       	     logger.debug("\t recrod = {}  ", record);
 
 			 try{ 
-				 bytes = serializer.serialize(topic, record);
+				 //bytes = serializer.serialize(topic, record);
+				 EncoderFactory encoderFactory = EncoderFactory.get();
+				 ByteArrayOutputStream out = new ByteArrayOutputStream();
+				 logger.debug("1");
+				 BinaryEncoder encoder = encoderFactory.directBinaryEncoder(out, null);
+				 logger.debug("2");
+			        DatumWriter<Object> writer;
+			        Object value = record ;
+			        //if (value instanceof SpecificRecord) {
+			          //writer = new SpecificDatumWriter<Object>(schema);
+			        //} else {
+			          writer = new GenericDatumWriter<Object>(schema);
+			          logger.debug("3");
+			       // }
+			        writer.write(value, encoder);
+			        logger.debug("4");
+			        encoder.flush();
+			        logger.debug("5");
+			        byte[] bytes2 = out.toByteArray();
+			        out.close();
+			        logger.debug("6");
+			        bytes = serializer.serialize(topic, record);
 			 }catch (Exception e){
 	        	   logger.error("Confluent KafkaAvroSerializer serialization error: " + e);
 
