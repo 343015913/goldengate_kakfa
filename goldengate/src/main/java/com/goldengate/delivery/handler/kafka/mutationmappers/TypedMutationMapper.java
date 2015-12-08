@@ -70,14 +70,14 @@ public class TypedMutationMapper extends AbstractMutationMapper {
 		  int scale = type.getScale();
 		  SQLDataConverter.addFieldSchema(builder,sqlType,fieldName, optional, scale); 
 		  
-		  /*
+		  logger.debug("\t Col Name  = " + column.getColumnName());
 		  logger.debug("\t toString = " + type.toString());
+		  logger.debug("\t isNullable = " + column.isNullable());
 		  logger.debug("\t getJDBCType = " + type.getJDBCType());
 		  logger.debug("\t getPrecision = " + type.getPrecision());
 		  logger.debug("\t getScale = " + type.getScale());
 		  logger.debug("\t getGGDataType = " + type.getGGDataType());
 		  logger.debug("\t getGGDataSubType = " + type.getGGDataSubType());
-		  */
 
 	   }
 
