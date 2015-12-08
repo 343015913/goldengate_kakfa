@@ -83,28 +83,30 @@ public class SpecificAvroMutationSerializer extends AbstractSpecificAvroSerDe im
 	        	   logger.debug("\t Insert/Update  ");
 	        	   RowMutation mutation =  op.getMutation();
 	        	   this.processRowOp(mutation,record);
-	        	   return record; 
+	        	   
+	        	   break;
 	        	  // break;
 	           }
 	           case  DELETE: {  
 	        	   logger.debug("\t Delete  ");
 	        	   //Nothing is sent for delete
-	        	   return null; 
-	        	   //break;
+	        	   record = null; 
+	        	   break;
 	           }         
 	           case PKUPDATE:
 	        	   logger.debug("\t PKUPDATE ");
 	        	   // Just writing the new Pkey value. The only value is sent in the key. 
 	        	   RowMutation mutation =  op.getMutation();
 	        	   this.processRowOp(mutation,record);
-	        	   return  record;
-	        	   //break;
+	        	  
+	        	   break;
 	        	  /// logger.error("The operation type PKUPDATE on table=[" + op.getTableName() + "]" + "is not supported");
 	        	  // throw new IllegalArgumentException("KafkaAvroHandler::addBody PKUPDATE operation not supported");   
 	           default:
 	        	   logger.error("The operation type " + op.getType() + " on  operation: table=[" + op.getTableName() + "]" + "is not supported");
 	        	   throw new IllegalArgumentException("KafkaAvroHandler::addBody Unknown operation type");                                                                            
-       }                                                                                              
+       }  
+	        return record;
 	    }
 
 		protected void processRowOp(RowMutation op, GenericRecord record) {
