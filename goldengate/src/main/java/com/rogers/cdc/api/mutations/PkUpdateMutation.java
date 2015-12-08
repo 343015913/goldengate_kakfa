@@ -2,14 +2,15 @@ package com.rogers.cdc.api.mutations;
 
 import com.rogers.cdc.api.schema.*;
 
-public class PkUpdateMutation extends Mutation {
+public class PkUpdateMutation extends RowMutation {
 	public PkUpdateMutation(Table table){
-		super(table);
-        magicByte = UpdatePKByte; 
-    	
-		assert false : "not implimented";
+		this(table, null);
 
     }
+	 public PkUpdateMutation(Table table, Row  _row){
+	    	super(table, _row);
+	    	magicByte = UpdatePKByte;
+	    }
 	  @Override
 	  public  MutationType getType(){
 	    	return MutationType.PKUPDATE;

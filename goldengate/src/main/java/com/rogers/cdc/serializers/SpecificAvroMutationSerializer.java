@@ -74,24 +74,30 @@ public class SpecificAvroMutationSerializer extends AbstractSpecificAvroSerDe im
 	 protected  GenericData.Record avroRecord(Mutation op, Schema schema){
 		    GenericData.Record record = new GenericData.Record(schema);
 			//addHeader(record, op);
-			addBody(record,op);
-			return record; 
-	  }
-	 private  void addBody(GenericRecord record, Mutation op){
+			//addBody(record,op);
+
 	        switch(op.getType()){
 	           case INSERT:
 	           case UPDATE:
 	           {
 	        	   RowMutation mutation =  op.getMutation();
 	        	   this.processRowOp(mutation,record);
-	        	   break;
+	        	   return record; 
+	        	  // break;
 	           }
-	           case  DELETE: {   	   
-	        	   break;
+	           case  DELETE: {  
+	        	   //Nothing is sent for delete
+	        	   return null; 
+	        	   //break;
 	           }         
-	           case PKUPDATE: 	
-	        	   logger.error("The operation type PKUPDATE on table=[" + op.getTableName() + "]" + "is not supported");
-	        	   throw new IllegalArgumentException("KafkaAvroHandler::addBody PKUPDATE operation not supported");   
+	           case PKUPDATE:
+	        	   // Just writing the new Pkey value. The only value is sent in the key. 
+	        	   RowMutation mutation =  op.getMutation();
+	        	   this.processRowOp(mutation,record);
+	        	  return  record;
+	        	   //break;
+	        	  /// logger.error("The operation type PKUPDATE on table=[" + op.getTableName() + "]" + "is not supported");
+	        	  // throw new IllegalArgumentException("KafkaAvroHandler::addBody PKUPDATE operation not supported");   
 	           default:
 	        	   logger.error("The operation type " + op.getType() + " on  operation: table=[" + op.getTableName() + "]" + "is not supported");
 	        	   throw new IllegalArgumentException("KafkaAvroHandler::addBody Unknown operation type");                                                                            
