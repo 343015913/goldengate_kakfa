@@ -58,7 +58,7 @@ public class SpecificAvroMutationSerializer extends AbstractSpecificAvroSerDe im
 			
 			 GenericData.Record record = avroRecord(op, schema);
 			 byte[] bytes;
-      	   logger.error("Try to serialize: topic = {}, \n mutation = {}, \n schema = {}, \n recrod = {}  ", topic, op, schema, record);
+      	     logger.debug("Try to serialize: topic = {}, \n mutation = {}, \n schema = {}, \n recrod = {}  ", topic, op, schema, record);
 
 			 try{ 
 				 bytes = serializer.serialize(topic, record);

@@ -211,7 +211,10 @@ public class SQLDataConverter {
 		    // TODO: check if val is SQLNull 
 		    // Should never get a null object anywhere here
 		    // If it's null - for updates, how do we know if it's a really null (SQLNull), or missing field
-		
+		    logger.debug("convertFieldValue ");
+		    if (typeConvertor.isNull(col)){
+		    	return null; 
+		    }
 		    final Object colValue;
 		    switch (colType) {
 		      case Types.NULL: {
@@ -386,7 +389,7 @@ public class SQLDataConverter {
 		        return null;
 		      }
 		    }
-		    logger.warn("convertFieldValue, return + {}", colValue);
+		    logger.debug("convertFieldValue, return + {}", colValue);
             return colValue; 
 		    // FIXME: Would passing in some extra info about the schema so we can get the Field by index
 		    // be faster than setting this by name?
