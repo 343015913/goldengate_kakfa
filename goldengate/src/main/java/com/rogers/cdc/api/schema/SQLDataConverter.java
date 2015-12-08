@@ -42,7 +42,7 @@ public class SQLDataConverter {
 	
 	 // TODO: Wrap sqlType, fieldName and Optional in a "Type" struct
 	 static public void addFieldSchema(SchemaBuilder builder, int sqlType, String fieldName, boolean optional, int scale ){
-
+		 logger.debug("addFieldSchema: type = {}, name = {}, optional = {}", sqlType, fieldName, optional);
 		  switch (sqlType) {
 	      case Types.NULL: {
 	        logger.warn("JDBC type {} not currently supported", sqlType);
