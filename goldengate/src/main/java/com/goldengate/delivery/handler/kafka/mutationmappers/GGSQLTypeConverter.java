@@ -229,7 +229,7 @@ public class GGSQLTypeConverter implements AbstractSQLTypeConverter<DsColumn> {
 	}
 	
 	private String getStringInt (DsColumn col) throws SQLException{
-		logger.debug("getStringInt");
+		//logger.debug("getStringInt");
 		String val = col.getAfterValue();
 		if (val == null){
 			throw new SQLException("column val should not be null");

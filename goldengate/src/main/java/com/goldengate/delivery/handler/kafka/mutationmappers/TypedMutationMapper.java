@@ -26,7 +26,7 @@ public class TypedMutationMapper extends AbstractMutationMapper {
 
 	@Override
 	protected Object convertColumn(DsColumn column, int colType) throws IOException{
-		  logger.debug("convertColumn = {} colType =  {}" , column,   colType);
+		logger.debug("\t convertColumn = {} colType =  {}" , column,   colType);
 		try {
 		   return SQLDataConverter.convertFieldValue(typeConvertor, column, colType);
 		} catch (IOException e) {
@@ -53,7 +53,7 @@ public class TypedMutationMapper extends AbstractMutationMapper {
 	   // Returns a Schema and a list of primary keys 
 	   private void setSchema( SchemaBuilder builder, TableMetaData tb, List<String> pkColumnNames){
 		   for(ColumnMetaData column : tb.getColumnMetaData()) {
-             logger.debug("meta for column = " + column.getColumnName()  );
+           //  logger.debug("meta for column = " + column.getColumnName()  );
                if ( column.isKeyCol()){
               	      pkColumnNames.add(column.getColumnName());
               	 
@@ -70,12 +70,14 @@ public class TypedMutationMapper extends AbstractMutationMapper {
 		  int scale = type.getScale();
 		  SQLDataConverter.addFieldSchema(builder,sqlType,fieldName, optional, scale); 
 		  
+		  /*
 		  logger.debug("\t toString = " + type.toString());
 		  logger.debug("\t getJDBCType = " + type.getJDBCType());
 		  logger.debug("\t getPrecision = " + type.getPrecision());
 		  logger.debug("\t getScale = " + type.getScale());
 		  logger.debug("\t getGGDataType = " + type.getGGDataType());
 		  logger.debug("\t getGGDataSubType = " + type.getGGDataSubType());
+		  */
 
 	   }
 

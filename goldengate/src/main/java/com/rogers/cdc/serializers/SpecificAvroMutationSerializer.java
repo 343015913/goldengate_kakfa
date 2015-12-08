@@ -55,10 +55,11 @@ public class SpecificAvroMutationSerializer extends AbstractSpecificAvroSerDe im
 		  
 			 Schema schema = getSchema(op);
 			 byte opType = op.getMagicByte();
+			 logger.debug("Try to serialize: topic = {}, \n mutation = {}, \n schema = {}  ", topic, op, schema);
 			
 			 GenericData.Record record = avroRecord(op, schema);
 			 byte[] bytes;
-      	     logger.debug("Try to serialize: topic = {}, \n mutation = {}, \n schema = {}, \n recrod = {}  ", topic, op, schema, record);
+      	     logger.debug("\t recrod = {}  ", record);
 
 			 try{ 
 				 bytes = serializer.serialize(topic, record);

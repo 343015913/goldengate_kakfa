@@ -44,15 +44,15 @@ public class KafkaAvroHandler<Op, Table, OpMapper extends MutationMapper<Op,  Ta
 	 @Override
 	 public  void processOp(Op op) {  
 		 try { 
+			   logger.debug("Start processing " , op);
                Mutation mutation = opMapper.toMutation(op);
                //TODO!!!! Rmove the if, it's just for testing
                if (mutation.getType() == com.rogers.cdc.api.mutations.MutationType.INSERT) {
+            	   logger.debug("processes insert mutation " , op);
 		          String topic = getSchemaSubject(mutation);
-		      // byte[] key = keySerialiazer.serialize(mutation.);
+		          // byte[] key = keySerialiazer.serialize(mutation.);
                   byte[] val = valSerialiazer.serialize(topic, mutation);
                   logger.info("KafkaHandler: Send Message to topic: " + topic);
-                  logger.debug("\t message =  " + val);
-                  logger.debug("\t string message =  " + new String(val));
 		          send(topic,null ,val);
                }
 		    } catch  (IOException e)  {

@@ -35,8 +35,8 @@ public abstract class AbstractMutationMapper   extends MutationMapper<Op,TableMe
 			  int i = 0;
 			  for(DsColumn column : op) {
 	               ColumnMetaData col_meta = tbl_meta.getColumnMetaData(i);; 
-	               logger.debug("column = " + op.getTableMeta().getColumnName(i) + ", changed = " + column.isChanged() + ", val= " + column.getAfterValue() );
-	               logger.debug("isKey = " + col_meta.isKeyCol() );
+	              // logger.debug("column = " + op.getTableMeta().getColumnName(i) + ", changed = " + column.isChanged() + ", val= " + column.getAfterValue() );
+	               //logger.debug("isKey = " + col_meta.isKeyCol() );
 			    	 //Always include key Column
 	                 if (!onlyChanged || column.isChanged() || col_meta.isKeyCol()){
 			    		 String name = col_meta.getColumnName(); 
@@ -66,10 +66,11 @@ public abstract class AbstractMutationMapper   extends MutationMapper<Op,TableMe
 	            case DO_UPDATE: 
 	            case DO_UPDATE_FIELDCOMP: 
 	            case DO_UPDATE_AC: 
-	           	   //TODO row = createRow(op, true);
-	       	       //return new UpdateMutation(table, row);
-	            case DO_UPDATE_FIELDCOMP_PK: 
-	      	        return new PkUpdateMutation(table);
+	           	   row = createRow(op, true);
+	       	       return new UpdateMutation(table, row);
+	            case DO_UPDATE_FIELDCOMP_PK:
+	            	row = createRow(op, true);
+	      	        return new PkUpdateMutation(table, row);
 	             default:
 	      	        //logger.error("The operation type " + op.getOpType() + " on  operation: table=[" + op.getTableName() + "]" + ", op ts=" + op.getTimestamp() + "is not supported");
 	      	        throw new IllegalArgumentException("KafkaAvroHandler::getMagicByte Unknown operation type");                                                                            

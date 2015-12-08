@@ -19,10 +19,12 @@ public class PkUpdateMutation extends RowMutation {
 	    @Override 
 	    public  String toString(){
 	       final StringBuilder sb = new StringBuilder();
-	       sb.append("UpdateMutation");
+	       sb.append("PkUpdateMutation");
 	        sb.append("{schema=").append(this.getSchemaName());
 	        sb.append(", table=").append(this.getTableName());
-	        sb.append("}");
+	        sb.append(", row=[");
+	        sb.append("\n").append(row);
+	        sb.append("]}");
 	       return sb.toString();
 	    }
 }
