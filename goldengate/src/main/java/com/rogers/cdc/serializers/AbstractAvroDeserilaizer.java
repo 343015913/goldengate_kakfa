@@ -18,12 +18,13 @@ import com.rogers.cdc.api.mutations.DeleteMutation;
 import com.rogers.cdc.api.mutations.InsertMutation;
 import com.rogers.cdc.api.mutations.Mutation;
 import com.rogers.cdc.api.mutations.PkUpdateMutation;
+
 import com.rogers.cdc.api.mutations.Row;
 import com.rogers.cdc.api.mutations.UpdateMutation;
 import com.rogers.cdc.api.schema.Table;
 import com.rogers.cdc.exceptions.SerializationException;
 
-
+// TODO: Should be in GenericAvro<utationDeserialzier
 public class AbstractAvroDeserilaizer extends AbstractGenericAvroSerDe {
 	final private static Logger logger = LoggerFactory
 			.getLogger(AbstractAvroDeserilaizer.class);
@@ -66,7 +67,7 @@ public class AbstractAvroDeserilaizer extends AbstractGenericAvroSerDe {
     	for(Map.Entry<String, String> entry: strings.entrySet()) {  
     		 String name = entry.getKey(); 
     		 Serializable val = entry.getValue();
-    		 row.addColumn(name, new Column(val));
+    		 row.addColumn(name, val);
     	}
     	return row;
     }

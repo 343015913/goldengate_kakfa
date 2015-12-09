@@ -6,7 +6,7 @@ package com.rogers.cdc.api.mutations;
 
 import com.rogers.cdc.api.schema.*;
 
-
+import org.apache.kafka.connect.data.Struct;
 //TODO: Do we really need the Row and Column classes?
 //TODO: Should we do a sanity check that a mutation has a row? pKey?
 
@@ -14,6 +14,7 @@ import com.rogers.cdc.api.schema.*;
 public abstract class RowMutation extends Mutation {
 
 	    protected Row row;
+	    //protect Struct struct
 	    
 	    public RowMutation(Table table,  Row  _row ){
 	    	super(table);
@@ -35,7 +36,8 @@ public abstract class RowMutation extends Mutation {
 	    	return row;
 	    }
 	    public Object getColumnVal(String name){
-	    	return row.getColumn(name).getValue();
+	    	System.out.println(this);
+	    	return row.getColumn(name);
 	    }
 	    
 

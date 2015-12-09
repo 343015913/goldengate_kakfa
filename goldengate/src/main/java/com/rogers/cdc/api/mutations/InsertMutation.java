@@ -12,7 +12,7 @@ public class InsertMutation extends RowMutation {
     public InsertMutation(Table table){
     	this(table, null);
     }
-    public InsertMutation(Table table,  Row  _row){
+    public InsertMutation(Table table, Row  _row){
     	super(table, _row);
         magicByte = InsertByte; 
     }

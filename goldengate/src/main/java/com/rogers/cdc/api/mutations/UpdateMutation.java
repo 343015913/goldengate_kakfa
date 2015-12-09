@@ -10,7 +10,7 @@ import com.rogers.cdc.api.schema.*;
 public class UpdateMutation extends RowMutation {
 
     
-    public UpdateMutation(Table table,  Row  _row ){
+    public UpdateMutation(Table table, Row  _row ){
     	super(table, _row);
         magicByte = UpdateByte; 
     }

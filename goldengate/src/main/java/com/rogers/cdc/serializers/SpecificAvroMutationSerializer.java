@@ -1,43 +1,22 @@
 package com.rogers.cdc.serializers;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.avro.Schema;
-import org.apache.avro.generic.GenericData;
-import org.apache.avro.generic.GenericDatumWriter;
-import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.io.BinaryEncoder;
-import org.apache.avro.io.DatumWriter;
-import org.apache.avro.io.EncoderFactory;
+import org.apache.kafka.common.errors.SerializationException;
+import org.apache.kafka.connect.data.Struct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.rogers.cdc.api.mutations.Column;
-import com.rogers.cdc.api.mutations.InsertMutation;
 import com.rogers.cdc.api.mutations.Mutation;
 import com.rogers.cdc.api.mutations.RowMutation;
-import com.rogers.cdc.api.mutations.UpdateMutation;
-import com.rogers.cdc.exceptions.InvalidTypeException;
-
-import org.apache.kafka.common.errors.SerializationException;
-import org.apache.kafka.common.serialization.Serializer;
-
-import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
-import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
-import io.confluent.kafka.serializers.AbstractKafkaAvroDeserializer;
+import io.confluent.connect.avro.AvroConverter;
 //import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
-import io.confluent.kafka.serializers.AbstractKafkaAvroSerializer;
-import io.confluent.kafka.serializers.KafkaAvroSerializer;
 //import io.confluent.kafka.serializers.NonRecordContainer;
 
 public class SpecificAvroMutationSerializer extends AbstractSpecificAvroSerDe implements MutationSerializer{ 
 	final private static Logger logger = LoggerFactory
 			.getLogger(SpecificAvroMutationSerializer.class);
-	  private Serializer<Object> serializer;
+	  //private Serializer<Object> serializer;
 	
 	 // public static final String SCHEMAS_CACHE_SIZE_CONFIG = "schemas.cache.config";
 	  //private static final int SCHEMAS_CACHE_SIZE_DEFAULT = 1000;
@@ -45,25 +24,31 @@ public class SpecificAvroMutationSerializer extends AbstractSpecificAvroSerDe im
 	 // private SchemaRegistryClient schemaRegistry;
 	  
 	  public SpecificAvroMutationSerializer(){
-		  serializer = new KafkaAvroSerializer();
+		 // serializer = new KafkaAvroSerializer();
 	  }
-
+		@Override
+		public void configure(Map<String, ?> configs) {
+			//serializer = new KafkaAvroSerializer();
+			//serializer.configure(configs, false); // This usually gets called by Kafka...but we have to call it here since we never pass the serialzer to Kafk	
+			
+			converter.configure(configs, false);
+		}
 	  @Override
 		 public byte[] serialize(String topic, Mutation op) {  
 			 // TODO topic shouldn't be handled here
 		     //String topic = getSchemaSubject(op);
 		  
-			 Schema schema = getSchema(op);
+			// Schema schema = getSchema(op);
 			// byte opType = op.getMagicByte();
-			 logger.debug("Try to serialize: topic = {}, \n mutation = {}, \n schema = {}  ", topic, op, schema);
+			 //logger.debug("Try to serialize: topic = {}, \n mutation = {}, \n schema = {}  ", topic, op, schema);
 			
-			 GenericData.Record record = avroRecord(op, schema);
+			 Struct record = getRecord(op);
 			 byte[] bytes;
-      	     logger.debug("\t recrod = {}  ", record);
+      	    // logger.debug("\t recrod = {}  ", record);
 
 			 try{ 
 				 //bytes = serializer.serialize(topic, record);
-				 EncoderFactory encoderFactory = EncoderFactory.get();
+				 /*EncoderFactory encoderFactory = EncoderFactory.get();
 				 ByteArrayOutputStream out = new ByteArrayOutputStream();
 				 logger.debug("1");
 				 BinaryEncoder encoder = encoderFactory.directBinaryEncoder(out, null);
@@ -82,8 +67,8 @@ public class SpecificAvroMutationSerializer extends AbstractSpecificAvroSerDe im
 			        logger.debug("5");
 			        byte[] bytes2 = out.toByteArray();
 			        out.close();
-			        logger.debug("6");
-			        bytes = serializer.serialize(topic, record);
+			        logger.debug("6");*/
+			        bytes = converter.fromConnectData(topic, record.schema(), record);
 			 }catch (Exception e){
 	        	   logger.error("Confluent KafkaAvroSerializer serialization error: " + e);
 
@@ -93,8 +78,8 @@ public class SpecificAvroMutationSerializer extends AbstractSpecificAvroSerDe im
 
 		 }
 	
-	 protected  GenericData.Record avroRecord(Mutation op, Schema schema){
-		    GenericData.Record record = new GenericData.Record(schema);
+	 protected  Struct getRecord(Mutation op){
+		    Struct record;
 		    logger.debug("\t avroRecord()  ");
 		    
 	        switch(op.getType()){
@@ -103,8 +88,8 @@ public class SpecificAvroMutationSerializer extends AbstractSpecificAvroSerDe im
 	           {
 	        	   logger.debug("\t Insert/Update  ");
 	        	   RowMutation mutation =  op.getMutation();
-	        	   this.processRowOp(mutation,record);
-	        	   
+	        	 //  this.processRowOp(mutation,record);
+	        	   record = mutation.getRow().toStruct(mutation.getTable().getSchema());
 	        	   break;
 	        	  // break;
 	           }
@@ -118,7 +103,8 @@ public class SpecificAvroMutationSerializer extends AbstractSpecificAvroSerDe im
 	        	   logger.debug("\t PKUPDATE ");
 	        	   // Just writing the new Pkey value. The only value is sent in the key. 
 	        	   RowMutation mutation =  op.getMutation();
-	        	   this.processRowOp(mutation,record);
+	        	   record = mutation.getRow().toStruct(mutation.getTable().getSchema());
+	        	 //  this.processRowOp(mutation,record);
 	        	  
 	        	   break;
 	        	  /// logger.error("The operation type PKUPDATE on table=[" + op.getTableName() + "]" + "is not supported");
@@ -130,7 +116,7 @@ public class SpecificAvroMutationSerializer extends AbstractSpecificAvroSerDe im
 	        return record;
 	    }
 
-		protected void processRowOp(RowMutation op, GenericRecord record) {
+	/*	protected void processRowOp(RowMutation op, GenericRecord record) {
 			     for(Map.Entry<String,Column> column : op.getRow().getColumns().entrySet()) {  
 			    	   String name = column.getKey(); 
 			    	   Object val = column.getValue().getValue();
@@ -140,13 +126,9 @@ public class SpecificAvroMutationSerializer extends AbstractSpecificAvroSerDe im
 			    	          throw new InvalidTypeException("Invalid column type: " + e.getMessage());
 			    	     }
 			     } 
-		}
+		}*/
 
-	@Override
-	public void configure(Map<String, ?> configs) {
-		serializer = new KafkaAvroSerializer();
-		serializer.configure(configs, false); // This usually gets called by Kafka...but we have to call it here since we never pass the serialzer to Kafk	
-	}
+
 
 	@Override
 	public void close() {

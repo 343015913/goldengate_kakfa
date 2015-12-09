@@ -1,7 +1,6 @@
 package com.rogers.cdc.api.mutations;
 
 import java.io.Serializable;
-import java.text.MessageFormat;
 import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.HashMap;
@@ -9,19 +8,16 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.kafka.connect.data.Schema;
-import org.apache.kafka.connect.data.Struct;
-import org.apache.kafka.connect.data.Field;
 
 
-// TODO: Clean this up...
-// We're converting Row to Kafka connect struct... why not just use Struct to represent columns? 
-// Struct assumes a schema is present, which is not really the case if when using GenericAvroMutationSerializer/DeSerializer (it produces string values with no Schema...), we still want to support both. 
-// Mayebe create an Abstact Row with SchemaRow and SchemaLessRow implimentations? 
-public class Row implements Serializable{
+
+
+
+/*
+public class RegularRow implements Serializable{
 
 	private Map<String, Column> columns; 
-	public Row(){
+	public RegularRow(){
 		columns = new HashMap();
 	}
 	public static class RowVal{
@@ -46,31 +42,27 @@ public class Row implements Serializable{
 		
 	}
 	
-	public Row(Map<String, Column> cols){
+	public RegularRow(Map<String, Column> cols){
 		columns = cols;
 	}
-	public Row(Row.RowVal... cols){
+	public RegularRow(RegularRow.RowVal... cols){
 		this();
-    	for(Row.RowVal entry: cols) {  
-    		 this.addColumn(entry.getName(), entry.getCol().getValue());
+    	for(RegularRow.RowVal entry: cols) {  
+    		 this.addColumn(entry.getName(), entry.getCol());
     	}
 	}
-	public void addColumn(String name, Object col){
+	public void addColumn(String name, Column col){
 		//System.out.print(name);
-		columns.put(name, new Column(col));	
+		columns.put(name, col);	
 	}
-	/*public Map<String, Column> getColumns(){
+	public Map<String, Column> getColumns(){
 		return columns;
-	}*/
+	}
 	public Collection<Column> getRawColumns(){
 		return columns.values();
 	}
-	Object getColumn(String name){
-		System.out.println("getColumn " + name.toCharArray());
-		Column column =  columns.get(name);
-		System.out.println("\t column = " + column);
-		System.out.println("\t cal = " + column.getValue());
-		return column.getValue();
+	Column getColumn(String name){
+		return columns.get(name);
 	}
     @Override
 	public String toString(){
@@ -87,7 +79,7 @@ public class Row implements Serializable{
         if (ob.getClass() != getClass()) return false;
         if (ob == this) return true;
  
-        Row other = (Row)ob;
+  	   RegularRow other = (RegularRow)ob;
   	   Map<String, Column> m1 = this.columns;
   	   Map<String, Column> m2 = other.columns;
   	   if (m1.size() != m2.size())
@@ -104,19 +96,7 @@ public class Row implements Serializable{
           }
 		return set; 
     }
-	public Struct toStruct(Schema schema){
-		Struct struct = new Struct(schema);
-		for (Map.Entry<String,Column> entry : columns.entrySet()){
-			struct.put(entry.getKey(), entry.getValue().getValue());
-		}
-		return struct; 
-	}
-	static public Row fromStruct(Struct struct){
-		Row row = new Row();
-		for (Field field : struct.schema().fields()) {
-			row.addColumn(field.name(), struct.get(field));
-		}
-		return row; 
-	}
+	
 
 }
+*/

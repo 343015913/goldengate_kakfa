@@ -1,7 +1,7 @@
 package com.rogers.cdc.serializers;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
+//import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -111,9 +111,9 @@ public class GenericAvroMutationSerializer extends AbstractGenericAvroSerDe impl
 
 		  Map<String,String> strings = new HashMap<String,String>();
 		  int i = 0;
-		     for(Map.Entry<String,Column> column : op.getRow().getColumns().entrySet()) {  
+		     for(Map.Entry<String,Object> column : op.getRow().entrySet()) {  
 		    	   String name = column.getKey(); 
-	    		   Object val = column.getValue().getValue();
+	    		   Object val = column.getValue();
 		    	     try{		
 		    		     strings.put(name,(String)val);
 		    	     } catch (ClassCastException e) {
@@ -135,9 +135,9 @@ public class GenericAvroMutationSerializer extends AbstractGenericAvroSerDe impl
 	protected void processInsertOp(InsertMutation op, GenericRecord record) {
 		  Map<String,String> strings = new HashMap<String,String>();
 		  int i = 0;
-		     for(Map.Entry<String,Column> column : op.getRow().getColumns().entrySet()) {  
+		     for(Map.Entry<String,Object> column : op.getRow().entrySet()) {  
 		    	   String name = column.getKey(); 
-		    	   Object val = column.getValue().getValue();
+		    	   Object val = column.getValue();
 		    	     try{		
 		    		     strings.put(name,(String)val);
 		    	     } catch (ClassCastException e) {
