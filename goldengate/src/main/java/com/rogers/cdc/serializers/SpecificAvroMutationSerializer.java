@@ -77,6 +77,7 @@ public class SpecificAvroMutationSerializer extends AbstractSpecificAvroSerDe im
 				        //} else {
 				          writer = new GenericDatumWriter<Object>(avroData.fromConnectSchema(record.schema()));
 				          logger.debug("3");
+				          logger.debug("Avro schema  = " + avroData.fromConnectSchema(record.schema()));
 				       // }
 				        writer.write(value, encoder);
 				        logger.debug("4");
