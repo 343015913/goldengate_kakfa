@@ -75,6 +75,7 @@ public class SpecificAvroMutationSerializer extends AbstractSpecificAvroSerDe im
 				 logger.debug("recrod = " + record);
 
 				    Object obj = avroData.fromConnectData(record.schema(), record);
+				    logger.debug("obj = " + obj);
 				    return serializer.serialize(topic,obj);
 			      //  bytes = converter.fromConnectData(topic, record.schema(), record);
 			 }catch (Exception e){
