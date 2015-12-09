@@ -35,8 +35,8 @@ public abstract class AbstractMutationMapper   extends MutationMapper<Op,TableMe
 	                 if (!onlyChanged || column.isChanged() || col_meta.isKeyCol()){
 			    		 String name = col_meta.getColumnName(); 
 			    		 //String str_val = column.getAfterValue();
-			    		 Column col = new Column(convertColumn(column,col_meta.getDataType().getJDBCType() ));                    
-			    		 row.addColumn(name,col);
+			    		 //Column col = new Column(convertColumn(column,col_meta.getDataType().getJDBCType() ));                    
+			    		 row.addColumn(name,convertColumn(column,col_meta.getDataType().getJDBCType()));
 			    	 }
 	             i++;
 			    } 
