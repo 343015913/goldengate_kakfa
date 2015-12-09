@@ -12,11 +12,11 @@ import com.rogers.cdc.api.mutations.Mutation;
 abstract public class AbstractSpecificAvroSerDe{
 	protected AvroConverter converter; 
 	private static final int SCHEMAS_CACHE_SIZE_DEFAULT = 1000;
-	//private AvroData avroData;
+	protected AvroData avroData;
 	 
 	AbstractSpecificAvroSerDe(){
 		converter = new AvroConverter();
-		//avroData = new AvroData(SCHEMAS_CACHE_SIZE_DEFAULT);
+		avroData = new AvroData(SCHEMAS_CACHE_SIZE_DEFAULT);
 	 }
 	public void configure(Map<String, ?> configs, boolean isKey) {
 		//converter.configure(configs, isKey);

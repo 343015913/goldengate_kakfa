@@ -3,20 +3,23 @@ package com.rogers.cdc.serializers;
 import java.util.Map;
 
 import org.apache.kafka.common.errors.SerializationException;
+import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.connect.data.Struct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.rogers.cdc.api.mutations.Mutation;
 import com.rogers.cdc.api.mutations.RowMutation;
+
 import io.confluent.connect.avro.AvroConverter;
+import io.confluent.kafka.serializers.KafkaAvroSerializer;
 //import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 //import io.confluent.kafka.serializers.NonRecordContainer;
 
 public class SpecificAvroMutationSerializer extends AbstractSpecificAvroSerDe implements MutationSerializer{ 
 	final private static Logger logger = LoggerFactory
 			.getLogger(SpecificAvroMutationSerializer.class);
-	  //private Serializer<Object> serializer;
+	  private Serializer<Object> serializer;
 	
 	 // public static final String SCHEMAS_CACHE_SIZE_CONFIG = "schemas.cache.config";
 	  //private static final int SCHEMAS_CACHE_SIZE_DEFAULT = 1000;
@@ -24,7 +27,7 @@ public class SpecificAvroMutationSerializer extends AbstractSpecificAvroSerDe im
 	 // private SchemaRegistryClient schemaRegistry;
 	  
 	  public SpecificAvroMutationSerializer(){
-		 // serializer = new KafkaAvroSerializer();
+		  serializer = new KafkaAvroSerializer();
 	  }
 		@Override
 		public void configure(Map<String, ?> configs) {
@@ -43,7 +46,7 @@ public class SpecificAvroMutationSerializer extends AbstractSpecificAvroSerDe im
 			 //logger.debug("Try to serialize: topic = {}, \n mutation = {}, \n schema = {}  ", topic, op, schema);
 			
 			 Struct record = getRecord(op);
-			 byte[] bytes;
+			// byte[] bytes;
       	    // logger.debug("\t recrod = {}  ", record);
 
 			 try{ 
@@ -65,16 +68,21 @@ public class SpecificAvroMutationSerializer extends AbstractSpecificAvroSerDe im
 			        logger.debug("4");
 			        encoder.flush();
 			        logger.debug("5");
-			        byte[] bytes2 = out.toByteArray();
+			        byte[] bytes2 = out.toByteArray(); 
 			        out.close();
 			        logger.debug("6");*/
-			        bytes = converter.fromConnectData(topic, record.schema(), record);
+				 logger.debug("schema = " + record.schema());
+				 logger.debug("recrod = " + record);
+
+				    Object obj = avroData.fromConnectData(record.schema(), record);
+				    return serializer.serialize(topic,obj);
+			      //  bytes = converter.fromConnectData(topic, record.schema(), record);
 			 }catch (Exception e){
 	        	   logger.error("Confluent KafkaAvroSerializer serialization error: " + e);
 
 				 throw new SerializationException("Failed to serialze Avro object, with error: " + e);
 			 }
-		     return bytes; 
+		     //return bytes; 
 
 		 }
 	
