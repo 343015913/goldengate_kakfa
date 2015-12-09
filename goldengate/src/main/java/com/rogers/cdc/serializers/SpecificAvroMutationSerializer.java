@@ -79,7 +79,7 @@ public class SpecificAvroMutationSerializer extends AbstractSpecificAvroSerDe im
 				          logger.debug("3");
 				          logger.debug("Avro schema  = " + avroData.fromConnectSchema(record.schema()));
 				       // }
-				        writer.write(value, encoder);
+				        writer.write(obj, encoder);
 				        logger.debug("4");
 				        encoder.flush();
 				        logger.debug("5");
