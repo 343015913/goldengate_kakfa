@@ -1,7 +1,12 @@
 package com.rogers.cdc.serializers;
 
+import java.io.ByteArrayOutputStream;
 import java.util.Map;
 
+import org.apache.avro.generic.GenericDatumWriter;
+import org.apache.avro.io.BinaryEncoder;
+import org.apache.avro.io.DatumWriter;
+import org.apache.avro.io.EncoderFactory;
 import org.apache.kafka.common.errors.SerializationException;
 import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.connect.data.Struct;
@@ -13,6 +18,7 @@ import com.rogers.cdc.api.mutations.RowMutation;
 
 import io.confluent.connect.avro.AvroConverter;
 import io.confluent.kafka.serializers.KafkaAvroSerializer;
+import org.apache.avro.generic.GenericContainer;
 //import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 //import io.confluent.kafka.serializers.NonRecordContainer;
 
@@ -51,31 +57,35 @@ public class SpecificAvroMutationSerializer extends AbstractSpecificAvroSerDe im
 
 			 try{ 
 				 //bytes = serializer.serialize(topic, record);
-				 /*EncoderFactory encoderFactory = EncoderFactory.get();
-				 ByteArrayOutputStream out = new ByteArrayOutputStream();
-				 logger.debug("1");
-				 BinaryEncoder encoder = encoderFactory.directBinaryEncoder(out, null);
-				 logger.debug("2");
-			        DatumWriter<Object> writer;
-			        Object value = record ;
-			        //if (value instanceof SpecificRecord) {
-			          //writer = new SpecificDatumWriter<Object>(schema);
-			        //} else {
-			          writer = new GenericDatumWriter<Object>(schema);
-			          logger.debug("3");
-			       // }
-			        writer.write(value, encoder);
-			        logger.debug("4");
-			        encoder.flush();
-			        logger.debug("5");
-			        byte[] bytes2 = out.toByteArray(); 
-			        out.close();
-			        logger.debug("6");*/
+
 				 logger.debug("schema = " + record.schema());
+				 logger.debug("fields = " + record.schema().fields());
 				 logger.debug("recrod = " + record);
 
 				    Object obj = avroData.fromConnectData(record.schema(), record);
 				    logger.debug("obj = " + obj);
+					 EncoderFactory encoderFactory = EncoderFactory.get();
+					 ByteArrayOutputStream out = new ByteArrayOutputStream();
+					 logger.debug("1");
+					 BinaryEncoder encoder = encoderFactory.directBinaryEncoder(out, null);
+					 logger.debug("2");
+				        DatumWriter<Object> writer;
+				        Object value = record ;
+				        
+				        //if (value instanceof SpecificRecord) {
+				          //writer = new SpecificDatumWriter<Object>(schema);
+				        //} else {
+				          writer = new GenericDatumWriter<Object>(avroData.fromConnectSchema(record.schema()));
+				          logger.debug("3");
+				       // }
+				        writer.write(value, encoder);
+				        logger.debug("4");
+				        encoder.flush();
+				        logger.debug("5");
+				        byte[] bytes2 = out.toByteArray(); 
+				        out.close();
+				        logger.debug("6");
+				   
 				    return serializer.serialize(topic,obj);
 			      //  bytes = converter.fromConnectData(topic, record.schema(), record);
 			 }catch (Exception e){
