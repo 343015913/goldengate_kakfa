@@ -29,11 +29,16 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 
 
 
+import org.apache.kafka.connect.data.Schema;
+import org.apache.kafka.connect.data.SchemaBuilder;
+import org.apache.kafka.connect.data.Struct;
+
 import com.rogers.cdc.api.mutations.Column;
 import com.rogers.cdc.api.mutations.DeleteMutation;
 import com.rogers.cdc.api.mutations.InsertMutation;
 import com.rogers.cdc.api.mutations.Mutation;
 import com.rogers.cdc.api.mutations.PassThroughMutationMapper;
+
 import com.rogers.cdc.api.mutations.Row;
 import com.rogers.cdc.api.mutations.UpdateMutation;
 import com.rogers.cdc.api.schema.Table;
@@ -51,22 +56,37 @@ public class KafkaAvroHandlerTest {
 	private final String KAFKA_CONFIG_FILE = "kafka.properties";
 	
 	private KafkaMutationAvroConsumer consumer;
+	
+	private static final Schema FLAT_STRUCT_SCHEMA = SchemaBuilder.struct()
+            .field("int8", Schema.INT8_SCHEMA)
+            .field("int16", Schema.INT16_SCHEMA)
+            .field("int32", Schema.INT32_SCHEMA)
+            .field("int64", Schema.INT64_SCHEMA)
+            .field("float32", Schema.FLOAT32_SCHEMA)
+            .field("float64", Schema.FLOAT64_SCHEMA)
+            .field("boolean", Schema.BOOLEAN_SCHEMA)
+            .field("string", Schema.STRING_SCHEMA)
+            .field("bytes", Schema.BYTES_SCHEMA)
+            .build();
 
 	
 	// String table = "testTable";
      //String schema = "testSchema";
 	//TODO: Add Schema
-     Table table = new Table("testSchema", "testTable", null, null);
-     Row.RowVal[] update_cols = {new Row.RowVal("name", new Column("Jon")),
-             new Row.RowVal("age", new Column("28")),
-             new Row.RowVal("balance", new Column("5.23"))
-     };
-     Row.RowVal[] insert_cols = {new Row.RowVal("name", new Column("Jon")),
-          new Row.RowVal("age", new Column("28")),
-          new Row.RowVal("balance", new Column("5.23"))
-      };
-     UpdateMutation updateM  = new UpdateMutation(table, new Row(update_cols));
-     InsertMutation insertM  = new InsertMutation(table,  new Row(insert_cols));
+     Table table = new Table("testSchema", "testTable", FLAT_STRUCT_SCHEMA, null);
+     Struct struct = new Struct(FLAT_STRUCT_SCHEMA)
+     .put("int8", (byte) 12)
+     .put("int16", (short) 12)
+     .put("int32", 12)
+     .put("int64", (long) 12)
+     .put("float32", 12.f)
+     .put("float64", 12.)
+     .put("boolean", true)
+     .put("string", "foobar")
+     .put("bytes", "foobar".getBytes());
+     
+     UpdateMutation updateM  = new UpdateMutation(table, Row.fromStruct(struct));
+     InsertMutation insertM  = new InsertMutation(table,  Row.fromStruct(struct));
      DeleteMutation deleteM  = new DeleteMutation(table);
 
     private static String randGroupName(String topic){

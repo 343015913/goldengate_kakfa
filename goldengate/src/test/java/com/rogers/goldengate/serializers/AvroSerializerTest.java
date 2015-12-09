@@ -12,7 +12,9 @@ import com.rogers.cdc.serializers.MutationSerializer;
 
 
 
+
 import static org.junit.Assert.assertEquals;
+
 
 
 
@@ -34,7 +36,7 @@ public class AvroSerializerTest {
                   new Row.RowVal("age", new Column("28")),
                   new Row.RowVal("balance", new Column("5.23"))
           };
-          Row.RowVal[] insert_cols = {new Row.RowVal("name", new Column("Jon")),
+	      Row.RowVal[] insert_cols = {new Row.RowVal("name", new Column("Jon")),
                new Row.RowVal("age", new Column("28")),
                new Row.RowVal("balance", new Column("5.23"))
            };
@@ -59,13 +61,17 @@ public class AvroSerializerTest {
 	    		  table ,  res.getTableName() );
 	      assertEquals("Update Mutation Test: table name should be the same",
 	    		  schema ,  res.getSchemaName() );*/
+	      System.out.println(update_cols[0].getCol().getValue());
+	      System.out.println((((UpdateMutation)res).getColumnVal("name")));
+	      String bla =  (String) update_cols[0].getCol().getValue(); 
+	      String bl2 = (String)(((UpdateMutation)res).getColumnVal("name"));
 	      
 	      assertEquals("Update Mutation Test: name should be the same",
-	    		  (String) update_cols[0].getCol().getValue() ,  (String)((UpdateMutation)res).getColumnVal("name")) ;
+	    		  (String) update_cols[0].getCol().getValue() ,  (String) (((UpdateMutation)res).getColumnVal("name") )) ;
 	      assertEquals("Update Mutation Test: name should be the same",
-	    		  (String) update_cols[1].getCol().getValue() ,  (String)((UpdateMutation)res).getColumnVal("age") );
+	    		  (String) update_cols[1].getCol().getValue() ,  (String) (((UpdateMutation)res).getColumnVal("age") )) ;
 	      assertEquals("Update Mutation Test: name should be the same",
-	    		  (String) update_cols[2].getCol().getValue() ,  (String)((UpdateMutation)res).getColumnVal("balance") );
+	    		  (String) update_cols[2].getCol().getValue() ,  (String) (((UpdateMutation)res).getColumnVal("balance")  ));
 	      
 	      output  = serializer.serialize(topic, insertM);
 	      res = deserializer.deserialize(output);
