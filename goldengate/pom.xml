@@ -78,7 +78,7 @@
          <dependency>
             <groupId>io.confluent</groupId>
             <artifactId>kafka-avro-serializer</artifactId>
-            <version>kafka-avro-serializer-2.0.0-SNAPSHOT.jar</version>
+            <version>2.0.0-SNAPSHOT.jar</version>
             <scope>system</scope>
             <systemPath>${project.basedir}/libs/kafka-avro-serializer-2.0.0-SNAPSHOT.jar</systemPath>
         </dependency>
