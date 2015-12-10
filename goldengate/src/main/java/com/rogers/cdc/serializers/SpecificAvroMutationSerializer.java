@@ -3,7 +3,9 @@ package com.rogers.cdc.serializers;
 import java.io.ByteArrayOutputStream;
 import java.util.Map;
 
+import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericDatumWriter;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.BinaryEncoder;
 import org.apache.avro.io.DatumWriter;
 import org.apache.avro.io.EncoderFactory;
@@ -18,6 +20,7 @@ import com.rogers.cdc.api.mutations.RowMutation;
 
 import io.confluent.connect.avro.AvroConverter;
 import io.confluent.kafka.serializers.KafkaAvroSerializer;
+
 import org.apache.avro.generic.GenericContainer;
 //import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 //import io.confluent.kafka.serializers.NonRecordContainer;
@@ -62,15 +65,16 @@ public class SpecificAvroMutationSerializer extends AbstractSpecificAvroSerDe im
 				 logger.debug("fields = " + record.schema().fields());
 				 logger.debug("recrod = " + record);
 
-				    Object obj = avroData.fromConnectData(record.schema(), record);
-				    logger.debug("obj = " + obj);
+				 GenericRecord obj = (GenericRecord)avroData.fromConnectData(record.schema(), record);
+				     logger.debug("obj = " + obj);
+				     Schema bla = obj.getSchema();
+				     logger.debug("Avro schema  = " + bla);
 					 EncoderFactory encoderFactory = EncoderFactory.get();
 					 ByteArrayOutputStream out = new ByteArrayOutputStream();
 					 logger.debug("1");
 					 BinaryEncoder encoder = encoderFactory.directBinaryEncoder(out, null);
 					 logger.debug("2");
 				        DatumWriter<Object> writer;
-				        Object value = record ;
 				        
 				        //if (value instanceof SpecificRecord) {
 				          //writer = new SpecificDatumWriter<Object>(schema);
