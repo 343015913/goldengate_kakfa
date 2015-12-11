@@ -6,9 +6,9 @@ import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 
 import com.rogers.cdc.api.mutations.Mutation;
-import com.rogers.cdc.serializers.AbstractAvroDeserilaizer;
+import com.rogers.cdc.serializers.GenericAvroMutationDeserializer;
 /*Can be plugged into Kafka config as a desirilaizer */
-public class KafkaAvroMutationDeserializer extends AbstractAvroDeserilaizer
+public class KafkaAvroMutationDeserializer extends GenericAvroMutationDeserializer
 		implements Deserializer<Mutation> {
 	 private Deserializer<byte[]> firstDeserializer;
 	 KafkaAvroMutationDeserializer(Deserializer<byte[]> _firstDeserializer){

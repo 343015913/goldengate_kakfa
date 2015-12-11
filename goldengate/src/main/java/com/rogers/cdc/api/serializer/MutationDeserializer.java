@@ -1,4 +1,4 @@
-package com.rogers.cdc.serializers;
+package com.rogers.cdc.api.serializer;
 
 
 
@@ -29,7 +29,7 @@ public interface MutationDeserializer extends Closeable {
      * @param Mutation
      * @return serialized bytes
      */
-    public Mutation deserialize( byte[] payload);
+    public Mutation deserialize( String topic, byte[] payload);
 
 
     /**

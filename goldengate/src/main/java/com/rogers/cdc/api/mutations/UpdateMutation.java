@@ -22,8 +22,8 @@ public class UpdateMutation extends RowMutation {
     public MutationType getType(){
     	return MutationType.UPDATE;	
     }
-    @Override
-    public String toString() {
+   // @Override
+    /*  public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("UpdateMutation");
         sb.append("{schema=").append(this.getSchemaName());
@@ -32,7 +32,7 @@ public class UpdateMutation extends RowMutation {
         sb.append("\n").append(row);
         sb.append("]}");
         return sb.toString();
-    }
+    }*/
    
     
 }

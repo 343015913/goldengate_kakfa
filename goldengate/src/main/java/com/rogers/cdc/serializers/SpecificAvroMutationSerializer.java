@@ -17,8 +17,10 @@ import org.slf4j.LoggerFactory;
 
 import com.rogers.cdc.api.mutations.Mutation;
 import com.rogers.cdc.api.mutations.RowMutation;
+import com.rogers.cdc.api.serializer.MutationSerializer;
 
 import io.confluent.connect.avro.AvroConverter;
+import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
 import io.confluent.kafka.serializers.KafkaAvroSerializer;
 
 import org.apache.avro.generic.GenericContainer;
@@ -38,12 +40,17 @@ public class SpecificAvroMutationSerializer extends AbstractSpecificAvroSerDe im
 	  public SpecificAvroMutationSerializer(){
 		  serializer = new KafkaAvroSerializer();
 	  }
+	  public SpecificAvroMutationSerializer(SchemaRegistryClient schemaRegistry){
+		  super(schemaRegistry);
+		  serializer = new KafkaAvroSerializer(schemaRegistry);
+	  }
+	   
 		@Override
 		public void configure(Map<String, ?> configs) {
 			//serializer = new KafkaAvroSerializer();
 			//serializer.configure(configs, false); // This usually gets called by Kafka...but we have to call it here since we never pass the serialzer to Kafk	
+			super.configure(configs);
 			
-			converter.configure(configs, false);
 		}
 	  @Override
 		 public byte[] serialize(String topic, Mutation op) {  
@@ -55,19 +62,21 @@ public class SpecificAvroMutationSerializer extends AbstractSpecificAvroSerDe im
 			 //logger.debug("Try to serialize: topic = {}, \n mutation = {}, \n schema = {}  ", topic, op, schema);
 			
 			 Struct record = getRecord(op);
-			// byte[] bytes;
+			 byte[] bytes = null;
       	    // logger.debug("\t recrod = {}  ", record);
-
-			 try{ 
+			 // record will be null only if it's a delete mutation
+             if (record != null){
+			    try{ 
 				 //bytes = serializer.serialize(topic, record);
 
-				 logger.debug("schema = " + record.schema());
+				/* logger.debug("schema = " + record.schema());
 				 logger.debug("fields = " + record.schema().fields());
 				 logger.debug("recrod = " + record);
 
 				 GenericRecord obj = (GenericRecord)avroData.fromConnectData(record.schema(), record);
 				     logger.debug("obj = " + obj);
 				     Schema bla = obj.getSchema();
+				     
 				     logger.debug("Avro schema  = " + bla);
 					 EncoderFactory encoderFactory = EncoderFactory.get();
 					 ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -91,14 +100,16 @@ public class SpecificAvroMutationSerializer extends AbstractSpecificAvroSerDe im
 				        out.close();
 				        logger.debug("6");
 				   
-				    return serializer.serialize(topic,obj);
-			      //  bytes = converter.fromConnectData(topic, record.schema(), record);
-			 }catch (Exception e){
-	        	   logger.error("Confluent KafkaAvroSerializer serialization error: " + e);
+				    return serializer.serialize(topic,obj);*/
+			       bytes = converter.fromConnectData(topic, record.schema(), record);
+			    }catch (Exception e){
+	        	   logger.error("Confluent KafkaAvroSerializer serialization error: " , e);
 
-				 throw new SerializationException("Failed to serialze Avro object, with error: " + e);
-			 }
-		     //return bytes; 
+				 throw new SerializationException("Failed to serialze Avro object, with error: " , e);
+			    
+			    }
+             }
+		     return bytes; 
 
 		 }
 	

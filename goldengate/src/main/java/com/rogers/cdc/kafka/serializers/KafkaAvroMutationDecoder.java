@@ -1,20 +1,14 @@
 package com.rogers.cdc.kafka.serializers;
 
-import java.util.Map;
-
 import kafka.serializer.Decoder;
 import kafka.serializer.DefaultDecoder;
-
-import org.apache.kafka.common.serialization.ByteArrayDeserializer;
-import org.apache.kafka.common.serialization.Deserializer;
-
-import com.rogers.cdc.api.mutations.Mutation;
-import com.rogers.cdc.serializers.AbstractAvroDeserilaizer;
-
 import kafka.utils.VerifiableProperties;
 
+import com.rogers.cdc.api.mutations.Mutation;
+import com.rogers.cdc.serializers.GenericAvroMutationDeserializer;
 
-public class KafkaAvroMutationDecoder extends AbstractAvroDeserilaizer
+
+public class KafkaAvroMutationDecoder extends GenericAvroMutationDeserializer
 implements Decoder<Mutation> {
 private Decoder<byte[]> firstDeserializer;
 /**

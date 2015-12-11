@@ -21,7 +21,7 @@ public class InsertMutation extends RowMutation {
 	    	return MutationType.INSERT;
 	    	
 	    }
-
+	  /*
 	    @Override
 	    public String toString() {
 	        final StringBuilder sb = new StringBuilder();
@@ -32,6 +32,6 @@ public class InsertMutation extends RowMutation {
 	        sb.append("\n").append(row);
 	        sb.append("]}");
 	        return sb.toString();
-	    }
+	    }*/
 
 }

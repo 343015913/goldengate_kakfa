@@ -56,8 +56,8 @@ public abstract class AbstractMutationMapper   extends MutationMapper<Op,TableMe
 	           	    row = createRow(op, schema, false);
 	      	        return new InsertMutation(table,  row);
 	            case  DO_DELETE: 
-	            	 row = createRow(op, schema, false);
-	       	        return new DeleteMutation(table,  row);
+	            	 //row = createRow(op, schema, false);
+	       	        return new DeleteMutation(table);
 	            case DO_UPDATE: 
 	            case DO_UPDATE_FIELDCOMP: 
 	            case DO_UPDATE_AC: 

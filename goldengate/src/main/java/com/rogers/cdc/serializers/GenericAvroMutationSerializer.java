@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.rogers.cdc.api.mutations.*;
+import com.rogers.cdc.api.serializer.MutationSerializer;
 import com.rogers.cdc.exceptions.InvalidTypeException;
 import com.rogers.cdc.exceptions.SerializationException;
 

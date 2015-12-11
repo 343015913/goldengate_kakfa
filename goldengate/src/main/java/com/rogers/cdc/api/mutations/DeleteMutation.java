@@ -4,28 +4,33 @@ package com.rogers.cdc.api.mutations;
 //import com.rogers.goldengate.api.mutations.MutationType;
 import com.rogers.cdc.api.schema.*;
 
-public class DeleteMutation extends RowMutation {
-	public DeleteMutation(Table table ){
-    	this(table, null);
-         
-    }
-	 public DeleteMutation(Table table, Row  _row){
-	    	super(table, _row);
+public class DeleteMutation extends Mutation {
+       public DeleteMutation(Table table){
+	    	super(table);
 	    	magicByte = DeleteByte;
 	    }
 	  @Override
 	    public MutationType getType(){
 	    	return MutationType.DELETE;
 	    	
-	    }   
+	    } 
+	  
 	    @Override
 	    public String toString() {
+	        
 	        final StringBuilder sb = new StringBuilder();
-	        sb.append("DeleteMutation");
-	        sb.append("{schema=").append(this.getSchemaName());
-	        sb.append(", table=").append(this.getTableName());
+	        sb.append(this.getType()).append("{").append("\n");
+	        sb.append("  schema=").append(this.getSchemaName()).append("\n");
+	        sb.append("  table=").append(this.getTableName()).append("\n");
 	        sb.append("}");
 	        return sb.toString();
 	        
 	    }
+	     @Override
+	      public boolean equals(Object ob) {
+	    		if (!super.equals(ob)) return false;
+	           if (ob.getClass() != getClass()) return false;
+
+	        return true;
+	      }
 }

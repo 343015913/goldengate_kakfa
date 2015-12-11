@@ -7,9 +7,9 @@ import org.slf4j.LoggerFactory;
 
 import com.rogers.cdc.api.mutations.Mutation;
 import com.rogers.cdc.api.mutations.MutationMapper;
+import com.rogers.cdc.api.serializer.MutationSerializer;
 import com.rogers.cdc.kafka.KafkaUtil;
 import com.rogers.cdc.serializers.GenericAvroMutationSerializer;
-import com.rogers.cdc.serializers.MutationSerializer;
 import com.rogers.cdc.serializers.SpecificAvroMutationSerializer;
 
 import org.apache.kafka.common.config.AbstractConfig;
@@ -30,7 +30,7 @@ public class KafkaAvroHandler<Op, Table, OpMapper extends MutationMapper<Op,  Ta
 			.getLogger(KafkaAvroHandler.class);
 	//TODO: Serilaizer should be a generic
 	MutationSerializer valSerialiazer ;
-	Serializer<Object> keySerialiazer;
+	//Serializer<Object> keySerialiazer;
 	//TODO: Add key serialiazer
     
 	public KafkaAvroHandler(OpMapper _opMapper, String configFile) {
@@ -38,8 +38,8 @@ public class KafkaAvroHandler<Op, Table, OpMapper extends MutationMapper<Op,  Ta
 		  //TODO: Config file? 
 		  //valSerialiazer = new GenericAvroMutationSerializer();
 		  valSerialiazer = new SpecificAvroMutationSerializer();
-		  keySerialiazer = new KafkaAvroSerializer(); 
-		  keySerialiazer.configure(new AbstractConfig(new ConfigDef(), config).originals(), false);// TODO use AbstractKafkaAvroSerDeConfig when new confluent comes out
+		//  keySerialiazer = new KafkaAvroSerializer(); 
+		  //keySerialiazer.configure(new AbstractConfig(new ConfigDef(), config).originals(), false);// TODO use AbstractKafkaAvroSerDeConfig when new confluent comes out
 	  }
 	 @Override
 	 public  void processOp(Op op) {  

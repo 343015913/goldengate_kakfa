@@ -6,9 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.rogers.cdc.api.mutations.*;
+import com.rogers.cdc.api.serializer.MutationDeserializer;
 import com.rogers.cdc.kafka.serializers.KafkaAvroMutationDecoder;
 import com.rogers.cdc.serializers.GenericAvroMutationDeserializer;
-import com.rogers.cdc.serializers.MutationDeserializer;
 
 abstract public class KafkaMutationAvroConsumer extends KafkaConsumer<Mutation> {
 	final private static Logger logger = LoggerFactory

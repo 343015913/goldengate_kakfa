@@ -30,7 +30,8 @@ public abstract class Mutation implements Serializable {
       @Override
       public boolean equals(Object ob) {
         if (ob == null) return false;
-        if (ob.getClass() != getClass()) return false;
+        //TODO: enable class check when we figure out proper way to recreate a mutation from a Struct
+        //if (ob.getClass() != getClass()) return false;
         if (ob == this) return true;
         Mutation other = (Mutation)ob;
         if (!this.getTableName().equals(other.getTableName())) return false;

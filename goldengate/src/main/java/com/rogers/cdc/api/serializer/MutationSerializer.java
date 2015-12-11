@@ -1,4 +1,4 @@
-package com.rogers.cdc.serializers;
+package com.rogers.cdc.api.serializer;
 
 
 

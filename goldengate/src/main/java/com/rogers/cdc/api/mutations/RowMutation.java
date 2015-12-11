@@ -39,6 +39,20 @@ public abstract class RowMutation extends Mutation {
 	    	System.out.println(this);
 	    	return row.getColumn(name);
 	    }
+	    @Override
+	    public String toString() {
+	        final StringBuilder sb = new StringBuilder();
+	        sb.append(this.getType()).append("{").append("\n");
+	        sb.append("  schema=").append(this.getSchemaName()).append("\n");
+	        sb.append("  table=").append(this.getTableName()).append("\n");
+	        sb.append("  row=[").append("\n");
+	        if (row != null){
+	           sb.append(row.toString(5)).append("\n");
+	        }
+	        sb.append("  ]").append("\n");;
+	        sb.append("}");
+	        return sb.toString();
+	    }
 	    
 
 }
