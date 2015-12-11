@@ -68,11 +68,6 @@ public class KafkaAvroHandlerTest {
             .field("string", Schema.STRING_SCHEMA)
             .field("bytes", Schema.BYTES_SCHEMA)
             .build();
-
-	
-	// String table = "testTable";
-     //String schema = "testSchema";
-	//TODO: Add Schema
      Table table = new Table("testSchema", "testTable", FLAT_STRUCT_SCHEMA, null);
      Struct struct = new Struct(FLAT_STRUCT_SCHEMA)
      .put("int8", (byte) 12)

@@ -1,28 +1,23 @@
-package com.rogers.goldengate.serializers;
-
-import com.rogers.cdc.api.mutations.*;
-import com.rogers.cdc.api.schema.Table;
-import com.rogers.cdc.kafka.KafkaUtil;
-import com.rogers.cdc.serializers.GenericAvroMutationDeserializer;
-import com.rogers.cdc.serializers.GenericAvroMutationSerializer;
-import com.rogers.cdc.serializers.MutationDeserializer;
-import com.rogers.cdc.serializers.MutationSerializer;
-
-
-
-
-
+package com.rogers.cdc.serializers;
 
 import static org.junit.Assert.assertEquals;
 
-
-
-
-
-
 import org.junit.Test;
 
-public class AvroSerializerTest {
+import com.rogers.cdc.api.mutations.Column;
+import com.rogers.cdc.api.mutations.DeleteMutation;
+import com.rogers.cdc.api.mutations.InsertMutation;
+import com.rogers.cdc.api.mutations.Mutation;
+import com.rogers.cdc.api.mutations.Row;
+import com.rogers.cdc.api.mutations.UpdateMutation;
+import com.rogers.cdc.api.schema.Table;
+import com.rogers.cdc.api.serializer.MutationDeserializer;
+import com.rogers.cdc.api.serializer.MutationSerializer;
+import com.rogers.cdc.kafka.KafkaUtil;
+import com.rogers.cdc.serializers.GenericAvroMutationDeserializer;
+import com.rogers.cdc.serializers.GenericAvroMutationSerializer;
+
+public class GenericAvroMutationSerializerTest {
 	
 	 
 	       
@@ -55,7 +50,7 @@ public class AvroSerializerTest {
 	      
 	      
 	      output  = serializer.serialize(topic, updateM);
-	      res = deserializer.deserialize(output);
+	      res = deserializer.deserialize(topic, output);
 	      
 	      /*  assertEquals("Update Mutation Test: table name should be the same",
 	    		  table ,  res.getTableName() );
@@ -74,7 +69,7 @@ public class AvroSerializerTest {
 	    		  (String) update_cols[2].getCol().getValue() ,  (String) (((UpdateMutation)res).getColumnVal("balance")  ));
 	      
 	      output  = serializer.serialize(topic, insertM);
-	      res = deserializer.deserialize(output);
+	      res = deserializer.deserialize(topic, output);
 	      
 	      
 	      /* assertEquals("Insert Mutation Test: table name should be the same",
@@ -89,7 +84,7 @@ public class AvroSerializerTest {
 	    		  (String) insert_cols[2].getCol().getValue() ,  (String)((InsertMutation)res).getColumnVal("balance") );
 	      
 	      output  = serializer.serialize(topic, deleteM);
-	      res = deserializer.deserialize(output);
+	      res = deserializer.deserialize(topic, output);
 	      /* assertEquals("Delete Mutation Test: table name should be the same",
 	    		  table ,  res.getTableName() );
 	      assertEquals("Delete Mutation Test: table name should be the same",
@@ -99,7 +94,7 @@ public class AvroSerializerTest {
 	              null, deserializer.deserialize(topic, serializer.serialize(topic, null)));*/
 	  }
 	  public static void main(String [ ] args) {
-		  AvroSerializerTest tester = new AvroSerializerTest();
+		  GenericAvroMutationSerializerTest tester = new GenericAvroMutationSerializerTest();
 		  tester.testSecureSerializerV1();
 		}
 }
