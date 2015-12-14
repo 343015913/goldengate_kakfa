@@ -69,10 +69,10 @@ public class SpecificAvroMutationSerializer extends AbstractSpecificAvroSerDe im
 			    try{ 
 				 //bytes = serializer.serialize(topic, record);
 
-				/* logger.debug("schema = " + record.schema());
+				 logger.debug("schema = " + record.schema());
 				 logger.debug("fields = " + record.schema().fields());
 				 logger.debug("recrod = " + record);
-
+				 /*
 				 GenericRecord obj = (GenericRecord)avroData.fromConnectData(record.schema(), record);
 				     logger.debug("obj = " + obj);
 				     Schema bla = obj.getSchema();
