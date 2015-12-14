@@ -16,6 +16,7 @@ import org.apache.kafka.common.config.AbstractConfig;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.common.serialization.Serializer;
 
+import io.confluent.kafka.schemaregistry.client.MockSchemaRegistryClient;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.confluent.kafka.serializers.KafkaAvroSerializer;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerializer;
@@ -38,7 +39,7 @@ public class KafkaAvroHandler<Op, Table, OpMapper extends MutationMapper<Op,  Ta
 		  super(_opMapper, configFile);
 		  //TODO: Config file? 
 		  //valSerialiazer = new GenericAvroMutationSerializer();
-		  valSerialiazer = new SpecificAvroMutationSerializer();
+		  valSerialiazer = new SpecificAvroMutationSerializer(new MockSchemaRegistryClient());
 		  valSerialiazer.configure(new AbstractConfig(new ConfigDef(), config).originals());
 		//  keySerialiazer = new KafkaAvroSerializer(); 
 		  //keySerialiazer.configure(new AbstractConfig(new ConfigDef(), config).originals(), false);// TODO use AbstractKafkaAvroSerDeConfig when new confluent comes out
