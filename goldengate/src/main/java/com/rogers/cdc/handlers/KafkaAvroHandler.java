@@ -39,7 +39,7 @@ public class KafkaAvroHandler<Op, Table, OpMapper extends MutationMapper<Op,  Ta
 		  super(_opMapper, configFile);
 		  //TODO: Config file? 
 		  //valSerialiazer = new GenericAvroMutationSerializer();
-		  valSerialiazer = new SpecificAvroMutationSerializer(new MockSchemaRegistryClient());
+		  valSerialiazer = new SpecificAvroMutationSerializer();
 		  valSerialiazer.configure(new AbstractConfig(new ConfigDef(), config).originals());
 		//  keySerialiazer = new KafkaAvroSerializer(); 
 		  //keySerialiazer.configure(new AbstractConfig(new ConfigDef(), config).originals(), false);// TODO use AbstractKafkaAvroSerDeConfig when new confluent comes out
