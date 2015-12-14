@@ -103,7 +103,7 @@ public class SpecificAvroMutationSerializer extends AbstractSpecificAvroSerDe im
 				    return serializer.serialize(topic,obj);*/
 			       bytes = converter.fromConnectData(topic, record.schema(), record);
 			    }catch (Exception e){
-	        	   logger.error("Confluent KafkaAvroSerializer serialization error: " , e);
+	        	   logger.error(" KafkaAvroSerializer serialization error: " , e);
 
 				 throw new SerializationException("Failed to serialze Avro object, with error: " , e);
 			    
