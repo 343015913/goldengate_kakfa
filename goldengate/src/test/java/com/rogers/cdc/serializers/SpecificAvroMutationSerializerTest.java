@@ -34,7 +34,7 @@ public class SpecificAvroMutationSerializerTest {
 	public SpecificAvroMutationSerializerTest() {
 		
 	}
-	//@Test
+	@Test
 	public void testSpecificAvroMutationSerializerWithMockRegistry() {
 		schemaRegistry = new MockSchemaRegistryClient();
 		MutationSerializer serializer = new SpecificAvroMutationSerializer(schemaRegistry);
@@ -46,7 +46,7 @@ public class SpecificAvroMutationSerializerTest {
 		testSpecificAvroMutationSerializerImpl(serializer, deserializer);
 		
 	}
-	@Test
+	//@Test
 	public void testSpecificAvroMutationSerializerWithRealRegistry() {
 		MutationSerializer serializer = new SpecificAvroMutationSerializer();
 		MutationDeserializer deserializer = new SpecificAvroMutationDeserializer();
