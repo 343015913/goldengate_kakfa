@@ -216,6 +216,7 @@ public class SQLDataConverter {
 		    	logger.debug("field is null ");
 		    	return null; 
 		    }
+		    logger.debug(" convertFieldValue 2 ");
 		    final Object colValue;
 		    switch (colType) {
 		      case Types.NULL: {
@@ -318,6 +319,7 @@ public class SQLDataConverter {
 
 		      // Timestamp is a date + time
 		      case Types.TIMESTAMP: {
+		    	  logger.debug(" convertFieldValue:getTimestamp ");
 		        colValue = typeConvertor.getTimestamp(col, UTC_CALENDAR);
 		        break;
 		      }
