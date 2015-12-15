@@ -49,6 +49,7 @@ public class KafkaAvroHandler<Op, Table, OpMapper extends MutationMapper<Op,  Ta
 		 try { 
 			   logger.debug("Start processing " , op);
                Mutation mutation = opMapper.toMutation(op);
+               logger.debug("Mapped to mutation succesfully ");
                //TODO!!!! Rmove the if, it's just for testing
                if (mutation.getType() == com.rogers.cdc.api.mutations.MutationType.INSERT) {
             	  logger.debug("processes insert mutation " , op);
@@ -58,9 +59,13 @@ public class KafkaAvroHandler<Op, Table, OpMapper extends MutationMapper<Op,  Ta
                   logger.info("KafkaHandler: Send Message to topic: " + topic);
 		          send(topic,null ,val);
                }
-		    } catch  (IOException e)  {
-			   logger.error("KafkaAvroHandler Failed to processes operation: " + op + " with error: " + e ); 
-		    }
+		      } catch  (IOException e)  {
+			  // logger.error("KafkaAvroHandler Failed to processes operation: " + op + " with error: " + e );
+			   throw new RuntimeException(" Failed to processes operation", e);
+		    
+	          } catch  (Exception e)  {
+	        	   throw new RuntimeException(" Failed to processes operation", e);
+			  }
 	    }
 	
 	

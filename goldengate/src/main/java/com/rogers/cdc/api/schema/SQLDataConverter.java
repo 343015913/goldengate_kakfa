@@ -211,8 +211,9 @@ public class SQLDataConverter {
 		    // TODO: check if val is SQLNull 
 		    // Should never get a null object anywhere here
 		    // If it's null - for updates, how do we know if it's a really null (SQLNull), or missing field
-		    logger.debug("convertFieldValue ");
+		    logger.debug("start convertFieldValue ");
 		    if (typeConvertor.isNull(col)){
+		    	logger.debug("field is null ");
 		    	return null; 
 		    }
 		    final Object colValue;

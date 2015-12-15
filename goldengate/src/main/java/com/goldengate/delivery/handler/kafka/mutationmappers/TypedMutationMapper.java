@@ -30,11 +30,15 @@ public class TypedMutationMapper extends AbstractMutationMapper {
 		try {
 		   return SQLDataConverter.convertFieldValue(typeConvertor, column, colType);
 		} catch (IOException e) {
-			logger.warn("Ignoring record due to SQL error:", e);
+			//logger.warn("Ignoring record due to SQL error:", e);
 	        throw new IOException("failed to convert " + column + "to SQL type " + colType);
 	    } 
 		catch (SQLException e) {
-			logger.warn("Ignoring record due to SQL error:", e);
+			//logger.warn("Ignoring record due to SQL error:", e);
+			throw new IOException("failed to convert " + column + "to SQL type " + colType);
+	    }
+		catch (Exception e) {
+			//logger.warn("Ignoring record due to SQL error:", e);
 			throw new IOException("failed to convert " + column + "to SQL type " + colType);
 	    }
 	}

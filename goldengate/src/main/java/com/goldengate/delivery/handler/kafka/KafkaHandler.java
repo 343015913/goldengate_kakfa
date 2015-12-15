@@ -235,7 +235,7 @@ public class KafkaHandler extends AbstractHandler {
                    + ", op pos=" + op.getPosition()                                                      
                    + ", tx pos=" + currentTx.getTranID()                                                 
                    + ", op ts=" + op.getTimestamp() 
-                   + " with error: " + e);	
+                   + " with error: " , e);	
         }
                                       
                                                                                                       
