@@ -162,10 +162,11 @@ public class GGSQLTypeConverter implements AbstractSQLTypeConverter<DsColumn> {
 		String val =  getStringInt(col);
 		// One would think that Oracle.sql.TIMESTAMP would be able to parse GG time stamps.... not that case :(
 		// We try a bunch of ways to prase until one hopefully works.
-		
+		logger.debug("getTimestamp value {}", val);
 		try {
 			return new TIMESTAMP(val).timestampValue(cal);
 		} catch (Exception e){
+			logger.debug("getTimestamp try parsers");
 			DateTimeParser[] parsers = { 
 					DateTimeFormat.forPattern( "yyyy-MM-dd:HH:mm:ss.SSSSSS Z" ).getParser(),
 			        DateTimeFormat.forPattern("yyyy-MM-dd:HH:mm:ss.SSSSSS" ).getParser(),// TimeStamp - for some reason the format is a bit different from the GG doc and JDBC standard
@@ -173,6 +174,7 @@ public class GGSQLTypeConverter implements AbstractSQLTypeConverter<DsColumn> {
 			        		};
 			DateTimeFormatter formatter = new DateTimeFormatterBuilder().append( null, parsers ).toFormatter();
 			DateTime time = formatter.parseDateTime(val);
+			logger.debug("time = {}", time);
 			if (time != null){
 			    return new Timestamp(time.toDateTime(DateTimeZone.forTimeZone(cal.getTimeZone())).getMillis());	
 			}
