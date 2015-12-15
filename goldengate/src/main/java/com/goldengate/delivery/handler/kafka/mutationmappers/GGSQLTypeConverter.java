@@ -12,6 +12,7 @@ import java.sql.Timestamp;
 //import java.sql.Timestamp;
 import java.util.Calendar;
 
+import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -171,7 +172,14 @@ public class GGSQLTypeConverter implements AbstractSQLTypeConverter<DsColumn> {
 			        DateTimeFormat.forPattern("yyyy-MM-dd:HH:mm:ss" ).getParser()
 			        		};
 			DateTimeFormatter formatter = new DateTimeFormatterBuilder().append( null, parsers ).toFormatter();
-			return new Timestamp(formatter.parseDateTime(val).toDateTime(DateTimeZone.forTimeZone(cal.getTimeZone())).getMillis());	
+			DateTime time = formatter.parseDateTime(val);
+			if (time != null){
+			    return new Timestamp(time.toDateTime(DateTimeZone.forTimeZone(cal.getTimeZone())).getMillis());	
+			}
+			else{
+				logger.warn("Timestamp value {} couldn't be parsed into a valid TimeStamp", val);
+				return null;
+			}
 		}
 		
 	}
