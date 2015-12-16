@@ -59,26 +59,35 @@ public class SpecificAvroMutationSerializerTest {
 	}
 	//Private
 	private void testSpecificAvroMutationSerializerImpl(MutationSerializer serializer, MutationDeserializer deserializer ) {
-		
-		Schema schema = SchemaBuilder.struct()
-				.field("int8", Schema.OPTIONAL_INT8_SCHEMA)
-				.field("int16", Schema.OPTIONAL_INT16_SCHEMA)
-				.field("int32", Schema.OPTIONAL_INT32_SCHEMA)
-				.field("int64", Schema.OPTIONAL_INT64_SCHEMA)
-				.field("float32", Schema.OPTIONAL_FLOAT32_SCHEMA)
-				.field("float64", Schema.OPTIONAL_FLOAT64_SCHEMA)
-				.field("boolean", Schema.OPTIONAL_BOOLEAN_SCHEMA)
-				.field("string", Schema.OPTIONAL_STRING_SCHEMA)
-				.field("bytes", Schema.OPTIONAL_BYTES_SCHEMA).build();
+				Schema schema = SchemaBuilder.struct()
+				.field("int8", Table.SQL_OPTIONAL_INT8_SCHEMA)
+				.field("int16", Table.SQL_OPTIONAL_INT16_SCHEMA)
+				.field("int32", Table.SQL_OPTIONAL_INT32_SCHEMA)
+				.field("int32b", Table.SQL_OPTIONAL_INT32_SCHEMA)
+				.field("int64", Table.SQL_OPTIONAL_INT64_SCHEMA)
+				.field("float32", Table.SQL_OPTIONAL_FLOAT32_SCHEMA)
+				.field("float64", Table.SQL_OPTIONAL_FLOAT64_SCHEMA)
+				.field("boolean", Table.SQL_OPTIONAL_BOOLEAN_SCHEMA)
+				.field("string", Table.SQL_OPTIONAL_STRING_SCHEMA)
+				.field("bytes", Table.SQL_OPTIONAL_BYTES_SCHEMA).build();
 		Table table = new Table("testSchema", "testTable", schema, null);
-		Struct insertRow = new Struct(schema).put("int8", (byte) 12)
-				.put("int16", (short) 12).put("int32", 12)
-				.put("int64", (long) 12).put("float32", 12.f)
-				.put("float64", 12.).put("boolean", true)
-				.put("string", "foobar").put("bytes",  ByteBuffer.wrap("foobar".getBytes()) );
-		Struct updateRow = new Struct(schema).put("int32", 12)
-				.put("float64", 12.).put("string", "foobar");
-		Struct pkUpdateRow = new Struct(schema).put("int32", 12);
+		Struct insertRow = new Struct(schema)
+		        .put("int8",Table.getSQLSchemaField( schema, "int8",(byte) 12))
+				.put("int16", Table.getSQLSchemaField( schema, "int16",(short) 12))
+				.put("int32", Table.getSQLSchemaField( schema, "int32", 12))
+				.put("int32b", Table.getSQLSchemaField( schema, "int32b", null))//Testing SQL null
+				.put("int64", Table.getSQLSchemaField( schema, "int64",(long) 12))
+				.put("float32", Table.getSQLSchemaField( schema, "float32", 12.f))
+				.put("float64", Table.getSQLSchemaField( schema, "float64", 12.))
+				.put("boolean", Table.getSQLSchemaField( schema, "boolean", true))
+				.put("string", Table.getSQLSchemaField( schema, "string", "foobar"))
+				.put("bytes",  Table.getSQLSchemaField( schema, "bytes", ByteBuffer.wrap("foobar".getBytes()))  );
+		Struct updateRow = new Struct(schema)
+		        .put("int32", Table.getSQLSchemaField( schema, "int32", 12))
+				.put("float64", Table.getSQLSchemaField( schema, "float64", 12.))
+				.put("string", Table.getSQLSchemaField( schema, "string", "foobar"));
+		Struct pkUpdateRow = new Struct(schema)
+		        .put("int32", Table.getSQLSchemaField( schema, "int32", 12));
 
 		UpdateMutation updateM = new UpdateMutation(table,
 				Row.fromStruct(updateRow));
@@ -94,7 +103,7 @@ public class SpecificAvroMutationSerializerTest {
 		
 		String topic = KafkaUtil.genericTopic(table);
 
-        try { 
+      //  try { 
 		output = serializer.serialize(topic, insertM);
 		res = deserializer.deserialize(topic, output);
 		System.out.println("Insert: " + insertM);
@@ -114,9 +123,9 @@ public class SpecificAvroMutationSerializerTest {
 		res = deserializer.deserialize(topic, output);
 		System.out.println("pkUpdateM: " + pkUpdateM);
 		assertEquals("UpdatePk Mutation: Results should be the same as orignal", pkUpdateM, res);
-        }catch (Exception e){
-			fail("Unexpecte expception: " + e);
-		}
+        //}catch (Exception e){
+			//fail("Unexpecte expception: " + e);
+		//}
 
 	}
 }
