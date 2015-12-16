@@ -64,6 +64,7 @@ public class KafkaAvroHandler<Op, Table, OpMapper extends MutationMapper<Op,  Ta
 			   throw new RuntimeException(" Failed to map op to Mutation ", e);
 		    
 	          } catch  (RuntimeException e)  {
+	        	  logger.error("Failed to serialize or send mutation  with error: " + e );
 	        	   throw new RuntimeException(" Failed to serialize or send mutation", e);
 			  }
 	    }
