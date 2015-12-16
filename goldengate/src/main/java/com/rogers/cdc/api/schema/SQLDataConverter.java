@@ -230,6 +230,7 @@ public class SQLDataConverter {
 	        break;
 	      }
 	    }
+		  logger.debug("addFieldSchema {}: {}", fieldName, builder.field(fieldName));
 	   }
 	public static <T> Object  convertFieldValue(AbstractSQLTypeConverter<T> typeConvertor, T col, int colType) throws SQLException, IOException {
 		    // TODO: check if val is SQLNull 

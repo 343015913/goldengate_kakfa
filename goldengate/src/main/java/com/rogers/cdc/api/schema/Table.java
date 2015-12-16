@@ -41,15 +41,15 @@ public class Table {
 	public static Schema SQL_STRING_SCHEMA = sqlSchemaFor("sql_string", SchemaBuilder.STRING_SCHEMA).build();
 	public static Schema SQL_BYTES_SCHEMA = sqlSchemaFor("sql_bytes", SchemaBuilder.BYTES_SCHEMA).build();
 	
-	public static Schema SQL_OPTIONAL_INT8_SCHEMA = sqlSchemaFor("sql_int8", SchemaBuilder.OPTIONAL_INT8_SCHEMA).build();
-	public static Schema SQL_OPTIONAL_INT16_SCHEMA = sqlSchemaFor("sql_int16", SchemaBuilder.OPTIONAL_INT16_SCHEMA).build();
-	public static Schema SQL_OPTIONAL_INT32_SCHEMA = sqlSchemaFor("sql_int32", SchemaBuilder.OPTIONAL_INT32_SCHEMA).build();
-	public static Schema SQL_OPTIONAL_INT64_SCHEMA = sqlSchemaFor("sql_int64", SchemaBuilder.OPTIONAL_INT64_SCHEMA).build();
-	public static Schema SQL_OPTIONAL_FLOAT32_SCHEMA = sqlSchemaFor("sql_float32", SchemaBuilder.OPTIONAL_FLOAT32_SCHEMA).build();
-	public static Schema SQL_OPTIONAL_FLOAT64_SCHEMA = sqlSchemaFor("sql_float64", SchemaBuilder.OPTIONAL_FLOAT64_SCHEMA).build();
-	public static Schema SQL_OPTIONAL_BOOLEAN_SCHEMA = sqlSchemaFor("sql_boolean", SchemaBuilder.OPTIONAL_BOOLEAN_SCHEMA).build();
-	public static Schema SQL_OPTIONAL_STRING_SCHEMA = sqlSchemaFor("sql_string", SchemaBuilder.OPTIONAL_STRING_SCHEMA).build();
-	public static Schema SQL_OPTIONAL_BYTES_SCHEMA = sqlSchemaFor("sql_bytes", SchemaBuilder.OPTIONAL_BYTES_SCHEMA).build();
+	public static Schema SQL_OPTIONAL_INT8_SCHEMA = sqlSchemaFor("sql_optional_int8", SchemaBuilder.OPTIONAL_INT8_SCHEMA).build();
+	public static Schema SQL_OPTIONAL_INT16_SCHEMA = sqlSchemaFor("sql_optional_int16", SchemaBuilder.OPTIONAL_INT16_SCHEMA).build();
+	public static Schema SQL_OPTIONAL_INT32_SCHEMA = sqlSchemaFor("sql_optional_int32", SchemaBuilder.OPTIONAL_INT32_SCHEMA).build();
+	public static Schema SQL_OPTIONAL_INT64_SCHEMA = sqlSchemaFor("sql_optional_int64", SchemaBuilder.OPTIONAL_INT64_SCHEMA).build();
+	public static Schema SQL_OPTIONAL_FLOAT32_SCHEMA = sqlSchemaFor("sql_optional_float32", SchemaBuilder.OPTIONAL_FLOAT32_SCHEMA).build();
+	public static Schema SQL_OPTIONAL_FLOAT64_SCHEMA = sqlSchemaFor("sql_optional_float64", SchemaBuilder.OPTIONAL_FLOAT64_SCHEMA).build();
+	public static Schema SQL_OPTIONAL_BOOLEAN_SCHEMA = sqlSchemaFor("sql_optional_boolean", SchemaBuilder.OPTIONAL_BOOLEAN_SCHEMA).build();
+	public static Schema SQL_OPTIONAL_STRING_SCHEMA = sqlSchemaFor("sql_optional_string", SchemaBuilder.OPTIONAL_STRING_SCHEMA).build();
+	public static Schema SQL_OPTIONAL_BYTES_SCHEMA = sqlSchemaFor("sql_optional_bytes", SchemaBuilder.OPTIONAL_BYTES_SCHEMA).build();
 	
 	
 	Schema schema;
