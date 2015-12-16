@@ -242,7 +242,7 @@ public class SQLDataConverter {
 		    if (typeConvertor.isNull(col)){
 		    	logger.debug("field is SQL null ");
 		    	//isSQLNull  = true;
-		    	return true; 
+		    	return null; 
 		    }
 		    logger.debug(" convertFieldValue 2 ");
 		    final Object colValue;
