@@ -40,6 +40,18 @@ public class SQLDataConverter {
 	
 	private static final Calendar UTC_CALENDAR = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
 	
+	//Schema Table.SQL_INT32_SCHEMA = SchemaBuilder.struct().optional().name("sql_int32").field("val",SchemaBuilder.OPTIONAL_INT32_SCHEMA).build();
+	
+	/*static SchemaBuilder sqlSchemaFor( String name, Schema schema, boolean optional){
+		SchemaBuilder bld = SchemaBuilder.struct().optional().name(name).field("val",schema);
+		if (optional){
+			bld.optional();
+		}
+		return bld; 
+		//return bld.build();	
+	}*/
+
+	
 	 // TODO: Wrap sqlType, fieldName and Optional in a "Type" struct
 	 static public void addFieldSchema(SchemaBuilder builder, int sqlType, String fieldName, boolean optional, int scale ){
 		 logger.debug("addFieldSchema: type = {}, name = {}, optional = {}", sqlType, fieldName, optional);
@@ -50,10 +62,11 @@ public class SQLDataConverter {
 	      }
 
 	      case Types.BOOLEAN: {
+	    	 
 	        if (optional) {
-	          builder.field(fieldName, Schema.OPTIONAL_BOOLEAN_SCHEMA);
+	          builder.field(fieldName, Table.SQL_OPTIONAL_BOOLEAN_SCHEMA);
 	        } else {
-	          builder.field(fieldName, Schema.BOOLEAN_SCHEMA);
+	          builder.field(fieldName, Table.SQL_BOOLEAN_SCHEMA);
 	        }
 	        break;
 	      }
@@ -62,18 +75,18 @@ public class SQLDataConverter {
 	      case Types.BIT:
 	      case Types.TINYINT: {
 	        if (optional) {
-	          builder.field(fieldName, Schema.OPTIONAL_INT8_SCHEMA);
+	          builder.field(fieldName, Table.SQL_OPTIONAL_INT8_SCHEMA);
 	        } else {
-	          builder.field(fieldName, Schema.INT8_SCHEMA);
+	          builder.field(fieldName, Table.SQL_INT8_SCHEMA);
 	        }
 	        break;
 	      }
 	      // 16 bit ints
 	      case Types.SMALLINT: {
 	        if (optional) {
-	          builder.field(fieldName, Schema.OPTIONAL_INT16_SCHEMA);
+	          builder.field(fieldName, Table.SQL_OPTIONAL_INT16_SCHEMA);
 	        } else {
-	          builder.field(fieldName, Schema.INT16_SCHEMA);
+	          builder.field(fieldName, Table.SQL_INT16_SCHEMA);
 	        }
 	        break;
 	      }
@@ -81,9 +94,9 @@ public class SQLDataConverter {
 	      // 32 bit ints
 	      case Types.INTEGER: {
 	        if (optional) {
-	          builder.field(fieldName, Schema.OPTIONAL_INT32_SCHEMA);
+	          builder.field(fieldName, Table.SQL_OPTIONAL_INT32_SCHEMA);
 	        } else {
-	          builder.field(fieldName, Schema.INT32_SCHEMA);
+	          builder.field(fieldName, Table.SQL_INT32_SCHEMA);
 	        }
 	        break;
 	      }
@@ -91,9 +104,9 @@ public class SQLDataConverter {
 	      // 64 bit ints
 	      case Types.BIGINT: {
 	        if (optional) {
-	          builder.field(fieldName, Schema.OPTIONAL_INT64_SCHEMA);
+	          builder.field(fieldName, Table.SQL_OPTIONAL_INT64_SCHEMA);
 	        } else {
-	          builder.field(fieldName, Schema.INT64_SCHEMA);
+	          builder.field(fieldName, Table.SQL_INT64_SCHEMA);
 	        }
 	        break;
 	      }
@@ -101,9 +114,9 @@ public class SQLDataConverter {
 	      // REAL is a single precision floating point value, i.e. a Java float
 	      case Types.REAL: {
 	        if (optional) {
-	          builder.field(fieldName, Schema.OPTIONAL_FLOAT32_SCHEMA);
+	          builder.field(fieldName, Table.SQL_OPTIONAL_FLOAT32_SCHEMA);
 	        } else {
-	          builder.field(fieldName, Schema.FLOAT32_SCHEMA);
+	          builder.field(fieldName, Table.SQL_FLOAT32_SCHEMA);
 	        }
 	        break;
 	      }
@@ -113,19 +126,21 @@ public class SQLDataConverter {
 	      case Types.FLOAT:
 	      case Types.DOUBLE: {
 	        if (optional) {
-	          builder.field(fieldName, Schema.OPTIONAL_FLOAT64_SCHEMA);
+	          builder.field(fieldName, Table.SQL_OPTIONAL_FLOAT64_SCHEMA);
 	        } else {
-	          builder.field(fieldName, Schema.FLOAT64_SCHEMA);
+	          builder.field(fieldName, Table.SQL_FLOAT64_SCHEMA);
 	        }
 	        break;
 	      }
 
 	      case Types.NUMERIC:
 	      case Types.DECIMAL: {
-	        SchemaBuilder fieldBuilder = Decimal.builder(scale);
+	    	
+	        SchemaBuilder subFieldBuilder = Decimal.builder(scale);
 	        if (optional) {
-	          fieldBuilder.optional();
+	        	subFieldBuilder.optional();
 	        }
+	        SchemaBuilder fieldBuilder = Table.sqlSchemaFor("dql_decimal", subFieldBuilder);
 	        builder.field(fieldName, fieldBuilder.build());
 	        break;
 	      }
@@ -143,9 +158,9 @@ public class SQLDataConverter {
 	        // Some of these types will have fixed size, but we drop this from the schema conversion
 	        // since only fixed byte arrays can have a fixed size
 	        if (optional) {
-	          builder.field(fieldName, Schema.OPTIONAL_STRING_SCHEMA);
+	          builder.field(fieldName, Table.SQL_OPTIONAL_STRING_SCHEMA);
 	        } else {
-	          builder.field(fieldName, Schema.STRING_SCHEMA);
+	          builder.field(fieldName, Table.SQL_STRING_SCHEMA);
 	        }
 	        break;
 	      }
@@ -157,40 +172,49 @@ public class SQLDataConverter {
 	      case Types.VARBINARY:
 	      case Types.LONGVARBINARY: {
 	        if (optional) {
-	          builder.field(fieldName, Schema.OPTIONAL_BYTES_SCHEMA);
+	          builder.field(fieldName, Table.SQL_OPTIONAL_BYTES_SCHEMA);
 	        } else {
-	          builder.field(fieldName, Schema.BYTES_SCHEMA);
+	          builder.field(fieldName, Table.SQL_BYTES_SCHEMA);
 	        }
 	        break;
 	      }
 
 	      // Date is day + moth + year
 	      case Types.DATE: {
-	        SchemaBuilder dateSchemaBuilder = Date.builder();
+	    	 
+	        SchemaBuilder subFieldBuilder = Date.builder();
 	        if (optional) {
-	          dateSchemaBuilder.optional();
+	        	subFieldBuilder.optional();
 	        }
+	        SchemaBuilder dateSchemaBuilder = Table.sqlSchemaFor("sql_date", subFieldBuilder);
 	        builder.field(fieldName, dateSchemaBuilder.build());
+	        
 	        break;
 	      }
 
 	      // Time is a time of day -- hour, minute, seconds, nanoseconds
 	      case Types.TIME: {
-	        SchemaBuilder timeSchemaBuilder = Time.builder();
+	    	  
+	    	 
+	        SchemaBuilder subFieldBuilder = Time.builder();
 	        if (optional) {
-	          timeSchemaBuilder.optional();
+	        	subFieldBuilder.optional();
 	        }
+	        SchemaBuilder timeSchemaBuilder = Table.sqlSchemaFor("sql_time", subFieldBuilder);
 	        builder.field(fieldName, timeSchemaBuilder.build());
 	        break;
 	      }
 
 	      // Timestamp is a date + time
 	      case Types.TIMESTAMP: {
-	        SchemaBuilder tsSchemaBuilder = Timestamp.builder();
+	    	 
+	    	 
+	        SchemaBuilder subFieldBuilder = Timestamp.builder();
 	        if (optional) {
-	          tsSchemaBuilder.optional();
+	        	subFieldBuilder.optional();
 	        }
-	        builder.field(fieldName, tsSchemaBuilder.build());
+	        SchemaBuilder timeSchemaBuilder = Table.sqlSchemaFor("sql_timestamp", subFieldBuilder);
+	        builder.field(fieldName, timeSchemaBuilder.build());
 	        break;
 	      }
 
@@ -212,9 +236,12 @@ public class SQLDataConverter {
 		    // Should never get a null object anywhere here
 		    // If it's null - for updates, how do we know if it's a really null (SQLNull), or missing field
 		    logger.debug("start convertFieldValue ");
+		  //  boolean isSQLNull = false; 
+		    // Check if SQL null
 		    if (typeConvertor.isNull(col)){
-		    	logger.debug("field is null ");
-		    	return null; 
+		    	logger.debug("field is SQL null ");
+		    	//isSQLNull  = true;
+		    	return true; 
 		    }
 		    logger.debug(" convertFieldValue 2 ");
 		    final Object colValue;

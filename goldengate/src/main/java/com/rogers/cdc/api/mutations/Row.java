@@ -13,13 +13,19 @@ import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.data.Field;
 
+import com.rogers.cdc.api.schema.Table;
+
 // TODO: Clean this up...
 // We're converting Row to Kafka connect struct... why not just use Struct to represent columns? 
 // Struct assumes a schema is present, which is not really the case if when using GenericAvroMutationSerializer/DeSerializer (it produces string values with no Schema...), we still want to support both. 
 // Mayebe create an Abstact Row with SchemaRow and SchemaLessRow implimentations? 
 public class Row implements Serializable {
+	private static class NullSQLColumn extends Column{
+	}
 
 	private Map<String, Column> columns;
+	
+	private static Column  nullSQLColumn = new NullSQLColumn();
 
 	public Row() {
 		columns = new HashMap();
@@ -53,6 +59,8 @@ public class Row implements Serializable {
 
 	}
 
+	
+
 	public Row(Map<String, Column> cols) {
 		columns = cols;
 	}
@@ -66,7 +74,13 @@ public class Row implements Serializable {
 
 	public void addColumn(String name, Object col) {
 		// System.out.print(name);
-		columns.put(name, new Column(col));
+		if (col == null){
+			// TODO should we just have 1 instance of NullSQLColumn, instead of creating it every time?
+			columns.put(name, nullSQLColumn);
+		}
+		else{ 
+		   columns.put(name, new Column(col));
+		}
 	}
 
 	/*
@@ -140,10 +154,23 @@ public class Row implements Serializable {
 		return this.columns.size();
 	}
 
+	
 	public Struct toStruct(Schema schema) {
 		Struct struct = new Struct(schema);
 		for (Map.Entry<String, Column> entry : columns.entrySet()) {
-			struct.put(entry.getKey(), entry.getValue().getValue());
+			
+			Schema fieldSchema = schema.field(entry.getKey()).schema();
+			Column col = entry.getValue();
+			String name = entry.getKey();
+			/*Object val;
+			if (col == nullSQLColumn){
+				//val = col.getValue();
+				val = new Struct(fieldSchema).put(Table.SQL_STRUCT_FIELD_NAME, null);
+			}else{
+				val = new Struct(fieldSchema).put(Table.SQL_STRUCT_FIELD_NAME, col.getValue());
+			}
+			struct.put(entry.getKey(),val );*/
+			struct.put(name,Table.getSQLSchemaField( schema, name, col.getValue())); // If Col is nullSQLColumn, getValue will return null
 		}
 		return struct;
 	}
@@ -153,7 +180,8 @@ public class Row implements Serializable {
 		if (struct != null) {
 			for (Field field : struct.schema().fields()) {
 				if (struct.get(field) != null){
-				   row.addColumn(field.name(), struct.get(field));
+					
+				   row.addColumn(field.name(), Table.fromSQLSchemaField(struct, field.name()));
 				}
 			}
 		}

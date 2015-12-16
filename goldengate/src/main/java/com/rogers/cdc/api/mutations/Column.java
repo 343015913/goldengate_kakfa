@@ -28,6 +28,9 @@ public class Column {
 	}
 	
 	  //public String type; 
+	  protected Column(){
+		  
+	  }
 	  public Column(Object v){
 		  value = v;
 	  }

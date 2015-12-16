@@ -33,11 +33,14 @@ public abstract class AbstractMutationMapper   extends MutationMapper<Op,TableMe
 	               //logger.debug("isKey = " + col_meta.isKeyCol() );
 			    	 //Always include key Column
 	                 if (!onlyChanged || column.isChanged() || col_meta.isKeyCol()){
-			    		 String name = col_meta.getColumnName(); 
-			    		 logger.debug("\t convertColumn {} = {} colType =  {}" , name , column,   col_meta.getDataType().getJDBCType());
-			    		 //String str_val = column.getAfterValue();
-			    		 //Column col = new Column(convertColumn(column,col_meta.getDataType().getJDBCType() ));                    
-			    		 row.addColumn(name,convertColumn(column,col_meta.getDataType().getJDBCType()));
+	                	 String name = col_meta.getColumnName(); 
+	                	 if (column.getAfter() == null){
+	                		 logger.warn("column {}.{} of SQL type {} in null" , tbl_meta.getTableName(), name , column,   col_meta.getDataType().getJDBCType());
+	                	 }else{ 
+			    		    logger.debug("\t convertColumn {} = {} colType =  {}" , name , column,   col_meta.getDataType().getJDBCType());
+			    		                   
+			    		    row.addColumn(name,convertColumn(column,col_meta.getDataType().getJDBCType()));
+	                	 }
 			    	 }
 	             i++;
 			    } 
