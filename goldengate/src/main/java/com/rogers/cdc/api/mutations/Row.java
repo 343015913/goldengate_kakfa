@@ -12,6 +12,8 @@ import java.util.Set;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.data.Field;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.rogers.cdc.api.schema.Table;
 
@@ -20,6 +22,7 @@ import com.rogers.cdc.api.schema.Table;
 // Struct assumes a schema is present, which is not really the case if when using GenericAvroMutationSerializer/DeSerializer (it produces string values with no Schema...), we still want to support both. 
 // Mayebe create an Abstact Row with SchemaRow and SchemaLessRow implimentations? 
 public class Row implements Serializable {
+	final private static Logger logger = LoggerFactory.getLogger(Row.class);
 	private static class NullSQLColumn extends Column{
 	}
 
@@ -157,11 +160,13 @@ public class Row implements Serializable {
 	
 	public Struct toStruct(Schema schema) {
 		Struct struct = new Struct(schema);
+		logger.debug("toStruct: " + schema);
 		for (Map.Entry<String, Column> entry : columns.entrySet()) {
 			
 			Schema fieldSchema = schema.field(entry.getKey()).schema();
 			Column col = entry.getValue();
 			String name = entry.getKey();
+			logger.debug("name = {}, col = {}, schema = {}", name, col,fieldSchema );
 			/*Object val;
 			if (col == nullSQLColumn){
 				//val = col.getValue();
