@@ -60,11 +60,11 @@ public class KafkaAvroHandler<Op, Table, OpMapper extends MutationMapper<Op,  Ta
 		          send(topic,null ,val);
                }
 		      } catch  (IOException e)  {
-			  // logger.error("KafkaAvroHandler Failed to processes operation: " + op + " with error: " + e );
-			   throw new RuntimeException(" Failed to processes operation", e);
+			  //logger.error("KafkaAvroHandler Failed to processes operation: " + op + " with error: " + e );
+			   throw new RuntimeException(" Failed to map op to Mutation ", e);
 		    
-	          } catch  (Exception e)  {
-	        	   throw new RuntimeException(" Failed to processes operation", e);
+	          } catch  (RuntimeException e)  {
+	        	   throw new RuntimeException(" Failed to serialize or send mutation", e);
 			  }
 	    }
 	
