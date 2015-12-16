@@ -420,7 +420,7 @@ public class SQLDataConverter {
 		        return null;
 		      }
 		    }
-		    logger.debug("convertFieldValue, return + {}", colValue);
+		    logger.debug("convertFieldValue, return {}", colValue);
             return colValue; 
 		    // FIXME: Would passing in some extra info about the schema so we can get the Field by index
 		    // be faster than setting this by name?
