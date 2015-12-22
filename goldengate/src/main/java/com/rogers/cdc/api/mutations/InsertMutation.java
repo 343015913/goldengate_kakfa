@@ -9,9 +9,9 @@ import com.rogers.cdc.api.schema.*;
 
 public class InsertMutation extends RowMutation {
 
-    public InsertMutation(Table table){
+   /* public InsertMutation(Table table){
     	this(table, null);
-    }
+    }*/
     public InsertMutation(Table table, Row  _row){
     	super(table, _row);
         magicByte = InsertByte; 
@@ -21,6 +21,14 @@ public class InsertMutation extends RowMutation {
 	    	return MutationType.INSERT;
 	    	
 	    }
+	  @Override 
+	  public void validate(){
+		  if (! (row.size() == table.getSchema().fields().size())){
+			  throw new RuntimeException("Insert Mutation failed validation: Cannot have empty columns");
+			  
+		  }
+		  
+	  }
 	  /*
 	    @Override
 	    public String toString() {

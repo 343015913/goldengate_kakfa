@@ -4,15 +4,21 @@ package com.rogers.cdc.api.mutations;
 //import com.rogers.cdc.api.mutations.Row;
 //import com.rogers.goldengate.api.mutations.RowMutation;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.rogers.cdc.api.schema.*;
 
+import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.Struct;
 //TODO: Do we really need the Row and Column classes?
 //TODO: Should we do a sanity check that a mutation has a row? pKey?
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public abstract class RowMutation extends Mutation {
-
+	final private static Logger logger = LoggerFactory.getLogger(RowMutation.class);
 	    protected Row row;
 	    //protect Struct struct
 	    
@@ -53,6 +59,35 @@ public abstract class RowMutation extends Mutation {
 	        sb.append("}");
 	        return sb.toString();
 	    }
+	 /*    public Set<Object> pKeysVals(){
+	    	  Set<Object>  pKeys = new HashSet();
+	    	 for ( String pKey : table.getPKList()){
+	    		 pKeys.add(this.row.getColumn(pKey));
+	    	 }
+	    	 return pKeys;
+	      }*/
+	    @Override
+	    public Struct getVal(){
+	    	return this.getRow().toStruct(this.getTable().getSchema());
+	    }
+	    @Override
+	     public Struct getKey(){
+	    	 
+	    	 
+	    	  Schema schema = this.table.getKeySchema();
+	    	  Struct struct = new Struct(schema);
+	    	  logger.debug("toStruct: " + schema);
+	  		  for (String keyName : this.pKeyNames()) {
+	  			
+	  			Schema fieldSchema = schema.field(keyName).schema();
+	  			Object val = this.row.getColumn(keyName);
+
+	  			logger.debug("name = {}, col = {}, val = {},  schema = {}", keyName, val, fieldSchema );
+
+	  			struct.put(keyName,Table.getSQLSchemaField( schema, keyName, val)); 
+	  		  }
+	  		  return struct;
+	      }
 	    
 
 }

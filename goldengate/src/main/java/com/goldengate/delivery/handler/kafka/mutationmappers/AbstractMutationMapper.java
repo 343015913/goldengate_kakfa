@@ -23,15 +23,14 @@ import com.rogers.cdc.api.schema.Table;
 
 public abstract class AbstractMutationMapper   extends MutationMapper<Op,TableMetaData > {
 		final private static Logger logger = LoggerFactory.getLogger(AbstractMutationMapper.class);
+		// TODO: Why do we need onlyChanged? If UPDATECOMPRESSE is on, GG will give up only changes columns anyway. Otherwise we probably want the full row 
 	    private Row createRow(Op op, Schema schema, boolean onlyChanged ) throws IOException{
 	  	    Row row = new Row();
 	        TableMetaData tbl_meta = op.getTableMeta(); 
 			  int i = 0;
 			  for(DsColumn column : op) {
 	               ColumnMetaData col_meta = tbl_meta.getColumnMetaData(i);; 
-	              // logger.debug("column = " + op.getTableMeta().getColumnName(i) + ", changed = " + column.isChanged() + ", val= " + column.getAfterValue() );
-	               //logger.debug("isKey = " + col_meta.isKeyCol() );
-			    	 //Always include key Column
+	                // TODO: DO we really need key columns here? Yes, for now!. If we add a key row to each mutation we can get rid of this
 	                 if (!onlyChanged || column.isChanged() || col_meta.isKeyCol()){
 	                	 String name = col_meta.getColumnName(); 
 	                	 if (column.getAfter() == null){
@@ -39,8 +38,24 @@ public abstract class AbstractMutationMapper   extends MutationMapper<Op,TableMe
 	                	 }else{ 
 			    		    logger.debug("\t convertColumn {} = {} colType =  {}" , name , column,   col_meta.getDataType().getJDBCType());
 			    		                   
-			    		    row.addColumn(name,convertColumn(column,col_meta.getDataType().getJDBCType()));
+			    		    row.addColumn(name,convertColumn(column.getAfter(),col_meta.getDataType().getJDBCType()));
 	                	 }
+			    	 }
+	             i++;
+			    } 
+	          logger.info("row: " + row.toString());
+			   return row;
+	    }
+	    // For now this is used only for Delete and UpdatePk where before Key will always  be there
+	    private Row createBeforeKeyRow(Op op, Schema schema) throws IOException{
+	  	    Row row = new Row();
+	        TableMetaData tbl_meta = op.getTableMeta(); 
+			  int i = 0;
+			  for(DsColumn column : op) {
+	               ColumnMetaData col_meta = tbl_meta.getColumnMetaData(i);; 
+	                 if ( col_meta.isKeyCol()){
+	                	 String name = col_meta.getColumnName(); 
+	                	 row.addColumn(name,convertColumn(column.getBefore(),col_meta.getDataType().getJDBCType()));
 			    	 }
 	             i++;
 			    } 
@@ -61,7 +76,7 @@ public abstract class AbstractMutationMapper   extends MutationMapper<Op,TableMe
 	      	        return new InsertMutation(table,  row);
 	            case  DO_DELETE: 
 	            	 //row = createRow(op, schema, false);
-	       	        return new DeleteMutation(table);
+	       	        return new DeleteMutation(table, createBeforeKeyRow(op, schema));
 	            case DO_UPDATE: 
 	            case DO_UPDATE_FIELDCOMP: 
 	            case DO_UPDATE_AC: 
@@ -69,7 +84,7 @@ public abstract class AbstractMutationMapper   extends MutationMapper<Op,TableMe
 	       	       return new UpdateMutation(table, row);
 	            case DO_UPDATE_FIELDCOMP_PK:
 	            	row = createRow(op, schema, true);
-	      	        return new PkUpdateMutation(table, row);
+	      	        return new PkUpdateMutation(table,  createBeforeKeyRow(op, schema), row);
 	             default:
 	      	        //logger.error("The operation type " + op.getOpType() + " on  operation: table=[" + op.getTableName() + "]" + ", op ts=" + op.getTimestamp() + "is not supported");
 	      	        throw new IllegalArgumentException("KafkaAvroHandler::getMagicByte Unknown operation type");                                                                            

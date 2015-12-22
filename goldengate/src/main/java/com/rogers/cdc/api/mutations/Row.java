@@ -138,11 +138,28 @@ public class Row implements Serializable {
 		Map<String, Column> m2 = other.columns;
 		if (m1.size() != m2.size())
 			return false;
-		for (String key : m1.keySet())
+for (String key : m1.keySet())
 			if (!m1.get(key).equals(m2.get(key)))
 				return false;
-		return true;
+						return true;
+		
+		//return m1 == m2; 
+
 	}
+	public boolean sameColumns(Object ob) {
+		if (ob == null)
+			return false;
+		if (ob.getClass() != getClass())
+			return false;
+		if (ob == this)
+			return true;
+
+		Row other = (Row) ob;
+		Map<String, Column> m1 = this.columns;
+		Map<String, Column> m2 = other.columns;
+		return m1.keySet() == m2.keySet(); 
+	}
+
 
 	public Set<Map.Entry<String, Object>> entrySet() {
 		Set<Map.Entry<String, Object>> set = new HashSet();
@@ -166,15 +183,7 @@ public class Row implements Serializable {
 			Schema fieldSchema = schema.field(entry.getKey()).schema();
 			Column col = entry.getValue();
 			String name = entry.getKey();
-			logger.debug("name = {}, col = {}, schema = {}", name, col,fieldSchema );
-			/*Object val;
-			if (col == nullSQLColumn){
-				//val = col.getValue();
-				val = new Struct(fieldSchema).put(Table.SQL_STRUCT_FIELD_NAME, null);
-			}else{
-				val = new Struct(fieldSchema).put(Table.SQL_STRUCT_FIELD_NAME, col.getValue());
-			}
-			struct.put(entry.getKey(),val );*/
+			logger.debug("name = {}, col = {}, val = {},  schema = {}", name, col, fieldSchema );
 			struct.put(name,Table.getSQLSchemaField( schema, name, col.getValue())); // If Col is nullSQLColumn, getValue will return null
 		}
 		return struct;

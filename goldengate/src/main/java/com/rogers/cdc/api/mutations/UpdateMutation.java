@@ -5,6 +5,8 @@ package com.rogers.cdc.api.mutations;
 //import com.rogers.cdc.api.mutations.RowMutation;
 
 
+import org.apache.kafka.connect.data.Struct;
+
 import com.rogers.cdc.api.schema.*;
 
 public class UpdateMutation extends RowMutation {
@@ -22,17 +24,7 @@ public class UpdateMutation extends RowMutation {
     public MutationType getType(){
     	return MutationType.UPDATE;	
     }
-   // @Override
-    /*  public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("UpdateMutation");
-        sb.append("{schema=").append(this.getSchemaName());
-        sb.append(", table=").append(this.getTableName());
-        sb.append(", row=[");
-        sb.append("\n").append(row);
-        sb.append("]}");
-        return sb.toString();
-    }*/
+     
    
     
 }

@@ -1,15 +1,20 @@
 package com.rogers.cdc.api.mutations;
 
+import org.apache.kafka.connect.data.Struct;
+
 import com.rogers.cdc.api.schema.*;
 
 public class PkUpdateMutation extends UpdateMutation {
-	public PkUpdateMutation(Table table){
-		this(table, null);
-
-    }
-	 public PkUpdateMutation(Table table, Row  _row){
+	Row key;
+	 /**
+	  * Constructor for  PkUpdateMutation
+	  * @param table
+	  * @param _key - Old key values
+	  * @param _row - New key values
+	  */
+	 public PkUpdateMutation(Table table, Row  _key, Row  _row){
 	    	super(table, _row);
-	    	
+	    	key = _key;
 	    	magicByte = UpdatePKByte;
 	    	if (row.size() != 1){
 	    		throw new RuntimeException("PkUpdateMutation can have only 1 column");
@@ -18,6 +23,11 @@ public class PkUpdateMutation extends UpdateMutation {
 	  @Override
 	  public  MutationType getType(){
 	    	return MutationType.PKUPDATE;
+	    	
+	    }
+	    @Override
+	    public Struct getKey(){
+	    	return key.toStruct(table.getSchema());
 	    	
 	    }
 	    @Override 
@@ -31,4 +41,9 @@ public class PkUpdateMutation extends UpdateMutation {
 	        sb.append("]}");
 	       return sb.toString();
 	    }
+	    @Override 
+		  public void validate(){
+	    	key.sameColumns(row);
+			  
+		  }
 }

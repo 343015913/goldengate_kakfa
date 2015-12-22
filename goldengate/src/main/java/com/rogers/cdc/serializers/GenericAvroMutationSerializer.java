@@ -35,7 +35,8 @@ public class GenericAvroMutationSerializer extends AbstractGenericAvroSerDe impl
 		
 	  }
 	 @Override
-	public void configure(Map<String, ?> configs){
+	public void configure(Map<String, ?> configs, boolean isKey){
+		 //super.configure(configs,isKey);
 		
 	}
 	 @Override

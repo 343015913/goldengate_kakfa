@@ -6,10 +6,14 @@ import java.io.InputStream;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
+import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.RecordMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+
 
 
 
@@ -55,11 +59,29 @@ public class Producer{
 		producer.send(rec);
 
 	}
-	public void send(String topic,  byte[] msg) throws InterruptedException,
+	public void send(final String topic,  byte[] msg) throws InterruptedException,
 	ExecutionException {
        ProducerRecord<byte[], byte[]> rec = new ProducerRecord<byte[], byte[]>(topic,  msg);
 
-       producer.send(rec);
+       producer.send(rec,new Callback() {
+           @Override
+           public void onCompletion(RecordMetadata recordMetadata, Exception e) {
+               if (e != null) {
+                   // Given the default settings for zero data loss, this should basically never happen --
+                   // between "infinite" retries, indefinite blocking on full buffers, and "infinite" request
+                   // timeouts, callbacks with exceptions should never be invoked in practice. If the
+                   // user overrode these settings, the best we can do is notify them of the failure via
+                   // logging.
+            	   logger.error("failed to send record to {}: {}", topic, e);
+               } else {
+            	   //logger.trace("Wrote record successfully: topic {} partition {} offset {}",
+                     //      recordMetadata.topic(), recordMetadata.partition(),
+                       //    recordMetadata.offset());
+               }
+ 
+           }
+       });
+
     }
 	
 }

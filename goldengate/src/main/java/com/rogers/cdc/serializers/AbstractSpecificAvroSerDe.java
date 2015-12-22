@@ -12,20 +12,21 @@ import com.rogers.cdc.api.mutations.Mutation;
 
 abstract public class AbstractSpecificAvroSerDe{
 	protected AvroConverter converter; 
-	private static final int SCHEMAS_CACHE_SIZE_DEFAULT = 1000;
-	protected AvroData avroData;
+//	private static final int SCHEMAS_CACHE_SIZE_DEFAULT = 1000;
+	//protected AvroData avroData;
+	protected boolean isKey;
 	 
 	AbstractSpecificAvroSerDe(){
 		converter = new AvroConverter();
-		avroData = new AvroData(SCHEMAS_CACHE_SIZE_DEFAULT);
+		//avroData = new AvroData(SCHEMAS_CACHE_SIZE_DEFAULT);
 	 }
 	AbstractSpecificAvroSerDe(SchemaRegistryClient schemaRegistry ){
 		converter = new AvroConverter(schemaRegistry);
-		avroData = new AvroData(SCHEMAS_CACHE_SIZE_DEFAULT);
 	 }
-	public void configure(Map<String, ?> configs) {
+	public void configure(Map<String, ?> configs, boolean isKey) {
 		//converter.configure(configs, isKey);
-		converter.configure(configs, false);
+		this.isKey = isKey;
+		converter.configure(configs, isKey);
 	}
 	 // TODO: Need a real mock schemare registry
 	//  INterface may depend on wheather we want to be able to evolve schemas,  

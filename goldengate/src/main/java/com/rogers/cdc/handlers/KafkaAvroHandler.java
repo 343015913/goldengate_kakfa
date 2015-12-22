@@ -32,7 +32,7 @@ public class KafkaAvroHandler<Op, Table, OpMapper extends MutationMapper<Op,  Ta
 			.getLogger(KafkaAvroHandler.class);
 	//TODO: Serilaizer should be a generic
 	MutationSerializer valSerialiazer ;
-	//Serializer<Object> keySerialiazer;
+	MutationSerializer keySerialiazer;
 	//TODO: Add key serialiazer
     
 	public KafkaAvroHandler(OpMapper _opMapper, String configFile) {
@@ -40,7 +40,9 @@ public class KafkaAvroHandler<Op, Table, OpMapper extends MutationMapper<Op,  Ta
 		  //TODO: Config file? 
 		  //valSerialiazer = new GenericAvroMutationSerializer();
 		  valSerialiazer = new SpecificAvroMutationSerializer();
-		  valSerialiazer.configure(new AbstractConfig(new ConfigDef(), config).originals());
+		  valSerialiazer.configure(new AbstractConfig(new ConfigDef(), config).originals(), false);
+		  keySerialiazer = new SpecificAvroMutationSerializer();
+		  keySerialiazer.configure(new AbstractConfig(new ConfigDef(), config).originals(), true);
 		//  keySerialiazer = new KafkaAvroSerializer(); 
 		  //keySerialiazer.configure(new AbstractConfig(new ConfigDef(), config).originals(), false);// TODO use AbstractKafkaAvroSerDeConfig when new confluent comes out
 	  }
@@ -56,8 +58,9 @@ public class KafkaAvroHandler<Op, Table, OpMapper extends MutationMapper<Op,  Ta
 		          String topic = getSchemaSubject(mutation);
 		          // byte[] key = keySerialiazer.serialize(mutation.);
                   byte[] val = valSerialiazer.serialize(topic, mutation);
+                  byte[] key = keySerialiazer.serialize(topic, mutation);
                   logger.info("KafkaHandler: Send Message to topic: " + topic);
-		          send(topic,null ,val);
+		          send(topic,key ,val);
                }
 		      } catch  (IOException e)  {
 			  //logger.error("KafkaAvroHandler Failed to processes operation: " + op + " with error: " + e );

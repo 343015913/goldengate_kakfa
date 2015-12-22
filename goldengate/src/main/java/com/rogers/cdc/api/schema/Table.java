@@ -7,9 +7,12 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.codec.binary.StringUtils;
+import org.apache.kafka.connect.data.Field;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaBuilder;
 import org.apache.kafka.connect.data.Struct;
+import org.apache.kafka.connect.data.Timestamp;
+import org.apache.kafka.connect.errors.DataException;
 //TODO: Some of the stuff should be move to a SQLSchema class
 public class Table {
 	public static String SQL_STRUCT_FIELD_NAME = "val";
@@ -40,6 +43,7 @@ public class Table {
 	public static Schema SQL_BOOLEAN_SCHEMA = sqlSchemaFor("sql_boolean", SchemaBuilder.BOOLEAN_SCHEMA).build();
 	public static Schema SQL_STRING_SCHEMA = sqlSchemaFor("sql_string", SchemaBuilder.STRING_SCHEMA).build();
 	public static Schema SQL_BYTES_SCHEMA = sqlSchemaFor("sql_bytes", SchemaBuilder.BYTES_SCHEMA).build();
+	public static Schema SQL_TIMESTAMP_SCHEMA = sqlSchemaFor("sql_timestamp", Timestamp.builder().build()).build();
 	
 	public static Schema SQL_OPTIONAL_INT8_SCHEMA = sqlSchemaFor("sql_optional_int8", SchemaBuilder.OPTIONAL_INT8_SCHEMA).build();
 	public static Schema SQL_OPTIONAL_INT16_SCHEMA = sqlSchemaFor("sql_optional_int16", SchemaBuilder.OPTIONAL_INT16_SCHEMA).build();
@@ -50,6 +54,7 @@ public class Table {
 	public static Schema SQL_OPTIONAL_BOOLEAN_SCHEMA = sqlSchemaFor("sql_optional_boolean", SchemaBuilder.OPTIONAL_BOOLEAN_SCHEMA).build();
 	public static Schema SQL_OPTIONAL_STRING_SCHEMA = sqlSchemaFor("sql_optional_string", SchemaBuilder.OPTIONAL_STRING_SCHEMA).build();
 	public static Schema SQL_OPTIONAL_BYTES_SCHEMA = sqlSchemaFor("sql_optional_bytes", SchemaBuilder.OPTIONAL_BYTES_SCHEMA).build();
+	public static Schema SQL_OPTIONAL_TIMESTAMP_SCHEMA = sqlSchemaFor("sql_optional_timestamp", Timestamp.builder().optional().build()).build();
 	
 	
 	Schema schema;
@@ -62,21 +67,43 @@ public class Table {
 	private List<String> pkColumnNames;
 	
 
-	public Table(String d, String name, Schema schema, List<String> pks) {
+	public Table(String d, String name) {
 		this.database_name = d;
 		this.name = name;
 		//this.encoding = encoding;
+	}
+	public void setSchema(Schema schema, List<String> pks){
 		this.schema = schema;
 
 		if ( pks == null )
 			pks = new ArrayList<String>();
 
 		this.setPKList(pks);
-
 	}
-
+    public String schemaName(){
+    	return database_name + "." + name;
+    }
+    public String pkSchemaName(){
+    	return database_name + "." + name + ".pk";
+    }
 	public Schema getSchema() {
 		return schema;
+	}
+	//TODO: pkeys cannot be empty (null), nor SQL Null (I think...). Should we use a simpler schema for keys (without the psudo-union structs )
+	public Schema getKeySchema() {
+
+		int num_keys = pkColumnNames.size();
+		if (num_keys == 0){
+			throw new DataException("Empty primary key");
+		}
+		//TODO: we always create Struct for the pKey - is there a point to just have a field if it's a single pKey?
+	    SchemaBuilder pkBuilder = SchemaBuilder.struct().name(this.pkSchemaName());
+
+	    for (String pk : this.pkColumnNames) {
+	    	    Field field = schema.field(pk);
+	    	    pkBuilder.field(field.name(), field.schema());
+	    }
+	    return pkBuilder.build();
 	}
 
 	public String getName() {

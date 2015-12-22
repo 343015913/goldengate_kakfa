@@ -10,7 +10,7 @@ import com.rogers.cdc.api.serializer.MutationDeserializer;
 import com.rogers.cdc.kafka.serializers.KafkaAvroMutationDecoder;
 import com.rogers.cdc.serializers.GenericAvroMutationDeserializer;
 
-abstract public class KafkaMutationAvroConsumer extends KafkaConsumer<Mutation> {
+abstract public class KafkaMutationAvroConsumer extends KafkaConsumer<byte[], Mutation> {
 	final private static Logger logger = LoggerFactory
 			.getLogger(KafkaMutationAvroConsumer.class);
 	

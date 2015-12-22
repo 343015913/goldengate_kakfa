@@ -22,7 +22,8 @@ public class StringMutationMapper extends AbstractMutationMapper{
    
     @Override
     protected Object convertColumn(DsColumn column, int colType)  throws IOException{  	  	 
-      return column.getAfterValue(); 
+     // return column.getAfterValue(); 
+      return column.getValue(); 
     }
     @Override
     protected Table toTable(TableMetaData tb){
@@ -32,7 +33,9 @@ public class StringMutationMapper extends AbstractMutationMapper{
 		 List<String> pkColumnNames = new ArrayList();
 		 getPks( tb, pkColumnNames);
 		 //We don't really care about the schema here, it should never be used 
-		 return new Table(databaseName, tableName, null, pkColumnNames );
+		 Table table=  new Table(databaseName, tableName);
+		 table.setSchema( null, pkColumnNames );
+		 return table;
     }
     private void getPks( TableMetaData tb,  List<String> pkColumnNames){
 		 

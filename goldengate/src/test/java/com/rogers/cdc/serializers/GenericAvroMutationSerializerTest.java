@@ -2,6 +2,8 @@ package com.rogers.cdc.serializers;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.Arrays;
+
 import org.junit.Test;
 
 import com.rogers.cdc.api.mutations.Column;
@@ -35,6 +37,9 @@ public class GenericAvroMutationSerializerTest {
                new Row.RowVal("age", new Column("28")),
                new Row.RowVal("balance", new Column("5.23"))
            };
+	      Row.RowVal[] delete_cols = {new Row.RowVal("name", new Column("Jon"))
+	               
+	           };
 	    
 	     
 	      MutationSerializer serializer = new GenericAvroMutationSerializer();
@@ -42,11 +47,13 @@ public class GenericAvroMutationSerializerTest {
 
 	      //String table = "test_table";
 	      //String schema = "test_schema";
-	      Table table = new Table("testSchema", "testTable", null, null);
+	    //  Table table = new Table("testSchema", "testTable");
+	      Table table = new Table("testSchema", "testTable");
+			
 	      String topic = KafkaUtil.genericTopic(table);
 	      UpdateMutation updateM  = new UpdateMutation(table,  new Row(update_cols));
 	      InsertMutation insertM  = new InsertMutation(table,  new Row(insert_cols));
-	      DeleteMutation deleteM  = new DeleteMutation(table);
+	      DeleteMutation deleteM  = new DeleteMutation(table , new Row(delete_cols));
 	      
 	      
 	      output  = serializer.serialize(topic, updateM);

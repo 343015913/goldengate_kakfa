@@ -236,9 +236,11 @@ public class GGSQLTypeConverter implements AbstractSQLTypeConverter<DsColumn> {
 	@Override
 	public boolean isNull(DsColumn col) throws SQLException{
 		//Return true if SQL null. 
-        if (col.getAfter() == null) 
-        	throw new SQLException("GG Column cannot be Null (col.getAfter() returned null)");
-		return col.getAfter().isValueNull();
+       // if (col.getAfter() == null) 
+		 if (col == null) 
+        	throw new SQLException("GG Column cannot be Null (col.getAfter() probably returned null)");
+		//return col.getAfter().isValueNull();
+		 return col.isValueNull();
 	}
 	
 	private String getStringInt (DsColumn col) throws SQLException{

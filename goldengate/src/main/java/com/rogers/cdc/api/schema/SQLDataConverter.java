@@ -214,7 +214,8 @@ public class SQLDataConverter {
 	        	subFieldBuilder.optional();
 	        }
 	        SchemaBuilder timeSchemaBuilder = Table.sqlSchemaFor("sql_timestamp", subFieldBuilder);
-	        builder.field(fieldName, timeSchemaBuilder.build());
+	       
+	        builder.field(fieldName, Table.SQL_TIMESTAMP_SCHEMA);
 	        break;
 	      }
 

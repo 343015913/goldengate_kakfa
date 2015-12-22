@@ -6,6 +6,7 @@ import static org.junit.Assert.fail;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +39,6 @@ import com.rogers.cdc.api.mutations.DeleteMutation;
 import com.rogers.cdc.api.mutations.InsertMutation;
 import com.rogers.cdc.api.mutations.Mutation;
 import com.rogers.cdc.api.mutations.PassThroughMutationMapper;
-
 import com.rogers.cdc.api.mutations.Row;
 import com.rogers.cdc.api.mutations.UpdateMutation;
 import com.rogers.cdc.api.schema.Table;
@@ -68,7 +68,11 @@ public class KafkaAvroHandlerTest {
             .field("string", Schema.STRING_SCHEMA)
             .field("bytes", Schema.BYTES_SCHEMA)
             .build();
-     Table table = new Table("testSchema", "testTable", FLAT_STRUCT_SCHEMA, null);
+	//com.rogers.cdc.api.schema.Table table = new Table("testSchema", "testTable");
+	//table.setSchema(FLAT_STRUCT_SCHEMA);
+	Table table = new Table("testSchema", "testTable");
+	//table.setSchema(FLAT_STRUCT_SCHEMA, Arrays.asList("int8"));
+	//table.
      Struct struct = new Struct(FLAT_STRUCT_SCHEMA)
      .put("int8", (byte) 12)
      .put("int16", (short) 12)
@@ -82,7 +86,7 @@ public class KafkaAvroHandlerTest {
      
      UpdateMutation updateM  = new UpdateMutation(table, Row.fromStruct(struct));
      InsertMutation insertM  = new InsertMutation(table,  Row.fromStruct(struct));
-     DeleteMutation deleteM  = new DeleteMutation(table);
+     DeleteMutation deleteM  = new DeleteMutation(table, Row.fromStruct(struct));
 
     private static String randGroupName(String topic){
     	return "test_group_" + topic + System.currentTimeMillis();

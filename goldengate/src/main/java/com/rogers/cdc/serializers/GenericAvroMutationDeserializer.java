@@ -73,7 +73,8 @@ public class GenericAvroMutationDeserializer extends AbstractGenericAvroSerDe im
     private Mutation toMutation(GenericRecord rec, byte type){
     	String tableName =  rec.get("table").toString();
 	   String schemaName = rec.get("schema").toString();
-	   Table table = new Table(schemaName, tableName, null,null);
+	   Table table = new Table(schemaName, tableName);
+	   table.setSchema(null,null); // Don't really have either here... 
 	  
 	    Mutation mutation; 
 	  
@@ -85,7 +86,7 @@ public class GenericAvroMutationDeserializer extends AbstractGenericAvroSerDe im
         	   break;
            }
            case  Mutation.DeleteByte: {
-        	   mutation =  new DeleteMutation(table);
+        	   mutation =  new DeleteMutation(table, createRows(rec));
    	           break;
            }
            case Mutation.UpdateByte: 
@@ -94,9 +95,9 @@ public class GenericAvroMutationDeserializer extends AbstractGenericAvroSerDe im
 
         	   break;
            }
-           case Mutation.UpdatePKByte: 
-        	   mutation =  new PkUpdateMutation(table);
-        	   break;
+          // case Mutation.UpdatePKByte: 
+        	//   mutation =  new PkUpdateMutation(table, createRows(rec));
+        	  // break;
            default:
         	   throw new IllegalArgumentException("AvroDesirializer unknown op type");                                                                            
         }    
@@ -118,7 +119,7 @@ public class GenericAvroMutationDeserializer extends AbstractGenericAvroSerDe im
       }
     
 	@Override
-	public void configure(Map<String, ?> configs) {
+	public void configure(Map<String, ?> configs, boolean isKey) {
 		// TODO Auto-generated method stub
 		
 	}

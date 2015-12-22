@@ -27,7 +27,7 @@ import kafka.serializer.DefaultDecoder;
 
 
 
-public abstract class KafkaConsumer<Val> {
+public abstract class KafkaConsumer<Key, Val> {
 	private ConsumerConnector consumer;
 	private KafkaStream stream;
 	
@@ -52,7 +52,7 @@ public abstract class KafkaConsumer<Val> {
 		 stream = consumerMap.get(topic).get(0);
 	}
 	public void start(){
-        ConsumerIterator<byte[], Val> it = stream.iterator();
+        ConsumerIterator<Key, Val> it = stream.iterator();
         while (it.hasNext()){
           try {
         	  Val msg = it.next().message(); 

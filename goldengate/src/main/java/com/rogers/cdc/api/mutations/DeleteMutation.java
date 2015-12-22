@@ -4,11 +4,18 @@ package com.rogers.cdc.api.mutations;
 //import com.rogers.goldengate.api.mutations.MutationType;
 import com.rogers.cdc.api.schema.*;
 
-public class DeleteMutation extends Mutation {
-       public DeleteMutation(Table table){
-	    	super(table);
-	    	magicByte = DeleteByte;
-	    }
+public class DeleteMutation extends RowMutation {
+        //TODO: Maybe all mutations should have a key param? Or maybe just UpadtePk and Delete?   
+	   /**
+	    * A constructor for DeleteMutation
+	    * Delete mutations don't have any column values, except the pKeys. row is used to hold the pKeys. 
+	    * @param table
+	    * @param _row
+	    */
+       public DeleteMutation(Table table, Row  _row){
+       	super(table, _row);
+       	magicByte = DeleteByte;
+       }
 	  @Override
 	    public MutationType getType(){
 	    	return MutationType.DELETE;

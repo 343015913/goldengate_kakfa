@@ -44,15 +44,18 @@ public class TypedMutationMapper extends AbstractMutationMapper {
 	}
 	 @Override
 	   protected Table toTable(TableMetaData tb){
-		   //TODO
 		   String tableName = tb.getTableName().getOriginalShortName().toLowerCase();
 		   String databaseName = tb.getTableName().getOriginalSchemaName().toLowerCase();
-		   SchemaBuilder builder = SchemaBuilder.struct().name(databaseName + "." + tableName);
+		   Table table=  new Table(databaseName, tableName);
+		   SchemaBuilder builder = SchemaBuilder.struct().name(table.schemaName());
 		   
 		   List<String> pkColumnNames = new ArrayList();
 		   setSchema(builder, tb, pkColumnNames);
 		   Schema schema = builder.build();
-		   return new Table(databaseName, tableName, schema, pkColumnNames );
+		  
+		   table.setSchema( schema, pkColumnNames );
+		   return table;
+		  
 	   }
 	   // Returns a Schema and a list of primary keys 
 	   private void setSchema( SchemaBuilder builder, TableMetaData tb, List<String> pkColumnNames){
