@@ -23,8 +23,11 @@ public class InsertMutation extends RowMutation {
 	    }
 	  @Override 
 	  public void validate(){
+		  
 		  if (! (row.size() == table.getSchema().fields().size())){
-			  throw new RuntimeException("Insert Mutation failed validation: Cannot have empty columns");
+			//TODO: The logic bellow makes sense. For some reason, GG somehow sometimes gives Insert Ops with missing collumns. Bug report subbmited
+			  
+			 // throw new RuntimeException("Insert Mutation failed validation: Cannot have empty columns");
 			  
 		  }
 		  
