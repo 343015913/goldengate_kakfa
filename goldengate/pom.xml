@@ -42,8 +42,8 @@
             <groupId>com.goldengate.atg</groupId>
             <artifactId>ggjava</artifactId>
             <version>12.1.2.1.0</version>
-            <scope>system</scope>            
-	    <systemPath>${project.basedir}/../../../../ggjava/ggjava.jar</systemPath>
+	    <!-- <scope>system</scope>            
+	    <systemPath>${project.basedir}/../../../../ggjava/ggjava.jar</systemPath> -->
     </dependency>
     <dependency>
       <groupId>com.rogers.kafka</groupId>
