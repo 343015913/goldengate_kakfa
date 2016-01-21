@@ -15,7 +15,7 @@
 		<repository>
 			<id>artifactory</id>
 			<name>artifactory-releases</name>
-			<url>http://172.31.50.126:8081/libs-release-local</url>
+			<url>http://ec2-54-174-30-44.compute-1.amazonaws.com:8081/libs-release-local</url>
 		</repository>
 	</distributionManagement>
 	<properties>
