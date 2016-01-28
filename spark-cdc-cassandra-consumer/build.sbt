@@ -6,10 +6,6 @@ scalaVersion := "2.10.4"
 
 resolvers += "Artifactory" at "http://172.31.50.126:8081/artifactory/libs-release-local/"
 
-publishTo := Some("Artifactory Realm" at "http://172.31.50.126:8081/artifactory/libs-release-local") credentials += Credentials("Artifactory Realm", "localhost", "admin", "password")
-
-publishTo := Some("Artifactory Realm" at "http://172.31.50.126:8081/artifactory/libs-snapshot-local;build.timestamp=" + new java.util.Date().getTime) credentials += Credentials("Artifactory Realm", "localhost", "admin", "password")
-
 libraryDependencies ++= Seq(
   "org.apache.kafka" % "kafka_2.10" % "0.8.2.0" exclude("javax.jms", "jms") exclude("com.sun.jdmk", "jmxtools") exclude("com.sun.jmx", "jmxri") withSources() withJavadoc()  ,
   "org.apache.spark" %% "spark-core" % "1.4.0" % "provided" withSources() withJavadoc() , 
