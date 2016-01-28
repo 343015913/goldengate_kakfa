@@ -5,7 +5,7 @@ version := "0.2"
 scalaVersion := "2.10.4"
 
 resolvers ++= Seq(
-	"Artifactory" at "http://172.31.50.126:8081/artifactory/libs-release-local/"
+	"Artifactory" at "http://172.31.50.126:8081/artifactory/libs-release-local/",
 	"confluent" at "http://packages.confluent.io/maven/", Resolver.sonatypeRepo("public")
 )
 
