@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import com.rogers.cdc.api.mutations.*;
 import com.rogers.cdc.api.serializer.MutationDeserializer;
-import com.rogers.cdc.kafka.serializers.KafkaAvroMutationDecoder;
+import com.rogers.cdc.kafka.serializers.KafkaGenericAvroMutationDecoder;
 import com.rogers.cdc.serializers.GenericAvroMutationDeserializer;
 
 abstract public class KafkaMutationAvroConsumer extends KafkaConsumer<byte[], Mutation> {
@@ -17,7 +17,7 @@ abstract public class KafkaMutationAvroConsumer extends KafkaConsumer<byte[], Mu
 	MutationDeserializer deserializer;
 	public KafkaMutationAvroConsumer(final String topic, final String zkConnect, final String groupId){
 		// TODO: The wy we pass a Decoder is ugly
-		super(topic, zkConnect,groupId, new KafkaAvroMutationDecoder(new VerifiableProperties()));
+		super(topic, zkConnect,groupId, new KafkaGenericAvroMutationDecoder(new VerifiableProperties()));
 	//	deserializer = new AvroMutationDeserializer(); //TODO there will be more desirilazer...for diffrent Avro records...Needs to be generic
 	}
 	//TODO: Maybe we should just return Avro objects? 

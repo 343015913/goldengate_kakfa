@@ -45,9 +45,13 @@ public class SpecificAvroMutationDeserializer extends AbstractSpecificAvroSerDe
 		super.configure(configs, isKey);
 
 	}
-
+	
 	@Override
 	public Struct deserialize(String topic, byte[] payload) {
+		return deserializeImpl(topic, payload);
+	}
+		
+	protected Struct deserializeImpl(String topic, byte[] payload) {
 		/*
 		 * if (isKey){ return deserializeKey(topic, op); }else{ return
 		 * deserializeVal(topic, op); }

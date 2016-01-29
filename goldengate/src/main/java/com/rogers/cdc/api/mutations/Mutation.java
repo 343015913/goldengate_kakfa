@@ -42,9 +42,8 @@ public abstract class Mutation implements Serializable {
 	public boolean equals(Object ob) {
 		if (ob == null)
 			return false;
-		// TODO: enable class check when we figure out proper way to recreate a
-		// mutation from a Struct
-		// if (ob.getClass() != getClass()) return false;
+
+		if (ob.getClass() != getClass()) return false;
 		if (ob == this)
 			return true;
 		Mutation other = (Mutation) ob;
@@ -113,13 +112,28 @@ public abstract class Mutation implements Serializable {
 			mutation = new DeleteMutation(table, Row.fromStruct(keyStruct));
 		} else if (row.size() == valSchema.fields().size()) {
 			mutation = new InsertMutation(table, row);
-		} else if (keySchema == valSchema ) {
+		} else if(isValKey(row, pKeys)){
 			mutation = new PkUpdateMutation(table,  Row.fromStruct(keyStruct), row);
 		}else{
 			mutation = new UpdateMutation(table, row);
 		}
+	
 		return mutation;
 
+	}
+	
+	private static boolean isValKey(Row row,  List<String> pKeys){
+		if (row.size() != pKeys.size()){
+			return false;
+		}
+        for (String key: pKeys){
+        	if (row.getColumn(key) == null){
+        		return false; 
+        	}
+        }
+        return true;
+		
+		
 	}
 
 }

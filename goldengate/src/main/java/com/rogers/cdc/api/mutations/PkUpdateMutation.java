@@ -25,11 +25,7 @@ public class PkUpdateMutation extends UpdateMutation {
 	    	return MutationType.PKUPDATE;
 	    	
 	    }
-	    @Override
-	    public Struct getKey(){
-	    	return key.toStruct(table.getSchema());
-	    	
-	    }
+
 	    @Override 
 	    public  String toString(){
 	       final StringBuilder sb = new StringBuilder();

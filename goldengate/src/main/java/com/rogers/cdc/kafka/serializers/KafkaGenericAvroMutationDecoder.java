@@ -8,13 +8,13 @@ import com.rogers.cdc.api.mutations.Mutation;
 import com.rogers.cdc.serializers.GenericAvroMutationDeserializer;
 
 
-public class KafkaAvroMutationDecoder extends GenericAvroMutationDeserializer
+public class KafkaGenericAvroMutationDecoder extends GenericAvroMutationDeserializer
 implements Decoder<Mutation> {
 private Decoder<byte[]> firstDeserializer;
 /**
  * Constructor used for testing.
  */
-public KafkaAvroMutationDecoder(Decoder<byte[]> _firstDeserializer){
+public KafkaGenericAvroMutationDecoder(Decoder<byte[]> _firstDeserializer){
 	//TODO: Move to AbstractAvroDeserilaizer
  if(_firstDeserializer == null){
 	 firstDeserializer = new DefaultDecoder(null);
@@ -27,7 +27,7 @@ public KafkaAvroMutationDecoder(Decoder<byte[]> _firstDeserializer){
 /**
  * Constructor used by Kafka consumer.
  */
-public KafkaAvroMutationDecoder(VerifiableProperties props) {
+public KafkaGenericAvroMutationDecoder(VerifiableProperties props) {
 	//TODO Parase Props file....
 	 firstDeserializer = new DefaultDecoder(null);
 }

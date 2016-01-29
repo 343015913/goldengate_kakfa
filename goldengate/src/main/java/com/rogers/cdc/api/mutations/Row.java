@@ -23,12 +23,14 @@ import com.rogers.cdc.api.schema.Table;
 // Mayebe create an Abstact Row with SchemaRow and SchemaLessRow implimentations? 
 public class Row implements Serializable {
 	final private static Logger logger = LoggerFactory.getLogger(Row.class);
-	private static class NullSQLColumn extends Column{
+
+	private static class NullSQLColumn extends Column {
 	}
 
+	//TODO: This can just be a Map<String,Object>
 	private Map<String, Column> columns;
-	
-	private static Column  nullSQLColumn = new NullSQLColumn();
+
+	private static Column nullSQLColumn = new NullSQLColumn();
 
 	public Row() {
 		columns = new HashMap();
@@ -62,8 +64,6 @@ public class Row implements Serializable {
 
 	}
 
-	
-
 	public Row(Map<String, Column> cols) {
 		columns = cols;
 	}
@@ -77,12 +77,12 @@ public class Row implements Serializable {
 
 	public void addColumn(String name, Object col) {
 		// System.out.print(name);
-		if (col == null){
-			// TODO should we just have 1 instance of NullSQLColumn, instead of creating it every time?
+		if (col == null) {
+			// TODO should we just have 1 instance of NullSQLColumn, instead of
+			// creating it every time?
 			columns.put(name, nullSQLColumn);
-		}
-		else{ 
-		   columns.put(name, new Column(col));
+		} else {
+			columns.put(name, new Column(col));
 		}
 	}
 
@@ -93,33 +93,41 @@ public class Row implements Serializable {
 		return columns.values();
 	}
 
+	public Map<String, Column>  getColumns() {
+		return columns;
+	}
 	Object getColumn(String name) {
 		System.out.println("getColumn " + name.toCharArray());
 		Column column = columns.get(name);
 		System.out.println("\t column = " + column);
 		System.out.println("\t cal = " + column.getValue());
-		return column.getValue();
+		if (column != null){
+		   return column.getValue();
+		}else{
+			return null;
+		}
 	}
 
 	@Override
 	public String toString() {
 		return this.toString(0);
 	}
+
 	public String toString(int offset) {
 		final StringBuilder sb = new StringBuilder();
 		int size = columns.entrySet().size();
 		int i = 0;
 		for (Map.Entry<String, Column> entry : columns.entrySet()) {
 			i++;
-			for(int j=0; j < offset; j++)
-		    {
-		        sb.append(" ");
-		    }
-			sb.append(entry.getKey()).append(": ").append(entry.getValue().getValue());
-			if (i < size){
+			for (int j = 0; j < offset; j++) {
+				sb.append(" ");
+			}
+			sb.append(entry.getKey()).append(": ")
+					.append(entry.getValue().getValue());
+			if (i < size) {
 				sb.append(",\n");
 			}
-			
+
 		}
 		return sb.toString();
 	}
@@ -138,14 +146,15 @@ public class Row implements Serializable {
 		Map<String, Column> m2 = other.columns;
 		if (m1.size() != m2.size())
 			return false;
-for (String key : m1.keySet())
+		for (String key : m1.keySet())
 			if (!m1.get(key).equals(m2.get(key)))
 				return false;
-						return true;
-		
-		//return m1 == m2; 
+		return true;
+
+		// return m1 == m2;
 
 	}
+
 	public boolean sameColumns(Object ob) {
 		if (ob == null)
 			return false;
@@ -157,9 +166,8 @@ for (String key : m1.keySet())
 		Row other = (Row) ob;
 		Map<String, Column> m1 = this.columns;
 		Map<String, Column> m2 = other.columns;
-		return m1.keySet() == m2.keySet(); 
+		return m1.keySet() == m2.keySet();
 	}
-
 
 	public Set<Map.Entry<String, Object>> entrySet() {
 		Set<Map.Entry<String, Object>> set = new HashSet();
@@ -174,17 +182,25 @@ for (String key : m1.keySet())
 		return this.columns.size();
 	}
 
-	
 	public Struct toStruct(Schema schema) {
 		Struct struct = new Struct(schema);
 		logger.debug("toStruct: " + schema);
 		for (Map.Entry<String, Column> entry : columns.entrySet()) {
-			
+
 			Schema fieldSchema = schema.field(entry.getKey()).schema();
 			Column col = entry.getValue();
 			String name = entry.getKey();
-			logger.debug("name = {}, col = {}, val = {},  schema = {}", name, col, fieldSchema );
-			struct.put(name,Table.getSQLSchemaField( schema, name, col.getValue())); // If Col is nullSQLColumn, getValue will return null
+			logger.debug("name = {}, col = {}, val = {},  schema = {}", name,
+					col, fieldSchema);
+			struct.put(name,
+					Table.getSQLSchemaField(schema, name, col.getValue())); // If
+																			// Col
+																			// is
+																			// nullSQLColumn,
+																			// getValue
+																			// will
+																			// return
+																			// null
 		}
 		return struct;
 	}
@@ -193,9 +209,10 @@ for (String key : m1.keySet())
 		Row row = new Row();
 		if (struct != null) {
 			for (Field field : struct.schema().fields()) {
-				if (struct.get(field) != null){
-					
-				   row.addColumn(field.name(), Table.fromSQLSchemaField(struct, field.name()));
+				if (struct.get(field) != null) {
+
+					row.addColumn(field.name(),
+							Table.fromSQLSchemaField(struct, field.name()));
 				}
 			}
 		}

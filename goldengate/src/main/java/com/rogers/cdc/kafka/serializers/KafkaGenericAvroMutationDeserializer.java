@@ -8,10 +8,10 @@ import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 import com.rogers.cdc.api.mutations.Mutation;
 import com.rogers.cdc.serializers.GenericAvroMutationDeserializer;
 /*Can be plugged into Kafka config as a desirilaizer */
-public class KafkaAvroMutationDeserializer extends GenericAvroMutationDeserializer
+public class KafkaGenericAvroMutationDeserializer extends GenericAvroMutationDeserializer
 		implements Deserializer<Mutation> {
 	 private Deserializer<byte[]> firstDeserializer;
-	 KafkaAvroMutationDeserializer(Deserializer<byte[]> _firstDeserializer){
+	 KafkaGenericAvroMutationDeserializer(Deserializer<byte[]> _firstDeserializer){
 		 if(_firstDeserializer == null){
 			 firstDeserializer = new ByteArrayDeserializer();
 			 //TODO: Should get this from config - look at KafkaProducer code...(in Kafka src)

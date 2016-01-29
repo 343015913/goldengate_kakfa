@@ -16,7 +16,7 @@ import org.apache.kafka.connect.data.Struct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
+// TODO: All mutations seem to inherit from this. Just merge it into Mutation
 public abstract class RowMutation extends Mutation {
 	final private static Logger logger = LoggerFactory.getLogger(RowMutation.class);
 	    protected Row row;
