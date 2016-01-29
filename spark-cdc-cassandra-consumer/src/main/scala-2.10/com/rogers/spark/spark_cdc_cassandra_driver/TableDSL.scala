@@ -1,10 +1,11 @@
 package com.rogers.spark.spark_cdc_cassandra_driver
 
 import scala.collection.JavaConverters.mapAsScalaMapConverter
+import scala.collection.JavaConversions._
 
 import com.datastax.spark.connector.CassandraRow
 import com.rogers.cdc.api.mutations.Mutation
-import com.rogers.cdc.api.mutations.RowMutation
+import com.rogers.cdc.api.mutations._
 import com.rogers.spark.spark_cdc_cassandra_driver.util.DataType
 import com.rogers.spark.spark_cdc_cassandra_driver.util.DateType
 import com.rogers.spark.spark_cdc_cassandra_driver.util.IntegerType
@@ -40,17 +41,41 @@ case class Schema(val columns: Array[Column]) {
     val schema = this
     //println(mutation)
     val seq = mutation match {
-      case x if (x.isInstanceOf[RowMutation]) => {
-        x.asInstanceOf[RowMutation].getRow.getColumns.asScala.flatMap {
+      // Insert Mutation - Just get all the values.
+      case x if (x.isInstanceOf[InsertMutation]) => {
+        x.asInstanceOf[InsertMutation].getRow.getColumns.map {
           case (key, v) if (schema(key).skip == false && v != null) => {
-
-            Some(key.toLowerCase() -> TypeCast.castTo(v.getValue.asInstanceOf[String], schema(key).dataType))
+            (key.toLowerCase() -> TypeCast.castTo(v.getValue.asInstanceOf[String], schema(key).dataType))
           }
-          case _ => None
+        }
+      }
+      // Update Mutation - Same like insert
+      case x if (x.isInstanceOf[UpdateMutation]) => {
+        x.asInstanceOf[UpdateMutation].getRow.getColumns.map {
+          case (key, v) if (schema(key).skip == false && v != null) => {
+            (key.toLowerCase() -> TypeCast.castTo(v.getValue.asInstanceOf[String], schema(key).dataType))
+          }
+        }
+      }
+      // UpdatePK Mutation - TODO: Need to move shit around. Tricly
+      case x if (x.isInstanceOf[PkUpdateMutation]) => {
+        x.asInstanceOf[PkUpdateMutation].getRow.getColumns.map {
+          case (key, v) if (schema(key).skip == false && v != null) => {
+            (key.toLowerCase() -> TypeCast.castTo(v.getValue.asInstanceOf[String], schema(key).dataType))
+          }
+        }
+      }
+      // Delete Mutation - TODO: Need to move shit around. Tricly
+      case x if (x.isInstanceOf[DeleteMutation]) => {
+        x.asInstanceOf[DeleteMutation].getRow.getColumns.map {
+          case (key, v) if (schema(key).skip == false && v != null) => {
+            (key.toLowerCase() -> TypeCast.castTo(v.getValue.asInstanceOf[String], schema(key).dataType))
+          }
         }
       }
       case _ => throw new Exception("Unsupported Mutation Type")
     }
+
     if (seq.exists(_ == ("objid", 586988297))) {
       println("586988297!!!")
       println(mutation)
